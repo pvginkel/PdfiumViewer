@@ -9,6 +9,9 @@ using System.Windows.Forms;
 
 namespace ChromePdfViewer
 {
+    /// <summary>
+    /// Control to render PDF documents.
+    /// </summary>
     public class PdfRenderer : Control
     {
         private static readonly Padding PageMargin = new Padding(4);
@@ -32,10 +35,10 @@ namespace ChromePdfViewer
         private int _maximumPageCache;
         private ShadeBorder _shadeBorder = new ShadeBorder();
         private int _suspendPaintCount;
-        private static int _defaultDpiX;
-        private static int _defaultDpiY;
-        private static int _defaultWidth;
-        private static int _defaultHeight;
+        private static readonly int _defaultDpiX;
+        private static readonly int _defaultDpiY;
+        private static readonly int _defaultWidth;
+        private static readonly int _defaultHeight;
 
         static PdfRenderer()
         {
@@ -43,18 +46,25 @@ namespace ChromePdfViewer
             {
                 bool found = false;
 
-                foreach (PrinterResolution resolution in dialog.PrinterSettings.PrinterResolutions)
+                try
                 {
-                    if (resolution.Kind == PrinterResolutionKind.Custom)
+                    foreach (PrinterResolution resolution in dialog.PrinterSettings.PrinterResolutions)
                     {
-                        _defaultDpiX = resolution.X;
-                        _defaultDpiY = resolution.Y;
-                        _defaultWidth = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Width / 100.0) * resolution.X);
-                        _defaultHeight = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Height / 100.0) * resolution.Y);
+                        if (resolution.Kind == PrinterResolutionKind.Custom)
+                        {
+                            _defaultDpiX = resolution.X;
+                            _defaultDpiY = resolution.Y;
+                            _defaultWidth = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Width / 100.0) * resolution.X);
+                            _defaultHeight = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Height / 100.0) * resolution.Y);
 
-                        found = true;
-                        break;
+                            found = true;
+                            break;
+                        }
                     }
+                }
+                catch
+                {
+                    // Ignore any exceptions; just use defaults.
                 }
 
                 if (!found)
@@ -69,6 +79,14 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
+        /// </summary>
+        /// 
+        /// <returns>
+        /// true if the user can give the focus to the control using the TAB key; otherwise, false. The default is true.Note:This property will always return true for an instance of the <see cref="T:System.Windows.Forms.Form"/> class.
+        /// </returns>
+        /// <filterpriority>1</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/><IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence"/><IPermission class="System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/></PermissionSet>
         [DefaultValue(true)]
         public new bool TabStop
         {
@@ -94,6 +112,9 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current zoom level.
+        /// </summary>
         public double Zoom
         {
             get { return _zoom; }
@@ -110,6 +131,9 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the PdfRenderer class.
+        /// </summary>
         public PdfRenderer()
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint, true);
@@ -208,6 +232,10 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.Layout"/> event.
+        /// </summary>
+        /// <param name="levent">A <see cref="T:System.Windows.Forms.LayoutEventArgs"/> that contains the event data. </param>
         protected override void OnLayout(LayoutEventArgs levent)
         {
             base.OnLayout(levent);
@@ -245,6 +273,10 @@ namespace ChromePdfViewer
             UpdateScrollbars();
         }
 
+        /// <summary>
+        /// Load a <see cref="PdfDocument"/> into the control.
+        /// </summary>
+        /// <param name="document">Document to load.</param>
         public void Load(PdfDocument document)
         {
             if (document == null)
@@ -378,6 +410,10 @@ namespace ChromePdfViewer
             _scaleFactor = ((double)height / _pageHeight) * _zoom;
         }
 
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint"/> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs"/> that contains the event data. </param>
         protected override void OnPaint(PaintEventArgs e)
         {
             if (_metafiles == null || _suspendPaintCount > 0)
@@ -512,6 +548,10 @@ namespace ChromePdfViewer
             return image;
         }
 
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseWheel"/> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
@@ -546,6 +586,13 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Determines whether the specified key is a regular input key or a special key that requires preprocessing.
+        /// </summary>
+        /// <returns>
+        /// true if the specified key is a regular input key; otherwise, false.
+        /// </returns>
+        /// <param name="keyData">One of the <see cref="T:System.Windows.Forms.Keys"/> values. </param>
         protected override bool IsInputKey(Keys keyData)
         {
             switch ((keyData) & Keys.KeyCode)
@@ -614,6 +661,10 @@ namespace ChromePdfViewer
             _pageCache.Clear();
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the <see cref="T:System.Windows.Forms.Control"/> and its child controls and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources. </param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed && disposing)
@@ -633,11 +684,17 @@ namespace ChromePdfViewer
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Zooms the PDF document in one step.
+        /// </summary>
         public void ZoomIn()
         {
             Zoom *= 1.1;
         }
 
+        /// <summary>
+        /// Zooms the PDF document out one step.
+        /// </summary>
         public void ZoomOut()
         {
             Zoom /= 1.1;

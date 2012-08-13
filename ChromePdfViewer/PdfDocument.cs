@@ -9,6 +9,9 @@ using System.Text;
 
 namespace ChromePdfViewer
 {
+    /// <summary>
+    /// Provides functionality to render a PDF document.
+    /// </summary>
     public class PdfDocument : IDisposable
     {
         private bool _disposed;
@@ -24,11 +27,19 @@ namespace ChromePdfViewer
         /// </summary>
         public double MaximumPageWidth { get; private set; }
 
+        /// <summary>
+        /// Initializes a new instance of the PdfDocument class with the provided stream.
+        /// </summary>
+        /// <param name="stream"></param>
         public PdfDocument(Stream stream)
             : this(PdfFile.Create(stream))
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the PdfDocument class with the provided path.
+        /// </summary>
+        /// <param name="path"></param>
         public PdfDocument(string path)
             : this(File.OpenRead(path))
         {
@@ -53,6 +64,19 @@ namespace ChromePdfViewer
             MaximumPageWidth = maxPageWidth;
         }
 
+        /// <summary>
+        /// Renders a page of the PDF document to the provided graphics instance.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="graphics">Graphics instance to render the page on.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="bounds">Bounds to render the page in.</param>
+        /// <param name="fitToBounds">true to fit the rendered page into the specified bounds; otherwise false.</param>
+        /// <param name="stretchToBounds">true to stretch the rendered page into the specified bounds; otherwise false.</param>
+        /// <param name="keepAspectRatio">true to keep the original aspect ratio in tact; otherwise false.</param>
+        /// <param name="centerInBounds">true to center the page within the specified bounds; otherwise false.</param>
+        /// <param name="autoRotate">true to rotate the page depending on the specified bounds; otherwise false.</param>
         public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool fitToBounds, bool stretchToBounds, bool keepAspectRatio, bool centerInBounds, bool autoRotate)
         {
             if (graphics == null)
@@ -100,6 +124,14 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Renders all the pages of the document as <see cref="Metafile"/>'s.
+        /// </summary>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="width">Target width of the generated <see cref="Metafile"/>'s.</param>
+        /// <param name="height">Target height of the generated <see cref="Metafile"/>'s.</param>
+        /// <returns>Generated <see cref="Metafile"/>'s.</returns>
         public Metafile[] RenderToMetafiles(float dpiX, float dpiY, int width, int height)
         {
             var result = new Metafile[PageCount];
@@ -112,6 +144,15 @@ namespace ChromePdfViewer
             return result;
         }
 
+        /// <summary>
+        /// Renders a single page of the document as a <see cref="Metafile"/>.
+        /// </summary>
+        /// <param name="page">Index of the page to render.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="width">Target width of the generated <see cref="Metafile"/>.</param>
+        /// <param name="height">Target height of the generated <see cref="Metafile"/>.</param>
+        /// <returns>Generated <see cref="Metafile"/>.</returns>
         public Metafile RenderToMetafile(int page, float dpiX, float dpiY, int width, int height)
         {
             using (var graphics = Graphics.FromHwnd(IntPtr.Zero))
@@ -154,6 +195,10 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Save the PDF document to the specified location.
+        /// </summary>
+        /// <param name="path">Path to save the PDF document to.</param>
         public void Save(string path)
         {
             if (path == null)
@@ -165,6 +210,10 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Save the PDF document to the specified location.
+        /// </summary>
+        /// <param name="stream">Stream to save the PDF document to.</param>
         public void Save(Stream stream)
         {
             if (stream == null)
@@ -173,11 +222,19 @@ namespace ChromePdfViewer
             _file.Save(stream);
         }
 
+        /// <summary>
+        /// Creates a <see cref="PrintDocument"/> for the PDF document.
+        /// </summary>
+        /// <returns></returns>
         public PrintDocument CreatePrintDocument()
         {
             return new PdfPrintDocument(this);
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
             if (!_disposed)

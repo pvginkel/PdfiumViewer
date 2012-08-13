@@ -8,10 +8,16 @@ using System.Windows.Forms;
 
 namespace ChromePdfViewer
 {
+    /// <summary>
+    /// Control to host PDF documents with support for printing.
+    /// </summary>
     public partial class PdfViewer : UserControl
     {
         private PdfDocument _document;
 
+        /// <summary>
+        /// Gets or sets the PDF document.
+        /// </summary>
         public PdfDocument Document
         {
             get { return _document; }
@@ -29,6 +35,9 @@ namespace ChromePdfViewer
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the PdfViewer class.
+        /// </summary>
         public PdfViewer()
         {
             InitializeComponent();
