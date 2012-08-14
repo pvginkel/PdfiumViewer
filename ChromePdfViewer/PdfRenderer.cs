@@ -15,7 +15,7 @@ namespace ChromePdfViewer
     {
         private static readonly Padding PageMargin = new Padding(4);
         private const double ZoomMin = 0.1;
-        private const double ZoomMax = 10;
+        private const double ZoomMax = 5;
 
         private ScrollBars _scrollbarsVisible;
         private int _height;
@@ -495,6 +495,9 @@ namespace ChromePdfViewer
         {
             var pageImage = GetPageImage(page, pageBounds.Size);
 
+            if (pageImage == null)
+                return;
+
             var srcBounds = new Rectangle(
                 Math.Max(clip.Left - pageBounds.Left, 0),
                 Math.Max(clip.Top - pageBounds.Top, 0),
@@ -536,9 +539,31 @@ namespace ChromePdfViewer
                 return node.Value.Image;
             }
 
+            // Trim the cache if we have too many items.
+
+            while (_pageCache.Count > _maximumPageCache - 1)
+            {
+                node = _pageCache.Last;
+
+                _pageCache.RemoveLast();
+
+                node.Value.Dispose();
+            }
+
             // We didn't have the page cached. Create a new cached page.
 
-            var image = new Bitmap(size.Width, size.Height);
+            Bitmap image;
+
+            try
+            {
+                // This throws when there isn't enough memory available.
+
+                image = new Bitmap(size.Width, size.Height);
+            }
+            catch
+            {
+                return null;
+            }
 
             // We render at a minimum of 150 DPI. Everything below this turns
             // into crap.
@@ -577,17 +602,6 @@ namespace ChromePdfViewer
             node = new LinkedListNode<CachedPage>(new CachedPage(page, image));
 
             _pageCache.AddFirst(node);
-
-            // Trim the cache if we have too many items.
-
-            while (_pageCache.Count > _maximumPageCache)
-            {
-                node = _pageCache.Last;
-
-                _pageCache.RemoveLast();
-
-                node.Value.Dispose();
-            }
 
             return image;
         }
