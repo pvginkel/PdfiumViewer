@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.Text;
 using System.Windows.Forms;
@@ -19,10 +18,7 @@ namespace ChromePdfViewer
         private const double ZoomMax = 10;
 
         private ScrollBars _scrollbarsVisible;
-        private Metafile[] _metafiles;
-        private int _maximumWidth;
         private int _height;
-        private int _pageHeight;
         private bool _disposed;
         private readonly HScrollBar _hScrollBar;
         private readonly VScrollBar _vScrollBar;
@@ -39,6 +35,7 @@ namespace ChromePdfViewer
         private static readonly int _defaultDpiY;
         private static readonly int _defaultWidth;
         private static readonly int _defaultHeight;
+        private PdfDocument _document;
 
         static PdfRenderer()
         {
@@ -284,27 +281,9 @@ namespace ChromePdfViewer
             if (document.PageCount == 0)
                 throw new ArgumentException("Document does not contain any pages", "document");
 
-            DisposeMetafiles();
+            _document = document;
 
-            _metafiles = document.RenderToMetafiles(
-                _defaultDpiX,
-                _defaultDpiY,
-                _defaultWidth,
-                _defaultHeight
-            );
-
-            _maximumWidth = int.MinValue;
-            _height = 0;
-
-            foreach (var metafile in _metafiles)
-            {
-                if (metafile.Width > _maximumWidth)
-                    _maximumWidth = metafile.Width;
-
-                _height += metafile.Height;
-            }
-
-            _pageHeight = _height / _metafiles.Length;
+            _height = _defaultHeight * _document.PageCount;
 
             UpdateScrollbars();
 
@@ -313,15 +292,15 @@ namespace ChromePdfViewer
 
         private void UpdateScrollbars()
         {
-            if (_metafiles == null)
+            if (_document == null)
                 return;
 
             UpdateScaleFactor(ScrollBars.Both);
 
             var bounds = GetScrollClientArea(ScrollBars.Both);
 
-            int fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _metafiles.Length + PageMargin.Vertical * _metafiles.Length);
-            int pageWidth = (int)(_maximumWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+            int fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _document.PageCount + PageMargin.Vertical * _document.PageCount);
+            int pageWidth = (int)(_defaultWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
 
             bool horizontalVisible = pageWidth > bounds.Width;
 
@@ -331,8 +310,8 @@ namespace ChromePdfViewer
 
                 bounds = GetScrollClientArea(ScrollBars.Vertical);
 
-                fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _metafiles.Length + PageMargin.Vertical * _metafiles.Length);
-                pageWidth = (int)(_maximumWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+                fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _document.PageCount + PageMargin.Vertical * _document.PageCount);
+                pageWidth = (int)(_defaultWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
 
             }
 
@@ -374,7 +353,7 @@ namespace ChromePdfViewer
             _previousHValue = -1;
             _previousVValue = -1;
 
-            int averagePageHeight = fullHeight / _metafiles.Length;
+            int averagePageHeight = fullHeight / _document.PageCount;
 
             // We cache at most three pages at zoom level 1.
 
@@ -407,7 +386,7 @@ namespace ChromePdfViewer
             // Scale factor determines what we need to multiply the dimensions
             // of the metafile with to get the size in the control.
 
-            _scaleFactor = ((double)height / _pageHeight) * _zoom;
+            _scaleFactor = ((double)height / _defaultHeight) * _zoom;
         }
 
         /// <summary>
@@ -416,12 +395,12 @@ namespace ChromePdfViewer
         /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs"/> that contains the event data. </param>
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (_metafiles == null || _suspendPaintCount > 0)
+            if (_document == null || _suspendPaintCount > 0)
                 return;
 
             var bounds = GetScrollClientArea();
 
-            int maxWidth = (int)(_maximumWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            int maxWidth = (int)(_defaultWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
             int leftOffset = _scrollbarsVisible == ScrollBars.Horizontal || _scrollbarsVisible == ScrollBars.Both ? -_hScrollBar.Value : (bounds.Width - maxWidth) / 2;
             int topOffset = _scrollbarsVisible == ScrollBars.Vertical || _scrollbarsVisible == ScrollBars.Both ? -_vScrollBar.Value : 0;
 
@@ -432,13 +411,11 @@ namespace ChromePdfViewer
 
             int offset = 0;
 
-            for (int page = 0; page < _metafiles.Length; page++)
+            for (int page = 0; page < _document.PageCount; page++)
             {
-                var metafile = _metafiles[page];
-
-                int height = (int)(metafile.Height * _scaleFactor);
+                int height = (int)(_defaultHeight * _scaleFactor);
                 int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                int width = (int)(metafile.Width * _scaleFactor);
+                int width = (int)(_defaultWidth * _scaleFactor);
                 int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
 
                 if (e.ClipRectangle.IntersectsWith(new Rectangle(
@@ -517,17 +494,38 @@ namespace ChromePdfViewer
 
             var image = new Bitmap(size.Width, size.Height);
 
-            using (var graphics = Graphics.FromImage(image))
+            // We render at a minimum of 150 DPI. Everything below this turns
+            // into crap.
+
+            int imageDpi = (int)(((double)size.Width / _defaultWidth) * _defaultDpiX);
+            int renderDpi = Math.Max(150, imageDpi);
+
+            int targetWidth = (int)(((double)_defaultWidth / _defaultDpiX) * renderDpi);
+            int targetHeight = (int)(((double)_defaultHeight / _defaultDpiY) * renderDpi);
+
+            if (imageDpi == renderDpi)
             {
-                graphics.DrawImage(
-                    _metafiles[page],
-                    new Rectangle(
-                        0,
-                        0,
-                        size.Width,
-                        size.Height
-                    )
-                );
+                RenderPage(page, image);
+            }
+            else
+            {
+                using (var fullImage = new Bitmap(targetWidth, targetHeight))
+                {
+                    RenderPage(page, fullImage);
+
+                    using (var graphics = Graphics.FromImage(image))
+                    {
+                        graphics.DrawImage(
+                            fullImage,
+                            new Rectangle(
+                                0,
+                                0,
+                                image.Width,
+                                image.Height
+                            )
+                        );
+                    }
+                }
             }
 
             node = new LinkedListNode<CachedPage>(new CachedPage(page, image));
@@ -546,6 +544,30 @@ namespace ChromePdfViewer
             }
 
             return image;
+        }
+
+        private void RenderPage(int page, Bitmap image)
+        {
+            using (var graphics = Graphics.FromImage(image))
+            {
+                _document.Render(
+                    page,
+                    graphics,
+                    graphics.DpiX,
+                    graphics.DpiY,
+                    new Rectangle(
+                        0,
+                        0,
+                        image.Width,
+                        image.Height
+                        ),
+                    true /* fitToBounds */,
+                    true /* stretchToBounds */,
+                    true /* keepAspectRatio */,
+                    true /* centerInBounds */,
+                    true /* autoRotate */
+                    );
+            }
         }
 
         /// <summary>
@@ -638,19 +660,6 @@ namespace ChromePdfViewer
             }
         }
 
-        private void DisposeMetafiles()
-        {
-            if (_metafiles != null)
-            {
-                foreach (var metafile in _metafiles)
-                {
-                    metafile.Dispose();
-                }
-
-                _metafiles = null;
-            }
-        }
-
         private void DisposePageCache()
         {
             foreach (var cachedPage in _pageCache)
@@ -669,7 +678,6 @@ namespace ChromePdfViewer
         {
             if (!_disposed && disposing)
             {
-                DisposeMetafiles();
                 DisposePageCache();
 
                 if (_shadeBorder != null)
