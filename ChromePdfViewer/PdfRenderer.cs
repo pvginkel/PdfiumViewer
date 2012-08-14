@@ -36,6 +36,7 @@ namespace ChromePdfViewer
         private static readonly int _defaultWidth;
         private static readonly int _defaultHeight;
         private PdfDocument _document;
+        private ToolTip _toolTip;
 
         static PdfRenderer()
         {
@@ -156,6 +157,7 @@ namespace ChromePdfViewer
             };
 
             _vScrollBar.ValueChanged += _vScrollBar_ValueChanged;
+            _vScrollBar.Scroll += _vScrollBar_Scroll;
 
             Controls.Add(_vScrollBar);
 
@@ -170,7 +172,30 @@ namespace ChromePdfViewer
             _scrollbarsVisible = ScrollBars.Both;
             ScrollbarsVisible = ScrollBars.None;
 
+            _toolTip = new ToolTip();
+
             ResumeLayout();
+        }
+
+        void _vScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            switch (e.Type)
+            {
+                case ScrollEventType.ThumbTrack:
+                    int x = _vScrollBar.Left - 60;
+                    int y = PointToClient(Cursor.Position).Y - 10;
+
+                    int offset = e.NewValue + _vScrollBar.LargeChange / 2;
+                    double pageHeight = _defaultHeight * _scaleFactor + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+                    int page = Math.Min(Math.Max((int)(offset / pageHeight) + 1, 1), _document.PageCount);
+
+                    _toolTip.Show(String.Format(Properties.Resources.PageNumber, page), this, x, y);
+                    break;
+
+                case ScrollEventType.EndScroll:
+                    _toolTip.Hide(this);
+                    break;
+            }
         }
 
         void _hScrollBar_ValueChanged(object sender, EventArgs e)
@@ -684,6 +709,12 @@ namespace ChromePdfViewer
                 {
                     _shadeBorder.Dispose();
                     _shadeBorder = null;
+                }
+
+                if (_toolTip != null)
+                {
+                    _toolTip.Dispose();
+                    _toolTip = null;
                 }
 
                 _disposed = true;

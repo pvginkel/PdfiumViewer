@@ -166,4 +166,7 @@
   <data name="SaveAsTitle" xml:space="preserve">
     <value>Save As</value>
   </data>
+  <data name="PageNumber" xml:space="preserve">
+    <value>Page {0}</value>
+  </data>
 </root>

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="PageNumber" xml:space="preserve">
+    <value>Pagina {0}</value>
+  </data>
   <data name="SaveAsFailedText" xml:space="preserve">
     <value>PDF bestand kon niet op de opgegeven locatie opgeslagen worden.</value>
   </data>
