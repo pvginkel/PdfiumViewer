@@ -37,6 +37,9 @@ namespace ChromePdfViewer
         private static readonly int _defaultHeight;
         private PdfDocument _document;
         private ToolTip _toolTip;
+        private bool _panning;
+        private Point _beginDrag;
+        private Point _beginOffset;
 
         static PdfRenderer()
         {
@@ -129,6 +132,13 @@ namespace ChromePdfViewer
             }
         }
 
+        [DefaultValue(typeof(Cursors), "Hand")]
+        public override Cursor Cursor
+        {
+            get { return base.Cursor; }
+            set { base.Cursor = value; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
@@ -137,13 +147,15 @@ namespace ChromePdfViewer
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint, true);
 
             TabStop = true;
+            Cursor = Cursors.Hand;
 
             SuspendLayout();
 
             _hScrollBar = new HScrollBar
             {
                 TabStop = false,
-                TabIndex = 1
+                TabIndex = 1,
+                Cursor = Cursors.Default
             };
 
             _hScrollBar.ValueChanged += _hScrollBar_ValueChanged;
@@ -153,7 +165,8 @@ namespace ChromePdfViewer
             _vScrollBar = new VScrollBar
             {
                 TabStop = false,
-                TabIndex = 2
+                TabIndex = 2,
+                Cursor = Cursors.Default
             };
 
             _vScrollBar.ValueChanged += _vScrollBar_ValueChanged;
@@ -164,7 +177,8 @@ namespace ChromePdfViewer
             _filler = new Control
             {
                 TabStop = false,
-                TabIndex = 3
+                TabIndex = 3,
+                Cursor = Cursors.Default
             };
 
             Controls.Add(_filler);
@@ -737,6 +751,55 @@ namespace ChromePdfViewer
         public void ZoomOut()
         {
             Zoom /= 1.1;
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            if (e.Button == MouseButtons.Left)
+            {
+                Capture = true;
+
+                _panning = true;
+                _beginDrag = e.Location;
+                _beginOffset = new Point(_hScrollBar.Value, _vScrollBar.Value);
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            if (_panning)
+            {
+                var offset = new Point(
+                    e.Location.X - _beginDrag.X,
+                    e.Location.Y - _beginDrag.Y
+                );
+
+                // Calculate the new scrollbar positions.
+
+                int newHorizontal = _beginOffset.X - offset.X;
+                int newVertical = _beginOffset.Y - offset.Y;
+
+                // Truncate the scrollbar positions.
+
+                newHorizontal = Math.Max(Math.Min(newHorizontal, _hScrollBar.Maximum - _hScrollBar.LargeChange), 0);
+                newVertical = Math.Max(Math.Min(newVertical, _vScrollBar.Maximum - _vScrollBar.LargeChange), 0);
+
+                _hScrollBar.Value = newHorizontal;
+                _vScrollBar.Value = newVertical;
+            }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            Capture = false;
+
+            _panning = false;
         }
 
         private enum ScrollMode
