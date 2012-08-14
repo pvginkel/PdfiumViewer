@@ -99,7 +99,7 @@ namespace ChromePdfViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PDF File (*.pdf)|*.pdf|All Files (*.*)|*.*.
+        ///   Looks up a localized string similar to PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*.
         /// </summary>
         internal static string SaveAsFilter {
             get {

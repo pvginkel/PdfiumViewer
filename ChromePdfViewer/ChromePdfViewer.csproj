@@ -93,9 +93,13 @@
     <None Include="Resources\ShadeBorder-NW.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PdfViewer.nl.resx">
+      <DependentUpon>PdfViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PdfViewer.resx">
       <DependentUpon>PdfViewer.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.nl.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

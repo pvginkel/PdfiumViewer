@@ -117,53 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ShadeBorder_S" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-S.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_W" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-W.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="zoom_in" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\zoom_in.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_NW" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-NW.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_NE" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-NE.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_SE" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-SE.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="printer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\printer.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="disk_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\disk_blue.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_E" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-E.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_N" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-N.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShadeBorder_SW" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShadeBorder-SW.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="zoom_out" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\zoom_out.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="SaveAsFailedText" xml:space="preserve">
-    <value>Could not save the PDF file to the specified location.</value>
+    <value>PDF bestand kon niet op de opgegeven locatie opgeslagen worden.</value>
   </data>
   <data name="SaveAsFailedTitle" xml:space="preserve">
-    <value>Could not save file</value>
+    <value>PDF bestand niet opgeslagen</value>
   </data>
   <data name="SaveAsFilter" xml:space="preserve">
-    <value>PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*</value>
+    <value>PDF Bestanden (*.pdf)|*.pdf|All Bestanden (*.*)|*.*</value>
   </data>
   <data name="SaveAsTitle" xml:space="preserve">
-    <value>Save As</value>
+    <value>Opslaan Als</value>
   </data>
 </root>
