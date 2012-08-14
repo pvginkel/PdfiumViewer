@@ -17,19 +17,28 @@ namespace ChromePdfViewer.Demo
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            using (var form = new OpenFileDialog())
+            var args = Environment.GetCommandLineArgs();
+
+            if (args.Length > 1)
             {
-                form.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
-                form.RestoreDirectory = true;
-                form.Title = "Open PDF File";
-
-                if (form.ShowDialog(this) != DialogResult.OK)
+                pdfViewer1.Document = new PdfDocument(args[1]);
+            }
+            else
+            {
+                using (var form = new OpenFileDialog())
                 {
-                    Dispose();
-                    return;
-                }
+                    form.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
+                    form.RestoreDirectory = true;
+                    form.Title = "Open PDF File";
 
-                pdfViewer1.Document = new PdfDocument(form.FileName);
+                    if (form.ShowDialog(this) != DialogResult.OK)
+                    {
+                        Dispose();
+                        return;
+                    }
+
+                    pdfViewer1.Document = new PdfDocument(form.FileName);
+                }
             }
         }
     }
