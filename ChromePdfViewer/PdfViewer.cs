@@ -36,6 +36,11 @@ namespace ChromePdfViewer
         }
 
         /// <summary>
+        /// Gets or sets the default document name used when saving the document.
+        /// </summary>
+        public string DefaultDocumentName { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the PdfViewer class.
         /// </summary>
         public PdfViewer()
@@ -68,6 +73,7 @@ namespace ChromePdfViewer
                 form.Filter = Properties.Resources.SaveAsFilter;
                 form.RestoreDirectory = true;
                 form.Title = Properties.Resources.SaveAsTitle;
+                form.FileName = DefaultDocumentName;
 
                 if (form.ShowDialog(FindForm()) == DialogResult.OK)
                 {
