@@ -21,7 +21,7 @@ namespace PdfViewer.Demo
 
             if (args.Length > 1)
             {
-                pdfViewer1.Document = new PdfDocument(args[1]);
+                pdfViewer1.Document = PdfDocument.Load(args[1]);
             }
             else
             {
@@ -37,7 +37,7 @@ namespace PdfViewer.Demo
                         return;
                     }
 
-                    pdfViewer1.Document = new PdfDocument(form.FileName);
+                    pdfViewer1.Document = PdfDocument.Load(form.FileName);
                 }
             }
         }

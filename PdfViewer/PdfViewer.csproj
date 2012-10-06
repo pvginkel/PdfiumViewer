@@ -39,6 +39,9 @@
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PDFLibNet">
+      <HintPath>..\Libraries\PdfLibNet\PDFLibNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -54,15 +57,17 @@
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PdfBufferFile.cs" />
+    <Compile Include="Chrome\PdfBufferFile.cs" />
+    <Compile Include="Chrome\PdfDocument.cs" />
     <Compile Include="PdfDocument.cs" />
-    <Compile Include="PdfFile.cs" />
-    <Compile Include="PdfFileStreamFile.cs" />
-    <Compile Include="PdfFileHandleFile.cs" />
-    <Compile Include="PdfMemoryStreamFile.cs" />
+    <Compile Include="Chrome\PdfFile.cs" />
+    <Compile Include="Chrome\PdfFileStreamFile.cs" />
+    <Compile Include="Chrome\PdfFileHandleFile.cs" />
+    <Compile Include="Chrome\PdfMemoryStreamFile.cs" />
     <Compile Include="PdfPrintDocument.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PdfEngine.cs" />
     <Compile Include="PdfRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -81,11 +86,9 @@
     <Compile Include="ScrollAction.cs" />
     <Compile Include="ShadeBorder.cs" />
     <Compile Include="StreamExtensions.cs" />
+    <Compile Include="XPdf\PdfDocument.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="pdf.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Key.snk" />
     <None Include="Resources\zoom_out.png" />
     <None Include="Resources\zoom_in.png" />
@@ -117,6 +120,13 @@
   <ItemGroup>
     <EmbeddedResource Include="pan.cur" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Libraries\ChromePdf\pdf.dll">
+      <Link>pdf.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -351,12 +351,7 @@ namespace PdfViewer
                         0,
                         image.Width,
                         image.Height
-                    ),
-                    true /* fitToBounds */,
-                    true /* stretchToBounds */,
-                    true /* keepAspectRatio */,
-                    true /* centerInBounds */,
-                    true /* autoRotate */
+                    )
                 );
             }
         }

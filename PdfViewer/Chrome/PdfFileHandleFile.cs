@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PdfViewer
+namespace PdfViewer.Chrome
 {
     internal abstract class PdfFileHandleFile : PdfFile
     {

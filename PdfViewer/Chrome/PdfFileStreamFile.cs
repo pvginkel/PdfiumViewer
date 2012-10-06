@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PdfViewer
+namespace PdfViewer.Chrome
 {
     internal class PdfFileStreamFile : PdfFileHandleFile
     {

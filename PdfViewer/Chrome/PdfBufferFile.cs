@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace PdfViewer
+namespace PdfViewer.Chrome
 {
     internal class PdfBufferFile : PdfFile
     {

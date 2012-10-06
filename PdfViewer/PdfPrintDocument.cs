@@ -38,12 +38,7 @@ namespace PdfViewer
                         0,
                         (int)((e.PageBounds.Width / 100.0) * e.PageSettings.PrinterResolution.X),
                         (int)((e.PageBounds.Height / 100.0) * e.PageSettings.PrinterResolution.Y)
-                    ),
-                    true /* fitToBounds */,
-                    true /* stretchToBounds */,
-                    true /* keepAspectRatio */,
-                    true /* centerInBounds */,
-                    true /* autoRotate */
+                    )
                 );
             }
 
