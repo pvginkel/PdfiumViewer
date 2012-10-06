@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>PdfViewer</id>
+    <version>$version$</version>
+    <title>PdfViewer</title>
+    <authors>Pieter van Ginkel</authors>
+    <owners>Pieter van Ginkel</owners>
+    <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.txt</licenseUrl>
+    <projectUrl>http://github.com/pvginkel/PdfViewer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>PDF viewer based on the pdf.dll library distributed with Google Chrome.</description>
+    <copyright>Pieter van Ginkel © 2012</copyright>
+    <tags>pdf viewer</tags>
+  </metadata>
+  <files>
+    <file src="pdf.dll" target="lib\net20" />
+    <file src="bin\Release\nl\*.dll" target="lib\net20\nl" />
+  </files>
+</package>
