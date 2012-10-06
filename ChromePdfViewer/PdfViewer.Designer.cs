@@ -92,7 +92,6 @@
             // 
             resources.ApplyResources(this._renderer, "_renderer");
             this._renderer.Name = "_renderer";
-            this._renderer.Zoom = 1D;
             // 
             // PdfViewer
             // 

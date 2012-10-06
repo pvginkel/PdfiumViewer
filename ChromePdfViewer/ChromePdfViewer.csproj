@@ -46,7 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomScrollControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DefaultSettings.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="PanningZoomingScrollControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="PdfBufferFile.cs" />
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
@@ -71,6 +78,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ScrollAction.cs" />
     <Compile Include="ShadeBorder.cs" />
     <Compile Include="StreamExtensions.cs" />
   </ItemGroup>
@@ -104,6 +112,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="pan.cur" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

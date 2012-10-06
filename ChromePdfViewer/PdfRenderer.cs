@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Printing;
 using System.Text;
 using System.Windows.Forms;
 
@@ -11,74 +10,20 @@ namespace ChromePdfViewer
     /// <summary>
     /// Control to render PDF documents.
     /// </summary>
-    public class PdfRenderer : Control
+    public class PdfRenderer : PanningZoomingScrollControl
     {
         private static readonly Padding PageMargin = new Padding(4);
-        private const double ZoomMin = 0.1;
-        private const double ZoomMax = 5;
+        private static readonly DefaultSettings DefaultSettings = new DefaultSettings();
 
-        private ScrollBars _scrollbarsVisible;
         private int _height;
         private bool _disposed;
-        private readonly HScrollBar _hScrollBar;
-        private readonly VScrollBar _vScrollBar;
-        private readonly Control _filler;
-        private double _zoom = 1;
         private double _scaleFactor;
-        private int _previousHValue = -1;
-        private int _previousVValue = -1;
         private readonly LinkedList<CachedPage> _pageCache = new LinkedList<CachedPage>();
         private int _maximumPageCache;
         private ShadeBorder _shadeBorder = new ShadeBorder();
         private int _suspendPaintCount;
-        private static readonly int _defaultDpiX;
-        private static readonly int _defaultDpiY;
-        private static readonly int _defaultWidth;
-        private static readonly int _defaultHeight;
         private PdfDocument _document;
         private ToolTip _toolTip;
-        private bool _panning;
-        private Point _beginDrag;
-        private Point _beginOffset;
-
-        static PdfRenderer()
-        {
-            using (var dialog = new PrintDialog())
-            {
-                bool found = false;
-
-                try
-                {
-                    foreach (PrinterResolution resolution in dialog.PrinterSettings.PrinterResolutions)
-                    {
-                        if (resolution.Kind == PrinterResolutionKind.Custom)
-                        {
-                            _defaultDpiX = resolution.X;
-                            _defaultDpiY = resolution.Y;
-                            _defaultWidth = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Width / 100.0) * resolution.X);
-                            _defaultHeight = (int)((dialog.PrinterSettings.DefaultPageSettings.PaperSize.Height / 100.0) * resolution.Y);
-
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                catch
-                {
-                    // Ignore any exceptions; just use defaults.
-                }
-
-                if (!found)
-                {
-                    // Default to A4 size.
-
-                    _defaultDpiX = 600;
-                    _defaultDpiY = 500;
-                    _defaultWidth = (int)(8.27 * _defaultDpiX);
-                    _defaultHeight = (int)(11.69 * _defaultDpiY);
-                }
-            }
-        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -95,57 +40,6 @@ namespace ChromePdfViewer
             set { base.TabStop = value; }
         }
 
-        internal ScrollBars ScrollbarsVisible
-        {
-            get { return _scrollbarsVisible; }
-            set
-            {
-                if (_scrollbarsVisible != value)
-                {
-                    _scrollbarsVisible = value;
-
-                    _hScrollBar.Visible = _scrollbarsVisible == ScrollBars.Horizontal || _scrollbarsVisible == ScrollBars.Both;
-                    _vScrollBar.Visible = _scrollbarsVisible == ScrollBars.Vertical || _scrollbarsVisible == ScrollBars.Both;
-                    _filler.Visible = _scrollbarsVisible == ScrollBars.Both;
-
-                    PerformLayout();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current zoom level.
-        /// </summary>
-        public double Zoom
-        {
-            get { return _zoom; }
-            set
-            {
-                if (value >= ZoomMin && value <= ZoomMax)
-                {
-                    _zoom = value;
-
-                    UpdateScrollbars();
-
-                    Invalidate();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the cursor that is displayed when the mouse pointer is over the control.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.Windows.Forms.Cursor"/> that represents the cursor to display when the mouse pointer is over the control.
-        /// </returns>
-        /// <filterpriority>1</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/><IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence"/><IPermission class="System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/></PermissionSet>
-        [DefaultValue(typeof(Cursors), "Hand")]
-        public override Cursor Cursor
-        {
-            get { return base.Cursor; }
-            set { base.Cursor = value; }
-        }
-
         /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
@@ -154,125 +48,8 @@ namespace ChromePdfViewer
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint, true);
 
             TabStop = true;
-            Cursor = Cursors.Hand;
-
-            SuspendLayout();
-
-            _hScrollBar = new HScrollBar
-            {
-                TabStop = false,
-                TabIndex = 1,
-                Cursor = Cursors.Default
-            };
-
-            _hScrollBar.ValueChanged += _hScrollBar_ValueChanged;
-
-            Controls.Add(_hScrollBar);
-
-            _vScrollBar = new VScrollBar
-            {
-                TabStop = false,
-                TabIndex = 2,
-                Cursor = Cursors.Default
-            };
-
-            _vScrollBar.ValueChanged += _vScrollBar_ValueChanged;
-            _vScrollBar.Scroll += _vScrollBar_Scroll;
-
-            Controls.Add(_vScrollBar);
-
-            _filler = new Control
-            {
-                TabStop = false,
-                TabIndex = 3,
-                Cursor = Cursors.Default
-            };
-
-            Controls.Add(_filler);
-
-            _scrollbarsVisible = ScrollBars.Both;
-            ScrollbarsVisible = ScrollBars.None;
 
             _toolTip = new ToolTip();
-
-            ResumeLayout();
-        }
-
-        void _vScrollBar_Scroll(object sender, ScrollEventArgs e)
-        {
-            switch (e.Type)
-            {
-                case ScrollEventType.ThumbTrack:
-                    int x = _vScrollBar.Left - 60;
-                    int y = PointToClient(Cursor.Position).Y - 10;
-
-                    int offset = e.NewValue + _vScrollBar.LargeChange / 2;
-                    double pageHeight = _defaultHeight * _scaleFactor + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                    int page = Math.Min(Math.Max((int)(offset / pageHeight) + 1, 1), _document.PageCount);
-
-                    _toolTip.Show(String.Format(Properties.Resources.PageNumber, page), this, x, y);
-                    break;
-
-                case ScrollEventType.EndScroll:
-                    _toolTip.Hide(this);
-                    break;
-            }
-        }
-
-        void _hScrollBar_ValueChanged(object sender, EventArgs e)
-        {
-            if (_previousHValue != -1)
-            {
-                if (_suspendPaintCount == 0)
-                {
-                    NativeMethods.ScrollWindowEx(
-                        Handle,
-                        -(_hScrollBar.Value - _previousHValue),
-                        0,
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        NativeMethods.SW_INVALIDATE
-                    );
-                }
-
-                _previousHValue = _hScrollBar.Value;
-            }
-            else
-            {
-                _previousHValue = _hScrollBar.Value;
-
-                Invalidate();
-            }
-        }
-
-        void _vScrollBar_ValueChanged(object sender, EventArgs e)
-        {
-            if (_previousVValue != -1)
-            {
-                if (_suspendPaintCount == 0)
-                {
-                    NativeMethods.ScrollWindowEx(
-                        Handle,
-                        0,
-                        -(_vScrollBar.Value - _previousVValue),
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        IntPtr.Zero,
-                        NativeMethods.SW_INVALIDATE
-                    );
-                }
-
-                _previousVValue = _vScrollBar.Value;
-            }
-            else
-            {
-                _previousVValue = _vScrollBar.Value;
-
-                Invalidate();
-            }
         }
 
         /// <summary>
@@ -283,36 +60,11 @@ namespace ChromePdfViewer
         {
             base.OnLayout(levent);
 
-            if (_scrollbarsVisible == ScrollBars.Vertical || _scrollbarsVisible == ScrollBars.Both)
-            {
-                _vScrollBar.SetBounds(
-                    Width - _vScrollBar.Width,
-                    0,
-                    _vScrollBar.Width,
-                    _scrollbarsVisible == ScrollBars.Both ? Height - _hScrollBar.Height : Height
-                );
-            }
+            UpdateScrollbars();
+        }
 
-            if (_scrollbarsVisible == ScrollBars.Horizontal || _scrollbarsVisible == ScrollBars.Both)
-            {
-                _hScrollBar.SetBounds(
-                    0,
-                    Height - _hScrollBar.Height,
-                    _scrollbarsVisible == ScrollBars.Both ? Width - _vScrollBar.Width : Width,
-                    _hScrollBar.Height
-                );
-            }
-
-            if (_scrollbarsVisible == ScrollBars.Both)
-            {
-                _filler.SetBounds(
-                    Width - _vScrollBar.Width,
-                    Height - _hScrollBar.Height,
-                    _vScrollBar.Width,
-                    _hScrollBar.Height
-                );
-            }
-
+        protected override void OnZoomChanged(EventArgs e)
+        {
             UpdateScrollbars();
         }
 
@@ -329,7 +81,7 @@ namespace ChromePdfViewer
 
             _document = document;
 
-            _height = _defaultHeight * _document.PageCount;
+            _height = DefaultSettings.Height * _document.PageCount;
 
             UpdateScrollbars();
 
@@ -345,10 +97,9 @@ namespace ChromePdfViewer
 
             var bounds = GetScrollClientArea(ScrollBars.Both);
 
-            int fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _document.PageCount + PageMargin.Vertical * _document.PageCount);
-            int pageWidth = (int)(_defaultWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+            var documentSize = GetDocumentBounds().Size;
 
-            bool horizontalVisible = pageWidth > bounds.Width;
+            bool horizontalVisible = documentSize.Width > bounds.Width;
 
             if (!horizontalVisible)
             {
@@ -356,50 +107,21 @@ namespace ChromePdfViewer
 
                 bounds = GetScrollClientArea(ScrollBars.Vertical);
 
-                fullHeight = (int)(_height * _scaleFactor + ShadeBorder.Size.Vertical * _document.PageCount + PageMargin.Vertical * _document.PageCount);
-                pageWidth = (int)(_defaultWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
-
+                documentSize = GetDocumentBounds().Size;
             }
-
-            bool verticalVisible = fullHeight > bounds.Height;
-
-            double verticalValue = (double)_vScrollBar.Value / _vScrollBar.Maximum;
-            double horizontalValue = (double)_hScrollBar.Value / _hScrollBar.Maximum;
 
             _suspendPaintCount++;
 
             try
             {
-                _vScrollBar.Maximum = fullHeight;
-                _vScrollBar.LargeChange = bounds.Height;
-                _vScrollBar.SmallChange = _vScrollBar.LargeChange / 10;
-                _vScrollBar.Value = (int)(verticalValue * _vScrollBar.Maximum);
-
-                _hScrollBar.Maximum = pageWidth;
-                _hScrollBar.LargeChange = bounds.Width;
-                _hScrollBar.SmallChange = _hScrollBar.LargeChange / 10;
-                _hScrollBar.Value = (int)(horizontalValue * _hScrollBar.Maximum);
+                SetDisplaySize(documentSize);
             }
             finally
             {
                 _suspendPaintCount--;
             }
 
-            ScrollbarsVisible =
-                horizontalVisible && verticalVisible
-                ? ScrollBars.Both
-                :
-                    horizontalVisible
-                    ? ScrollBars.Horizontal
-                    :
-                        verticalVisible
-                        ? ScrollBars.Vertical
-                        : ScrollBars.None;
-
-            _previousHValue = -1;
-            _previousVValue = -1;
-
-            int averagePageHeight = fullHeight / _document.PageCount;
+            int averagePageHeight = documentSize.Height / _document.PageCount;
 
             // We cache at most three pages at zoom level 1.
 
@@ -410,7 +132,18 @@ namespace ChromePdfViewer
 
         private Rectangle GetScrollClientArea()
         {
-            return GetScrollClientArea(_scrollbarsVisible);
+            ScrollBars scrollBarsVisible;
+
+            if (HScroll && VScroll)
+                scrollBarsVisible = ScrollBars.Both;
+            else if (HScroll)
+                scrollBarsVisible = ScrollBars.Horizontal;
+            else if (VScroll)
+                scrollBarsVisible = ScrollBars.Vertical;
+            else
+                scrollBarsVisible = ScrollBars.None;
+
+            return GetScrollClientArea(scrollBarsVisible);
         }
 
         private Rectangle GetScrollClientArea(ScrollBars scrollbars)
@@ -418,8 +151,8 @@ namespace ChromePdfViewer
             return new Rectangle(
                 0,
                 0,
-                scrollbars == ScrollBars.Vertical || scrollbars == ScrollBars.Both ? Width - _vScrollBar.Width : Width,
-                scrollbars == ScrollBars.Horizontal || scrollbars == ScrollBars.Both ? Height - _hScrollBar.Height : Height
+                scrollbars == ScrollBars.Vertical || scrollbars == ScrollBars.Both ? Width - SystemInformation.VerticalScrollBarWidth : Width,
+                scrollbars == ScrollBars.Horizontal || scrollbars == ScrollBars.Both ? Height - SystemInformation.HorizontalScrollBarHeight : Height
             );
         }
 
@@ -432,7 +165,7 @@ namespace ChromePdfViewer
             // Scale factor determines what we need to multiply the dimensions
             // of the metafile with to get the size in the control.
 
-            _scaleFactor = ((double)height / _defaultHeight) * _zoom;
+            _scaleFactor = ((double)height / DefaultSettings.Height) * Zoom;
         }
 
         /// <summary>
@@ -446,9 +179,9 @@ namespace ChromePdfViewer
 
             var bounds = GetScrollClientArea();
 
-            int maxWidth = (int)(_defaultWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-            int leftOffset = _scrollbarsVisible == ScrollBars.Horizontal || _scrollbarsVisible == ScrollBars.Both ? -_hScrollBar.Value : (bounds.Width - maxWidth) / 2;
-            int topOffset = _scrollbarsVisible == ScrollBars.Vertical || _scrollbarsVisible == ScrollBars.Both ? -_vScrollBar.Value : 0;
+            int maxWidth = (int)(DefaultSettings.Width * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            int leftOffset = HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2;
+            int topOffset = VScroll ? DisplayRectangle.Y : 0;
 
             using (var brush = new SolidBrush(BackColor))
             {
@@ -459,9 +192,9 @@ namespace ChromePdfViewer
 
             for (int page = 0; page < _document.PageCount; page++)
             {
-                int height = (int)(_defaultHeight * _scaleFactor);
+                int height = (int)(DefaultSettings.Height * _scaleFactor);
                 int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                int width = (int)(_defaultWidth * _scaleFactor);
+                int width = (int)(DefaultSettings.Width * _scaleFactor);
                 int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
 
                 if (e.ClipRectangle.IntersectsWith(new Rectangle(
@@ -469,7 +202,8 @@ namespace ChromePdfViewer
                     offset + topOffset,
                     fullWidth,
                     fullHeight
-                ))) {
+                )))
+                {
                     var pageBounds = new Rectangle(
                         leftOffset + ShadeBorder.Size.Left + PageMargin.Left,
                         offset + topOffset + ShadeBorder.Size.Top + PageMargin.Top,
@@ -486,9 +220,6 @@ namespace ChromePdfViewer
 
                 offset += fullHeight;
             }
-
-            _previousHValue = _hScrollBar.Value;
-            _previousVValue = _vScrollBar.Value;
         }
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds, Rectangle clip)
@@ -568,11 +299,11 @@ namespace ChromePdfViewer
             // We render at a minimum of 150 DPI. Everything below this turns
             // into crap.
 
-            int imageDpi = (int)(((double)size.Width / _defaultWidth) * _defaultDpiX);
+            int imageDpi = (int)(((double)size.Width / DefaultSettings.Width) * DefaultSettings.DpiX);
             int renderDpi = Math.Max(150, imageDpi);
 
-            int targetWidth = (int)(((double)_defaultWidth / _defaultDpiX) * renderDpi);
-            int targetHeight = (int)(((double)_defaultHeight / _defaultDpiY) * renderDpi);
+            int targetWidth = (int)(((double)DefaultSettings.Width / DefaultSettings.DpiX) * renderDpi);
+            int targetHeight = (int)(((double)DefaultSettings.Height / DefaultSettings.DpiY) * renderDpi);
 
             if (imageDpi == renderDpi)
             {
@@ -620,103 +351,13 @@ namespace ChromePdfViewer
                         0,
                         image.Width,
                         image.Height
-                        ),
+                    ),
                     true /* fitToBounds */,
                     true /* stretchToBounds */,
                     true /* keepAspectRatio */,
                     true /* centerInBounds */,
                     true /* autoRotate */
-                    );
-            }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseWheel"/> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            base.OnMouseWheel(e);
-
-            int offset = e.Delta < 0 ? 1 : -1;
-
-            PerformScroll(
-                offset,
-                (ModifierKeys & Keys.Control) != 0 ? ScrollMode.Zoom : ScrollMode.Small
-            );
-        }
-
-        private void PerformScroll(int offset, ScrollMode mode)
-        {
-            if (mode == ScrollMode.Zoom)
-            {
-                if (offset < 0)
-                    ZoomIn();
-                else
-                    ZoomOut();
-            }
-            else if (_vScrollBar.Visible)
-            {
-                _vScrollBar.Value =
-                    Math.Max(
-                        0,
-                        Math.Min(
-                            _vScrollBar.Value + (mode == ScrollMode.Large ? _vScrollBar.LargeChange : _vScrollBar.SmallChange) * offset,
-                            _vScrollBar.Maximum - _vScrollBar.LargeChange
-                        )
-                    );
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the specified key is a regular input key or a special key that requires preprocessing.
-        /// </summary>
-        /// <returns>
-        /// true if the specified key is a regular input key; otherwise, false.
-        /// </returns>
-        /// <param name="keyData">One of the <see cref="T:System.Windows.Forms.Keys"/> values. </param>
-        protected override bool IsInputKey(Keys keyData)
-        {
-            switch ((keyData) & Keys.KeyCode)
-            {
-                case Keys.Up:
-                    PerformScroll(-1, ScrollMode.Small);
-                    return true;
-
-                case Keys.Down:
-                    PerformScroll(1, ScrollMode.Small);
-                    return true;
-
-                case Keys.PageUp:
-                    PerformScroll(-1, ScrollMode.Large);
-                    return true;
-
-                case Keys.PageDown:
-                    PerformScroll(1, ScrollMode.Large);
-                    return true;
-
-                case Keys.Add:
-                case Keys.Oemplus:
-                    if ((keyData & Keys.Modifiers) == Keys.Control)
-                        PerformScroll(-1, ScrollMode.Zoom);
-                    return true;
-
-                case Keys.Subtract:
-                case Keys.OemMinus:
-                    if ((keyData & Keys.Modifiers) == Keys.Control)
-                        PerformScroll(1, ScrollMode.Zoom);
-                    return true;
-
-                case Keys.Home:
-                    _vScrollBar.Value = 0;
-                    return true;
-
-                case Keys.End:
-                    _vScrollBar.Value = _vScrollBar.Maximum - _vScrollBar.LargeChange;
-                    return true;
-
-                default:
-                    return base.IsInputKey(keyData);
+                );
             }
         }
 
@@ -728,6 +369,32 @@ namespace ChromePdfViewer
             }
 
             _pageCache.Clear();
+        }
+
+        protected override Rectangle GetDocumentBounds()
+        {
+            int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+            int width = (int)(DefaultSettings.Width * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+            
+            var center = new Point(
+                DisplayRectangle.Width / 2,
+                DisplayRectangle.Height / 2
+            );
+
+            if (
+                DisplayRectangle.Width > ClientSize.Width ||
+                DisplayRectangle.Height > ClientSize.Height
+            ) {
+                center.X += DisplayRectangle.Left;
+                center.Y += DisplayRectangle.Top;
+            }
+
+            return new Rectangle(
+                center.X - width / 2,
+                center.Y - height / 2,
+                width,
+                height
+            );
         }
 
         /// <summary>
@@ -756,90 +423,6 @@ namespace ChromePdfViewer
             }
 
             base.Dispose(disposing);
-        }
-
-        /// <summary>
-        /// Zooms the PDF document in one step.
-        /// </summary>
-        public void ZoomIn()
-        {
-            Zoom *= 1.1;
-        }
-
-        /// <summary>
-        /// Zooms the PDF document out one step.
-        /// </summary>
-        public void ZoomOut()
-        {
-            Zoom /= 1.1;
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseDown"/> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
-            base.OnMouseDown(e);
-
-            if (e.Button == MouseButtons.Left)
-            {
-                Capture = true;
-
-                _panning = true;
-                _beginDrag = e.Location;
-                _beginOffset = new Point(_hScrollBar.Value, _vScrollBar.Value);
-            }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseMove"/> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            base.OnMouseMove(e);
-
-            if (_panning)
-            {
-                var offset = new Point(
-                    e.Location.X - _beginDrag.X,
-                    e.Location.Y - _beginDrag.Y
-                );
-
-                // Calculate the new scrollbar positions.
-
-                int newHorizontal = _beginOffset.X - offset.X;
-                int newVertical = _beginOffset.Y - offset.Y;
-
-                // Truncate the scrollbar positions.
-
-                newHorizontal = Math.Max(Math.Min(newHorizontal, _hScrollBar.Maximum - _hScrollBar.LargeChange), 0);
-                newVertical = Math.Max(Math.Min(newVertical, _vScrollBar.Maximum - _vScrollBar.LargeChange), 0);
-
-                _hScrollBar.Value = newHorizontal;
-                _vScrollBar.Value = newVertical;
-            }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseUp"/> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            base.OnMouseUp(e);
-
-            Capture = false;
-
-            _panning = false;
-        }
-
-        private enum ScrollMode
-        {
-            Small,
-            Large,
-            Zoom
         }
 
         private class CachedPage : IDisposable

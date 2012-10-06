@@ -66,158 +66,6 @@ namespace ChromePdfViewer
         [DllImport("user32.dll")]
         public static extern int ScrollWindowEx(IntPtr hWnd, int dx, int dy, IntPtr prcScroll, IntPtr prcClip, IntPtr hrgnUpdate, IntPtr prcUpdate, uint flags);
 
-        /// <summary>
-        /// Scroll children within *lprcScroll.
-        /// </summary>
-        public const uint SW_SCROLLCHILDREN = 0x0001;
-        /// <summary>
-        /// Invalidate after scrolling.
-        /// </summary>
-        public const uint SW_INVALIDATE = 0x0002;
-        /// <summary>
-        /// If SW_INVALIDATE, don't send WM_ERASEBACKGROUND.
-        /// </summary>
-        public const uint SW_ERASE = 0x0004;
-        /// <summary>
-        /// Use smooth scrolling.
-        /// </summary>
-        public const uint SW_SMOOTHSCROLL = 0x0010;
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            private int _left;
-            private int _top;
-            private int _right;
-            private int _bottom;
-
-            public RECT(RECT rect)
-                : this(rect.Left, rect.Top, rect.Right, rect.Bottom)
-            {
-            }
-
-            public RECT(int left, int top, int right, int bottom)
-            {
-                _left = left;
-                _top = top;
-                _right = right;
-                _bottom = bottom;
-            }
-
-            public int X
-            {
-                get { return _left; }
-                set { _left = value; }
-            }
-
-            public int Y
-            {
-                get { return _top; }
-                set { _top = value; }
-            }
-
-            public int Left
-            {
-                get { return _left; }
-                set { _left = value; }
-            }
-
-            public int Top
-            {
-                get { return _top; }
-                set { _top = value; }
-            }
-
-            public int Right
-            {
-                get { return _right; }
-                set { _right = value; }
-            }
-
-            public int Bottom
-            {
-                get { return _bottom; }
-                set { _bottom = value; }
-            }
-
-            public int Height
-            {
-                get { return _bottom - _top; }
-                set { _bottom = value + _top; }
-            }
-
-            public int Width
-            {
-                get { return _right - _left; }
-                set { _right = value + _left; }
-            }
-
-            public Point Location
-            {
-                get { return new Point(Left, Top); }
-                set
-                {
-                    _left = value.X;
-                    _top = value.Y;
-                }
-            }
-
-            public Size Size
-            {
-                get { return new Size(Width, Height); }
-                set
-                {
-                    _right = value.Width + _left;
-                    _bottom = value.Height + _top;
-                }
-            }
-
-            public static implicit operator Rectangle(RECT Rectangle)
-            {
-                return new Rectangle(Rectangle.Left, Rectangle.Top, Rectangle.Width, Rectangle.Height);
-            }
-
-            public static implicit operator RECT(Rectangle Rectangle)
-            {
-                return new RECT(Rectangle.Left, Rectangle.Top, Rectangle.Right, Rectangle.Bottom);
-            }
-
-            public static bool operator ==(RECT Rectangle1, RECT Rectangle2)
-            {
-                return Rectangle1.Equals(Rectangle2);
-            }
-
-            public static bool operator !=(RECT Rectangle1, RECT Rectangle2)
-            {
-                return !Rectangle1.Equals(Rectangle2);
-            }
-
-            public override int GetHashCode()
-            {
-                return ToString().GetHashCode();
-            }
-
-            public bool Equals(RECT other)
-            {
-                return other._left == _left && other._top == _top && other._right == _right && other._bottom == _bottom;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is RECT)
-                {
-                    return Equals((RECT)obj);
-                }
-                else if (obj is Rectangle)
-                {
-                    return Equals(new RECT((Rectangle)obj));
-                }
-
-                return false;
-            }
-        }
-
-
         [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         public class MemoryMappedHandle : SafeHandleZeroOrMinusOneIsInvalid
@@ -267,5 +115,113 @@ namespace ChromePdfViewer
 
         [DllImport("gdi32.dll")]
         public static extern bool ModifyWorldTransform(IntPtr hdc, [In] ref XFORM lpXform, uint iMode);
+
+        public const uint SW_ERASE = 0x0004;
+        public const uint SW_SMOOTHSCROLL = 0x0010;
+        public const int WS_VSCROLL = 0x00200000;
+        public const int WS_HSCROLL = 0x00100000;
+        public const int WM_MOUSEWHEEL = 0x20a;
+        public const int SB_HORZ = 0x0;
+        public const int SB_VERT = 0x1;
+        public const uint SW_INVALIDATE = 0x0002;
+        public const uint SW_SCROLLCHILDREN = 0x0001;
+        public const int SB_LINEUP = 0;
+        public const int SB_LINELEFT = 0;
+        public const int SB_LINEDOWN = 1;
+        public const int SB_LINERIGHT = 1;
+        public const int SB_PAGEUP = 2;
+        public const int SB_PAGELEFT = 2;
+        public const int SB_PAGEDOWN = 3;
+        public const int SB_PAGERIGHT = 3;
+        public const int SB_THUMBPOSITION = 4;
+        public const int SB_THUMBTRACK = 5;
+        public const int SB_TOP = 6;
+        public const int SB_LEFT = 6;
+        public const int SB_BOTTOM = 7;
+        public const int SB_RIGHT = 7;
+        public const int SB_ENDSCROLL = 8;
+        public const int WM_HSCROLL = 0x114;
+        public const int WM_VSCROLL = 0x115;
+        public const int SIF_TRACKPOS = 0x10;
+        public const int SIF_RANGE = 0x1;
+        public const int SIF_POS = 0x4;
+        public const int SIF_PAGE = 0x2;
+        public const int SIF_ALL = SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+
+            public RECT(Rectangle r)
+            {
+                left = r.Left;
+                top = r.Top;
+                right = r.Right;
+                bottom = r.Bottom;
+            }
+
+            public Rectangle ToRectangle()
+            {
+                return new Rectangle(left, top, right - left, bottom - top);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class SCROLLINFO
+        {
+            public int cbSize = Marshal.SizeOf(typeof(SCROLLINFO));
+            public int fMask;
+            public int nMin;
+            public int nMax;
+            public int nPage;
+            public int nPos;
+            public int nTrackPos;
+
+            public SCROLLINFO()
+            {
+            }
+
+            public SCROLLINFO(int mask, int min, int max, int page, int pos)
+            {
+                fMask = mask;
+                nMin = min;
+                nMax = max;
+                nPage = page;
+                nPos = pos;
+            }
+        }
+
+        [DllImport("user32.dll")]
+        public static extern int ScrollWindowEx(HandleRef hWnd, int dx, int dy, IntPtr prcScroll, ref RECT prcClip, IntPtr hrgnUpdate, ref RECT prcUpdate, uint flags);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetScrollInfo(HandleRef hwnd, int fnBar, SCROLLINFO lpsi);
+
+        [DllImport("user32.dll")]
+        public static extern int SetScrollInfo(HandleRef hwnd, int fnBar, [In] SCROLLINFO lpsi, bool fRedraw);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern UIntPtr SendMessage(IntPtr handle, int message, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr WindowFromPoint(Point pt);
+
+        public static class Util
+        {
+            private static int LOWORD(int n)
+            {
+                return n & 0xffff;
+            }
+
+            public static int LOWORD(IntPtr n)
+            {
+                return LOWORD(unchecked((int)(long)n));
+            }
+        }
     }
 }
