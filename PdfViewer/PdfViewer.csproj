@@ -121,10 +121,10 @@
     <EmbeddedResource Include="pan.cur" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Libraries\ChromePdf\pdf.dll">
+    <None Include="..\Libraries\ChromePdf\pdf.dll">
       <Link>pdf.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

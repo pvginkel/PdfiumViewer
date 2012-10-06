@@ -14,7 +14,8 @@
     <tags>pdf viewer</tags>
   </metadata>
   <files>
-    <file src="pdf.dll" target="lib\net20" />
+    <file src="..\Libraries\ChromePdf\pdf.dll" target="lib\net20" />
+    <file src="..\Libraries\PdfLibNet\PDFLibNet.dll" target="lib\net20" />
     <file src="bin\Release\nl\*.dll" target="lib\net20\nl" />
   </files>
 </package>
