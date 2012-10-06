@@ -1,15 +1,15 @@
-# ChromePdfViewer
+# PdfViewer
 
 LGPL License.
 
-[Download from NuGet](http://nuget.org/packages/ChromePdfViewer).
+[Download from NuGet](http://nuget.org/packages/PdfViewer).
 
 ## Introduction
 
-ChromePdfViewer is a PDF viewer based on the pdf.dll library distributed with
-Google Chrome.
+PdfViewer is a PDF viewer based on the pdf.dll library distributed with
+Google Chrome and xPDF.
 
-ChromePdfViewer provides a number of components to work with PDF files:
+PdfViewer provides a number of components to work with PDF files:
 
 * PdfDocument is the base class used to render PDF documents;
 
@@ -21,8 +21,8 @@ ChromePdfViewer provides a number of components to work with PDF files:
 ## Bugs
 
 Bugs should be reported through github at
-[http://github.com/pvginkel/ChromePdfViewer/issues](http://github.com/pvginkel/ChromePdfViewer/issues).
+[http://github.com/pvginkel/PdfViewer/issues](http://github.com/pvginkel/PdfViewer/issues).
 
 ## License
 
-NHttp is licensed under the LGPL 3.
+PdfViewer is licensed under the LGPL 3.
