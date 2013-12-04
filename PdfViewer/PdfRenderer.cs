@@ -24,6 +24,7 @@ namespace PdfViewer
         private int _suspendPaintCount;
         private PdfDocument _document;
         private ToolTip _toolTip;
+        private PdfViewerZoomMode _zoomMode;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -38,6 +39,19 @@ namespace PdfViewer
         {
             get { return base.TabStop; }
             set { base.TabStop = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the way the document should be zoomed initially.
+        /// </summary>
+        public PdfViewerZoomMode ZoomMode
+        {
+            get { return _zoomMode; }
+            set
+            {
+                _zoomMode = value;
+                PerformLayout();
+            }
         }
 
         /// <summary>
@@ -160,12 +174,21 @@ namespace PdfViewer
         {
             var bounds = GetScrollClientArea(scrollBars);
 
-            int height = bounds.Height - ShadeBorder.Size.Vertical - PageMargin.Vertical;
-
             // Scale factor determines what we need to multiply the dimensions
             // of the metafile with to get the size in the control.
 
-            _scaleFactor = ((double)height / DefaultSettings.Height) * Zoom;
+            if (ZoomMode == PdfViewerZoomMode.FitHeight)
+            {
+                int height = bounds.Height - ShadeBorder.Size.Vertical - PageMargin.Vertical;
+
+                _scaleFactor = ((double)height / DefaultSettings.Height) * Zoom;
+            }
+            else
+            {
+                int width = bounds.Width - ShadeBorder.Size.Horizontal - PageMargin.Horizontal;
+
+                _scaleFactor = ((double)width / DefaultSettings.Width) * Zoom;
+            }
         }
 
         /// <summary>

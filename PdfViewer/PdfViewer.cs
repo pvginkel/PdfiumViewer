@@ -38,6 +38,15 @@ namespace PdfViewer
         public string DefaultDocumentName { get; set; }
 
         /// <summary>
+        /// Gets or sets the way the document should be zoomed initially.
+        /// </summary>
+        public PdfViewerZoomMode ZoomMode
+        {
+            get { return _renderer.ZoomMode; }
+            set { _renderer.ZoomMode = value; }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the PdfViewer class.
         /// </summary>
         public PdfViewer()
