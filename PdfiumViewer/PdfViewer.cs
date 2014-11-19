@@ -47,6 +47,16 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Gets or sets the visibility of the toolstrip.
+        /// The toolstrip contains the save, print and zoom buttons.
+        /// </summary>
+        public bool ToolStripVisible
+        {
+            get { return this._toolStrip.Visible; }
+            set { this._toolStrip.Visible = value; }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the PdfViewer class.
         /// </summary>
         public PdfViewer()
