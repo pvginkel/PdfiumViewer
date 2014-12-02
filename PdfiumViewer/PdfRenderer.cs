@@ -94,6 +94,12 @@ namespace PdfiumViewer
 
             _document = document;
 
+            SetDisplayRectLocation(new Point(0, 0));
+
+            _height = 0;
+            _maxHeight = 0;
+            _maxWidth = 0;
+
             foreach (var size in _document.PageSizes)
             {
                 _height += (int)size.Height;
