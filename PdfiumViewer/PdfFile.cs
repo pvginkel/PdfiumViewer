@@ -9,8 +9,6 @@ namespace PdfiumViewer
 {
     internal abstract class PdfFile : IDisposable
     {
-        private static readonly PdfLibrary _library = new PdfLibrary();
-
         private IntPtr _document;
         private IntPtr _form;
         private bool _disposed;
@@ -27,6 +25,11 @@ namespace PdfiumViewer
             if (stream is FileStream)
                 return new PdfFileStreamFile((FileStream)stream);
             return new PdfBufferFile(StreamExtensions.ToByteArray(stream));
+        }
+
+        protected PdfFile()
+        {
+            PdfLibrary.EnsureLoaded();
         }
 
         public bool RenderPDFPageToDC(int pageNumber, IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool fitToBounds, bool stretchToBounds, bool keepAspectRation, bool centerInBounds, bool autoRotate, bool forPrinting)

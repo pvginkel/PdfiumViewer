@@ -7,12 +7,24 @@ namespace PdfiumViewer
 {
     internal class PdfLibrary : IDisposable
     {
+        private static readonly object _syncRoot = new object();
+        private static PdfLibrary _library;
+
+        public static void EnsureLoaded()
+        {
+            lock (_syncRoot)
+            {
+                if (_library == null)
+                    _library = new PdfLibrary();
+            }
+        }
+
         private bool _disposed;
-        private NativeMethods.UNSUPPORT_INFO _unsupportedInfo;
+        private readonly NativeMethods.UNSUPPORT_INFO _unsupportedInfo;
         private GCHandle _unsupportedInfoHandle;
         private GCHandle _unsupportedHandlerHandle;
 
-        public PdfLibrary()
+        private PdfLibrary()
         {
             NativeMethods.FPDF_InitLibrary(IntPtr.Zero);
 
