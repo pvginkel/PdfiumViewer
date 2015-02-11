@@ -45,6 +45,19 @@ namespace PdfiumViewer
             return true;
         }
 
+        public bool RenderPDFPageToBitmap(int pageNumber, IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool fitToBounds, bool stretchToBounds, bool keepAspectRation, bool centerInBounds, bool autoRotate, bool forPrinting)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            using (var pageData = new PageData(_document, _form, pageNumber))
+            {
+                NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, forPrinting ? NativeMethods.FPDF.PRINTING : 0);
+            }
+
+            return true;
+        }
+
         public List<SizeF> GetPDFDocInfo()
         {
             if (_disposed)
