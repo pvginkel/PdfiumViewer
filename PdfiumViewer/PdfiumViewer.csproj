@@ -49,6 +49,9 @@
     <Compile Include="CustomScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="IRISTedExtensions\BitmapHelper.cs" />
+    <Compile Include="IRISTedExtensions\IRISExtensions.cs" />
+    <Compile Include="IRISTedExtensions\Win32API.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
