@@ -14,7 +14,8 @@
     <tags>pdf viewer pdfium</tags>
   </metadata>
   <files>
-    <file src="..\Libraries\Pdfium\pdfium.dll" target="content" />
+    <file src="..\Libraries\Pdfium\x86\pdfium.dll" target="content\x86" />
+    <file src="..\Libraries\Pdfium\x64\pdfium.dll" target="content\x64" />
     <file src="bin\Release\nl\*.dll" target="lib\net20\nl" />
   </files>
 </package>

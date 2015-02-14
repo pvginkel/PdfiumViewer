@@ -26,7 +26,7 @@ namespace PdfiumViewer
 
         private PdfLibrary()
         {
-            NativeMethods.FPDF_InitLibrary(IntPtr.Zero);
+            NativeMethods.FPDF_InitLibrary();
 
 
             _unsupportedInfo = new NativeMethods.UNSUPPORT_INFO();

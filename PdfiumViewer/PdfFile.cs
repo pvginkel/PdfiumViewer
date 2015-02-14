@@ -77,7 +77,7 @@ namespace PdfiumViewer
             _formCallbacksHandle = GCHandle.Alloc(_formCallbacks);
             _formCallbacks.version = 1;
 
-            _form = NativeMethods.FPDFDOC_InitFormFillEnviroument(_document, ref _formCallbacks);
+            _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, ref _formCallbacks);
             NativeMethods.FPDF_SetFormFieldHighlightColor(_form, 0, 0xFFE4DD);
             NativeMethods.FPDF_SetFormFieldHighlightAlpha(_form, 100);
 

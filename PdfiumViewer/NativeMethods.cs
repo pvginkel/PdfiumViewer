@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
@@ -11,10 +12,30 @@ namespace PdfiumViewer
 {
     internal static class NativeMethods
     {
+        static NativeMethods()
+        {
+            // Load the platform dependent Pdfium.dll if it exists.
+
+            string path = Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location);
+
+            if (IntPtr.Size == 4)
+                path = Path.Combine(path, "x86");
+            else
+                path = Path.Combine(path, "x64");
+
+            path = Path.Combine(path, "Pdfium.dll");
+
+            if (File.Exists(path))
+                LoadLibrary(path);
+        }
+
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
+        private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
+
         // Pdfium stuff.
 
         [DllImport("pdfium.dll")]
-        public static extern void FPDF_InitLibrary(IntPtr hInstance);
+        public static extern void FPDF_InitLibrary();
 
         [DllImport("pdfium.dll")]
         public static extern void FPDF_DestroyLibrary();
@@ -38,7 +59,7 @@ namespace PdfiumViewer
         public static extern uint FPDF_GetDocPermissions(IntPtr document);
 
         [DllImport("pdfium.dll")]
-        public static extern IntPtr FPDFDOC_InitFormFillEnviroument(IntPtr document, ref FPDF_FORMFILLINFO formInfo);
+        public static extern IntPtr FPDFDOC_InitFormFillEnvironment(IntPtr document, ref FPDF_FORMFILLINFO formInfo);
 
         [DllImport("pdfium.dll")]
         public static extern void FPDF_SetFormFieldHighlightColor(IntPtr hHandle, int fieldType, uint color);

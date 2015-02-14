@@ -28,10 +28,21 @@ without problems on 64-bit Windows though.
 
 To use the library, you must first add a reference to the NuGet package.
 
-After you've added this reference, a file named `pdfium.dll` will be added to the root
-of your project. This file must be placed next to your application. The easiest way
-to accomplish this is by changing the properties of that file, changing the
-Copy to Output Directory setting to Copy always.
+After you've added this reference, two files will be added to your project:
+
+* `x86\pdfium.dll` is the 32-bit version of the Pdfium library;
+
+* `x64\pdfium.dll` is the 64-bit version of the Pdfium library.
+
+You have two options. If your application is 32-bit only or 64-bit only, you can
+remove the DLL that won't be used. You can leave this file in the `x86` or `x64`
+directory, or move it to the root of your project. PdfiumViewer will find the DLL
+in both cases.
+
+When building your project, the `pdfiumdll` library(s) must be placed next to
+your application, either in the root or the `x86` or `x64` sub directory.
+The easiest way to accomplish this is by changing the properties of that file,
+changing the Copy to Output Directory setting to Copy always.
 
 ## Building PDFium
 
@@ -41,11 +52,10 @@ The PDFium source code does not have project files for Visual Studio. The full i
 to get to a project you can open in Visual Studio, you need to follow the steps at
 https://code.google.com/p/pdfium/wiki/Build.
 
-A few minor additions to this:
-
-* You need Python version 2. Version 3 won't work;
-
-* The `build\gyp_pdfium` command is a Python script. To execute this, execute `python build\gyp_pdfium`.
+One addition to the instructions on the website is that the `build\gyp_pdfium` command is a
+Python script. To execute this, execute `python build\gyp_pdfium`. Also, one of the projects
+require the Python executable to be in the `PATH`. `depot_tools` has a Python which can be
+used for this.
 
 After this, you can open the `all.sln` solution from the `build` directory. The project
 is configured to create static libraries. However, we need a dynamic library for PdfiumViewer.
@@ -59,7 +69,8 @@ of the `pdfium` project:
 * In the C/C++ | Preprocessor tab, the Preprocessor Definition `FPDFSDK_EXPORTS` must be
   added to have the DLL export the correct symbols;
 
-* In the Linker | Input tab, the Additional Dependencies must be set to:
+* In the Linker | Input tab, the Additional Dependencies must be set to. This dialog appears
+  after you've saved and re-opened the project configuration:
 
 ```
 kernel32.lib
@@ -84,6 +95,7 @@ $(OutDir)\lib\icuuc.lib
 $(OutDir)\lib\v8_snapshot.lib
 $(OutDir)\lib\jsapi.lib
 $(OutDir)\lib\pdfwindow.lib
+$(OutDir)\lib\freetype.lib
 ```
 
 * The platform toolset must be set to support Windows XP. The easiest way to do this is by
@@ -97,8 +109,16 @@ $(OutDir)\lib\pdfwindow.lib
   After the last include line, add `#include "../../v8/include/v8.h"`. Then, at the top of
   the `FPDF_InitLibrary` function, add the line `v8::V8::InitializeICU();`.
 
+You may have to run the build a few times because the dependencies don't appear to be resolved
+correctly. For me, the second time the build completes successfully.
+
 After you've made these changes and compiled the solution, you will get a valid DLL
 which can be copied into the "Libraries/Pdfium" directory of the project.
+
+To build the 64-bit version of the Pdfium library, drop down the `Release` option in the toolbar
+and open the `Configuration Manager`. There, change the `Active solution platform` to `x64`.
+The steps to update the project configuration explained above need to be performed again because
+they are dependent on the platform.
 
 ## Bugs
 

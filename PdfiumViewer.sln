@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumViewer", "PdfiumViewer\PdfiumViewer.csproj", "{438914B6-5D1C-482C-B942-5C0E057EEF6F}"
 EndProject
@@ -9,18 +9,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumViewer.Demo", "Pdfium
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Debug|x86.ActiveCfg = Debug|x86
-		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Debug|x86.Build.0 = Debug|x86
-		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Release|x86.ActiveCfg = Release|x86
-		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Release|x86.Build.0 = Release|x86
-		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Debug|x86.ActiveCfg = Debug|x86
-		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Debug|x86.Build.0 = Debug|x86
-		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Release|x86.ActiveCfg = Release|x86
-		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Release|x86.Build.0 = Release|x86
+		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{438914B6-5D1C-482C-B942-5C0E057EEF6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD131F6-17EB-4E42-932F-74CBE6DBEEB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
