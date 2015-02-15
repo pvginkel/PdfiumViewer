@@ -10,7 +10,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace PdfiumViewer
 {
-    internal static class NativeMethods
+    public static class NativeMethods
     {
         static NativeMethods()
         {
@@ -36,6 +36,10 @@ namespace PdfiumViewer
 
         [DllImport("pdfium.dll")]
         public static extern void FPDF_InitLibrary();
+
+
+        [DllImport("pdfium.dll")]
+        public static extern void FPDF_InitLibrary(IntPtr hInstance);
 
         [DllImport("pdfium.dll")]
         public static extern void FPDF_DestroyLibrary();
@@ -108,6 +112,23 @@ namespace PdfiumViewer
 
         [DllImport("pdfium.dll")]
         public static extern void FPDF_RenderPage(IntPtr dc, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags);
+
+        [DllImport("pdfium.dll")]
+        public static extern void FPDF_RenderPageBitmap(IntPtr bitmapHandle, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags);
+
+        [DllImport("pdfium.dll")]
+        public static extern IntPtr FPDFBitmap_Destroy(IntPtr bitmapHandle);
+
+        [DllImport("gdi32.dll")]
+        public static extern bool FillRgn(IntPtr hdc, IntPtr hrgn, IntPtr hbr);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
+        [DllImport("pdfium.dll")]
+        public static extern IntPtr FPDFBitmap_Create(int width, int height, int alpha);
+
+        [DllImport("pdfium.dll")]
+        public static extern void FPDFBitmap_FillRect(IntPtr bitmapHandle, int left, int top, int width, int height, int red, int green, int blue, int alpha);
 
         [DllImport("pdfium.dll")]
         public static extern int FPDF_GetPageSizeByIndex(IntPtr document, int page_index, out double width, out double height);
