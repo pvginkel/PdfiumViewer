@@ -253,7 +253,7 @@ namespace PdfiumViewer
 
         protected override Rectangle GetDocumentBounds()
         {
-            int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+            int height = (int)(_maxHeight * _document.PageCount * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount); //(int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
             int width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
             
             var center = new Point(
