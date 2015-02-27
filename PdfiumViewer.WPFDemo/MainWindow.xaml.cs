@@ -133,8 +133,13 @@ namespace PdfiumViewer.WPFDemo
 
         private BitmapSource RenderPageToFDIP(int page, int width, int height)
         {
-            var bitmap = pdfDoc.RenderToFDIB(page, width, height, 96, 96, false);
-            return BitmapHelper.ToBitmapSource(bitmap);
+            //Rendered 1095 pages within 20 seconds
+            byte[] bytes = pdfDoc.RenderToByteArray(page, width, height, 96, 96, false);
+            return BitmapHelper.ToBitmapSource(bytes, width, height, 96, 96);
+
+            //Rendered 1095 pages within 23 seconds
+            //var bitmap = pdfDoc.Render(page, width, height, 96, 96, false, true);
+            //return BitmapHelper.ToBitmapSource(bitmap);
         }
 
         private void LoadPDFButton_Click(object sender, RoutedEventArgs e)

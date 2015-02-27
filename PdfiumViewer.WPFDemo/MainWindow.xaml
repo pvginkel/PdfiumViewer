@@ -25,7 +25,7 @@
 
         <Button Click="LoadPDFButton_Click" Content="Load PDF" Grid.ColumnSpan="2"/>
         <Button Click="RenderToMemDCButton_Click" Content="Start Rendering by MemDC" Grid.Row="1" />
-        <Button Click="RenderPageBitmapButton_Click" Content="Start Rendering by RenderPageBitmap (Not Working Yet)" Grid.Row="1" Grid.Column="1" />
+        <Button Click="RenderPageBitmapButton_Click" Content="Start Rendering by RenderPageBitmap" Grid.Row="1" Grid.Column="1" />
 
         <Label Content="RenderPage with Memory Device Context" Grid.Row="3" Grid.Column="0" Background="LightGoldenrodYellow"/>
         <Label Content="RenderPageBitmap with Foxit Device Independent Bitmap" Grid.Row="3" Grid.Column="1" Background="LightGoldenrodYellow"/>
