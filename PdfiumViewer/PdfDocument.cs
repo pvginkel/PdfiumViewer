@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PdfiumViewer
@@ -129,19 +131,13 @@ namespace PdfiumViewer
             }
         }
 
-        /// <summary>
-        /// Renders a page of the PDF document to an image.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The rendered image.</returns>
-        public Image Render(int page, float dpiX, float dpiY, bool forPrinting)
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting,
+            bool useFDIB = false)
         {
-            var size = PageSizes[page];
-
-            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, forPrinting);
+            if (useFDIB)
+                return RenderUsingFDIB(page, width, height, dpiX, dpiY, forPrinting);
+            else
+                return Render(page, width, height, dpiX, dpiY, forPrinting);
         }
 
         /// <summary>
@@ -235,6 +231,125 @@ namespace PdfiumViewer
             {
                 NativeMethods.DeleteObject(dc);
             }
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to a Bitmap using FDIB (Foxit Device Independent Bitmap)
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>        
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="bounds">Bounds to render the page in.</param>
+        /// <param name="forPrinting">Render the page for printing.</param>
+        /// <returns>The result Bitmap</returns>
+        public Image RenderUsingFDIB(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
+        {
+            IntPtr bitmapHandle = IntPtr.Zero;
+            Bitmap bitmap = null;
+
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            try
+            {
+                bitmapHandle = NativeMethods.FPDFBitmap_Create(width, height, 1);
+                NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
+
+                bool success = _file.RenderPDFPageToBitmap(
+                    page,
+                    bitmapHandle,
+                    (int)dpiX, (int)dpiY,
+                    0, 0, width, height,
+                    true /* fitToBounds */,
+                    true /* stretchToBounds */,
+                    true /* keepAspectRatio */,
+                    true /* centerInBounds */,
+                    true /* autoRotate */,
+                    forPrinting
+                );
+
+                if (!success)
+                    throw new Win32Exception();
+                else
+                {
+                    IntPtr pixelsData = NativeMethods.FPDFBitmap_GetBuffer(bitmapHandle);
+
+
+                    uint bytesLength = (uint)(width * height * 4);
+                    bitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+
+                    BitmapData bData = bitmap.LockBits(
+                        new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
+
+                    NativeMethods.CopyMemory(bData.Scan0, pixelsData, bytesLength);
+
+                    bitmap.UnlockBits(bData);
+                }
+            }
+            catch (Exception e)
+            {
+            }
+            finally
+            {
+                NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
+            }
+
+            return bitmap;
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to a byte[] using FDIB (Foxit Device Independent Bitmap)
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>        
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="bounds">Bounds to render the page in.</param>
+        /// <param name="forPrinting">Render the page for printing.</param>
+        /// <returns>The raw byte array of pixel data</returns>
+        public byte[] RenderToByteArray(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
+        {
+            IntPtr bitmapHandle = IntPtr.Zero;
+
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            try
+            {
+                bitmapHandle = NativeMethods.FPDFBitmap_Create(width, height, 1);
+                NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
+
+                bool success = _file.RenderPDFPageToBitmap(
+                    page,
+                    bitmapHandle,
+                    (int)dpiX, (int)dpiY,
+                    0, 0, width, height,
+                    true /* fitToBounds */,
+                    true /* stretchToBounds */,
+                    true /* keepAspectRatio */,
+                    true /* centerInBounds */,
+                    true /* autoRotate */,
+                    forPrinting
+                );
+
+                if (!success)
+                    throw new Win32Exception();
+                else
+                {
+                    IntPtr pixelsData = NativeMethods.FPDFBitmap_GetBuffer(bitmapHandle);
+                    byte[] bytes = new byte[width * height * 4];
+                    Marshal.Copy(pixelsData, bytes, 0, bytes.Length);
+                    return bytes;
+                }
+            }
+            catch (Exception e)
+            {
+            }
+            finally
+            {
+                NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
+            }
+
+            return null;
         }
 
         /// <summary>
