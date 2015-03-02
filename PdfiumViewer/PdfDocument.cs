@@ -244,15 +244,18 @@ namespace PdfiumViewer
         /// <returns>The result Bitmap</returns>
         public Image RenderUsingFDIB(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
         {
-            IntPtr bitmapHandle = IntPtr.Zero;
-            Bitmap bitmap = null;
-
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
+            IntPtr bitmapHandle = IntPtr.Zero;
+            Bitmap bitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData bData = bitmap.LockBits(
+                    new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
             try
             {
-                bitmapHandle = NativeMethods.FPDFBitmap_Create(width, height, 1);
+                // During external function call bitmap data will be pinned automatically, so no reason to worry GC will reallocate it
+                bitmapHandle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, bData.Scan0, width * 4);
                 NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
 
                 bool success = _file.RenderPDFPageToBitmap(
@@ -272,17 +275,6 @@ namespace PdfiumViewer
                     throw new Win32Exception();
                 else
                 {
-                    IntPtr pixelsData = NativeMethods.FPDFBitmap_GetBuffer(bitmapHandle);
-
-
-                    uint bytesLength = (uint)(width * height * 4);
-                    bitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-
-                    BitmapData bData = bitmap.LockBits(
-                        new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-
-                    NativeMethods.CopyMemory(bData.Scan0, pixelsData, bytesLength);
-
                     bitmap.UnlockBits(bData);
                 }
             }
@@ -291,6 +283,7 @@ namespace PdfiumViewer
             }
             finally
             {
+                // This call will not destroy external buffer
                 NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
             }
 
@@ -308,14 +301,16 @@ namespace PdfiumViewer
         /// <returns>The raw byte array of pixel data</returns>
         public byte[] RenderToByteArray(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
         {
-            IntPtr bitmapHandle = IntPtr.Zero;
-
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
+            IntPtr bitmapHandle = IntPtr.Zero;
+            var bytes = new byte[width * height * 4];
+
             try
             {
-                bitmapHandle = NativeMethods.FPDFBitmap_Create(width, height, 1);
+                // During external function call bitmap data will be pinned automatically, so no reason to worry GC will reallocate it
+                bitmapHandle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, bytes, width * 4);
                 NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
 
                 bool success = _file.RenderPDFPageToBitmap(
@@ -334,18 +329,14 @@ namespace PdfiumViewer
                 if (!success)
                     throw new Win32Exception();
                 else
-                {
-                    IntPtr pixelsData = NativeMethods.FPDFBitmap_GetBuffer(bitmapHandle);
-                    byte[] bytes = new byte[width * height * 4];
-                    Marshal.Copy(pixelsData, bytes, 0, bytes.Length);
                     return bytes;
-                }
             }
             catch (Exception e)
             {
             }
             finally
             {
+                // This call will not destroy external buffer
                 NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
             }
 
