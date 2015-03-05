@@ -14,6 +14,8 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
             <RowDefinition />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -33,5 +35,14 @@
         <Image  x:Name="imageMemDC" Grid.Row="4" Grid.Column="0"/>
         <Image  x:Name="imageFDIB" Grid.Row="4" Grid.Column="1"/>
 
+        <StackPanel Grid.Row="5" Orientation="Horizontal">
+            <TextBox x:Name="searchValueTextBox" Text="Enter value to search"   VerticalAlignment="Center" Width="150"/>
+            <CheckBox x:Name="matchCaseCheckBox" Content="Match CaSe" VerticalAlignment="Center" Margin="5,0"/>
+            <CheckBox x:Name="wholeWordOnlyCheckBox" Content="Whole Word Only" VerticalAlignment="Center" Margin="5,0"/>
+        </StackPanel>
+        
+        <Button Content="Search" Grid.Row="6" Click="DoSearch_Click"/>
+
+        <Label x:Name="searchResultLabel" Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" />
     </Grid>
 </Window>

@@ -169,5 +169,37 @@ namespace PdfiumViewer.WPFDemo
             if (pdfDoc != null)
                 pdfDoc.Dispose();
         }
+
+        private void DoSearch_Click(object sender, RoutedEventArgs e)
+        {
+            string text = searchValueTextBox.Text;
+            bool matchCase = matchCaseCheckBox.IsChecked.GetValueOrDefault();
+            bool wholeWordOnly = wholeWordOnlyCheckBox.IsChecked.GetValueOrDefault();
+
+            DoSearch(text, matchCase, wholeWordOnly);
+        }
+
+        int LastSearchPage = 0;
+        private void DoSearch(string text, bool matchCase, bool wholeWord, bool fromStart = true)
+        {
+            if (LastSearchPage != 0)
+                fromStart = false;
+
+            int startIndex = fromStart ? 0 : (LastSearchPage - 1);
+
+            for (int i = startIndex; i < pdfDoc.PageCount; i++)
+            {
+                var res = pdfDoc.Search(text, i, matchCase, wholeWord, fromStart);
+                if (res.IsFound)
+                {
+                    LastSearchPage = i + 1;
+
+                    searchResultLabel.Content = String.Format("Found \"{0}\" in page: {1}, index: {2}, count: {3}, x: {4}, y: {5}", res.Text, LastSearchPage, res.StartIndex, res.Count, res.X, res.Y);
+
+                    break;
+                }
+            }
+        }
+
     }
 }

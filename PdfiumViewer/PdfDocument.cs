@@ -370,6 +370,11 @@ namespace PdfiumViewer
             _file.Save(stream);
         }
 
+        public SearchResult Search(string text, int pageNumber, bool matchCase, bool wholeWord, bool fromStart)
+        {
+            return _file.Search(text, pageNumber, matchCase, wholeWord, fromStart);
+        }
+
         /// <summary>
         /// Creates a <see cref="PrintDocument"/> for the PDF document.
         /// </summary>
