@@ -5,3 +5,4 @@ Thumbs.db
 /*.shfbproj_*
 /*.dotCover
 /_ReSharper*
+/packages

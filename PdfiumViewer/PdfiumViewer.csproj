@@ -50,6 +50,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="NativeMethods.Pdfium.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>

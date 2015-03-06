@@ -66,6 +66,9 @@ of the `pdfium` project:
 
 * In the General tab, Configuration Type must be set to Dynamic Library (.dll);
 
+* In the C/C++ | General tab, the Additional Include Directories must get the extra directory
+  `v8`. The full value should become `third_party\freetype\include;v8;v8\include;%(AdditionalIncludeDirectories)`;
+
 * In the C/C++ | Preprocessor tab, the Preprocessor Definition `FPDFSDK_EXPORTS` must be
   added to have the DLL export the correct symbols;
 
@@ -90,6 +93,7 @@ $(OutDir)\lib\fxge.lib
 $(OutDir)\lib\javascript.lib
 $(OutDir)\lib\v8_base.lib
 $(OutDir)\lib\v8_libbase.lib
+$(OutDir)\lib\v8_libplatform.lib
 $(OutDir)\lib\icui18n.lib
 $(OutDir)\lib\icuuc.lib
 $(OutDir)\lib\v8_snapshot.lib
@@ -104,10 +108,11 @@ $(OutDir)\lib\freetype.lib
   I believe you only need to do this for Visual Studio 2013, but I don't have access to a
   previous version of Visual Studio, so I cannot verify this;
 
-* The V8 ICU engine must be initialized. However, this is a C++ interface which is difficult
-  to access through P/Invoke. Instead, we make a small modification to `fpdfsdk\src\fpdfview.cpp`.
-  After the last include line, add `#include "../../v8/include/v8.h"`. Then, at the top of
-  the `FPDF_InitLibrary` function, add the line `v8::V8::InitializeICU();`.
+* A few methods need to be added to allow Pdfium to correctly initialize Pdfium. This file can
+  be found in the `Contrib` directory and must be copied to the `pdfium\fpdfsdk\src` directory.
+  After the file has been copied, it must be added to the project by right clicking on the `src`
+  directory in the `pdfium` project and then choosing Add | Existing item. Select the copied source file
+  and add it to the project.
 
 You may have to run the build a few times because the dependencies don't appear to be resolved
 correctly. For me, the second time the build completes successfully.
