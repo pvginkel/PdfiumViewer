@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PdfiumViewer
@@ -136,13 +135,19 @@ namespace PdfiumViewer
             }
         }
 
-        public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting,
-            bool useFDIB = false)
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="forPrinting">Render the page for printing.</param>
+        /// <returns>The rendered image.</returns>
+        public Image Render(int page, float dpiX, float dpiY, bool forPrinting)
         {
-            if (useFDIB)
-                return RenderUsingFDIB(page, width, height, dpiX, dpiY, forPrinting);
-            else
-                return Render(page, width, height, dpiX, dpiY, forPrinting);
+            var size = PageSizes[page];
+
+            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, forPrinting);
         }
 
         /// <summary>
@@ -160,192 +165,44 @@ namespace PdfiumViewer
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-            var dc = NativeMethods.CreateCompatibleDC(IntPtr.Zero);
+            var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
             try
             {
-                int dcDpiX = NativeMethods.GetDeviceCaps(dc, NativeMethods.LOGPIXELSX);
-                int dcDpiY = NativeMethods.GetDeviceCaps(dc, NativeMethods.LOGPIXELSY);
+                var handle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, data.Scan0, width * 4);
 
-                if (dcDpiX != (int)dpiX || dcDpiY != (int)dpiY)
-                {
-                    var transform = new NativeMethods.XFORM
-                    {
-                        eM11 = dcDpiX / dpiX,
-                        eM22 = dcDpiY / dpiY
-                    };
-
-                    NativeMethods.SetGraphicsMode(dc, NativeMethods.GM_ADVANCED);
-                    NativeMethods.ModifyWorldTransform(dc, ref transform, NativeMethods.MWT_LEFTMULTIPLY);
-                }
-
-                var bitmap = NativeMethods.CreateCompatibleBitmap(NativeMethods.GetDC(IntPtr.Zero), width, height);
                 try
                 {
-                    var oldBitmap = NativeMethods.SelectObject(dc, bitmap);
-                    try
-                    {
-                        var brush = NativeMethods.CreateSolidBrush(ColorTranslator.ToWin32(Color.White));
-                        try
-                        {
-                            var oldBrush = NativeMethods.SelectObject(dc, brush);
-                            try
-                            {
-                                NativeMethods.Rectangle(dc, 0, 0, width, height);
-                            }
-                            finally
-                            {
-                                NativeMethods.SelectObject(dc, oldBrush);
-                            }
-                        }
-                        finally
-                        {
-                            NativeMethods.DeleteObject(brush);
-                        }
+                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, 0xFFFFFFFF);
 
-                        // _file is an instance of PdfFile from PdfViewer port
-                        // Now render the page onto the memory DC, which in turn changes the bitmap                 
-                        bool success = _file.RenderPDFPageToDC(
-                            page,
-                            dc,
-                            (int)dpiX, (int)dpiY,
-                            0, 0, width, height,
-                            true /* fitToBounds */,
-                            true /* stretchToBounds */,
-                            true /* keepAspectRatio */,
-                            true /* centerInBounds */,
-                            true /* autoRotate */,
-                            forPrinting
-                        );
+                    bool success = _file.RenderPDFPageToBitmap(
+                        page,
+                        handle,
+                        (int)dpiX, (int)dpiY,
+                        0, 0, width, height,
+                        true /* fitToBounds */,
+                        true /* stretchToBounds */,
+                        true /* keepAspectRatio */,
+                        true /* centerInBounds */,
+                        true /* autoRotate */,
+                        forPrinting
+                    );
 
-                        if (!success)
-                            throw new Win32Exception();
-                    }
-                    finally
-                    {
-                        NativeMethods.SelectObject(dc, oldBitmap);
-                    }
-
-                    return Bitmap.FromHbitmap(bitmap);
+                    if (!success)
+                        throw new Win32Exception();
                 }
                 finally
                 {
-                    NativeMethods.DeleteObject(bitmap);
+                    NativeMethods.FPDFBitmap_Destroy(handle);
                 }
             }
             finally
             {
-                NativeMethods.DeleteObject(dc);
-            }
-        }
-
-        /// <summary>
-        /// Renders a page of the PDF document to a Bitmap using FDIB (Foxit Device Independent Bitmap)
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>        
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="bounds">Bounds to render the page in.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The result Bitmap</returns>
-        public Image RenderUsingFDIB(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-
-            IntPtr bitmapHandle = IntPtr.Zero;
-            Bitmap bitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bData = bitmap.LockBits(
-                    new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-
-            try
-            {
-                // During external function call bitmap data will be pinned automatically, so no reason to worry GC will reallocate it
-                bitmapHandle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, bData.Scan0, width * 4);
-                NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
-
-                bool success = _file.RenderPDFPageToBitmap(
-                    page,
-                    bitmapHandle,
-                    (int)dpiX, (int)dpiY,
-                    0, 0, width, height,
-                    true /* fitToBounds */,
-                    true /* stretchToBounds */,
-                    true /* keepAspectRatio */,
-                    true /* centerInBounds */,
-                    true /* autoRotate */,
-                    forPrinting
-                );
-
-                if (!success)
-                    throw new Win32Exception();
-                else
-                {
-                    bitmap.UnlockBits(bData);
-                }
-            }
-            catch (Exception e)
-            {
-            }
-            finally
-            {
-                // This call will not destroy external buffer
-                NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
+                bitmap.UnlockBits(data);
             }
 
             return bitmap;
-        }
-
-        /// <summary>
-        /// Renders a page of the PDF document to a byte[] using FDIB (Foxit Device Independent Bitmap)
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>        
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="bounds">Bounds to render the page in.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The raw byte array of pixel data</returns>
-        public byte[] RenderToByteArray(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-
-            IntPtr bitmapHandle = IntPtr.Zero;
-            var bytes = new byte[width * height * 4];
-
-            try
-            {
-                // During external function call bitmap data will be pinned automatically, so no reason to worry GC will reallocate it
-                bitmapHandle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, bytes, width * 4);
-                NativeMethods.FPDFBitmap_FillRect(bitmapHandle, 0, 0, width, height, new FPDFColor(0xFFFFFFFF));
-
-                bool success = _file.RenderPDFPageToBitmap(
-                    page,
-                    bitmapHandle,
-                    (int)dpiX, (int)dpiY,
-                    0, 0, width, height,
-                    true /* fitToBounds */,
-                    true /* stretchToBounds */,
-                    true /* keepAspectRatio */,
-                    true /* centerInBounds */,
-                    true /* autoRotate */,
-                    forPrinting
-                );
-
-                if (!success)
-                    throw new Win32Exception();
-                else
-                    return bytes;
-            }
-            catch (Exception e)
-            {
-            }
-            finally
-            {
-                // This call will not destroy external buffer
-                NativeMethods.FPDFBitmap_Destroy(bitmapHandle);
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -375,9 +232,19 @@ namespace PdfiumViewer
             _file.Save(stream);
         }
 
-        public SearchResult Search(string text, int pageNumber, bool matchCase, bool wholeWord, bool fromStart)
+        public PdfMatches Search(string text, bool matchCase, bool wholeWord)
         {
-            return _file.Search(text, pageNumber, matchCase, wholeWord, fromStart);
+            return Search(text, matchCase, wholeWord, 0, PageCount - 1);
+        }
+
+        public PdfMatches Search(string text, bool matchCase, bool wholeWord, int page)
+        {
+            return Search(text, matchCase, wholeWord, page, page);
+        }
+
+        public PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage)
+        {
+            return _file.Search(text, matchCase, wholeWord, startPage, endPage);
         }
 
         /// <summary>

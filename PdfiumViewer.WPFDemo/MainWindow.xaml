@@ -22,27 +22,23 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Label x:Name="labelMemDC" Grid.Row="2" Grid.Column="0" />
-        <Label x:Name="labelFDIB" Grid.Row="2" Grid.Column="1" />
+        <Label x:Name="labelMemDC" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
 
         <Button Click="LoadPDFButton_Click" Content="Load PDF" Grid.ColumnSpan="2"/>
-        <Button Click="RenderToMemDCButton_Click" Content="Start Rendering by MemDC" Grid.Row="1" />
-        <Button Click="RenderPageBitmapButton_Click" Content="Start Rendering by RenderPageBitmap" Grid.Row="1" Grid.Column="1" />
+        <Button Click="RenderToMemDCButton_Click" Content="Start Rendering by MemDC" Grid.Row="1" Grid.ColumnSpan="2" />
 
-        <Label Content="RenderPage with Memory Device Context" Grid.Row="3" Grid.Column="0" Background="LightGoldenrodYellow"/>
-        <Label Content="RenderPageBitmap with Foxit Device Independent Bitmap" Grid.Row="3" Grid.Column="1" Background="LightGoldenrodYellow"/>
+        <Label Content="RenderPage with Memory Device Context" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Background="LightGoldenrodYellow"/>
 
-        <Image  x:Name="imageMemDC" Grid.Row="4" Grid.Column="0"/>
-        <Image  x:Name="imageFDIB" Grid.Row="4" Grid.Column="1"/>
+        <Image  x:Name="imageMemDC" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal">
             <TextBox x:Name="searchValueTextBox" Text="Enter value to search"   VerticalAlignment="Center" Width="150"/>
             <CheckBox x:Name="matchCaseCheckBox" Content="Match CaSe" VerticalAlignment="Center" Margin="5,0"/>
             <CheckBox x:Name="wholeWordOnlyCheckBox" Content="Whole Word Only" VerticalAlignment="Center" Margin="5,0"/>
         </StackPanel>
-        
+
         <Button Content="Search" Grid.Row="6" Click="DoSearch_Click"/>
 
-        <Label x:Name="searchResultLabel" Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" />
+        <TextBox x:Name="searchResultLabel" Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" />
     </Grid>
 </Window>

@@ -9,6 +9,8 @@ namespace PdfiumViewer
 {
     internal abstract class PdfFile : IDisposable
     {
+        private static readonly Encoding FPDFEncoding = new UnicodeEncoding(false, false, false);
+
         private IntPtr _document;
         private IntPtr _form;
         private bool _disposed;
@@ -58,40 +60,6 @@ namespace PdfiumViewer
             return true;
         }
 
-
-        public SearchResult Search(string text, int pageNumber, bool matchCase, bool wholeWord, bool fromStart)
-        {
-            if (!fromStart && LastSearchPageData != null)
-            {
-                var res = LastSearchPageData.Search(text, matchCase, wholeWord, fromStart);
-
-                if (!res.IsFound)
-                {
-                    LastSearchPageData.Dispose();
-                    LastSearchPageData = null;
-                }
-
-                return res;
-            }
-            else
-            {
-                if (LastSearchPageData != null)
-                    LastSearchPageData.Dispose();
-
-                using (var pageData = new PageData(_document, _form, pageNumber))
-                {
-                    var res = pageData.Search(text, matchCase, wholeWord, fromStart);
-
-                    if (res.IsFound)
-                        LastSearchPageData = pageData;
-
-                    return res;
-                }
-            }
-        }
-
-        private PageData LastSearchPageData { get; set; }
-
         public List<SizeF> GetPDFDocInfo()
         {
             if (_disposed)
@@ -132,6 +100,54 @@ namespace PdfiumViewer
             NativeMethods.FORM_DoDocumentOpenAction(_form);
         }
 
+        public PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage)
+        {
+            var matches = new List<PdfMatch>();
+
+            for (int page = startPage; page <= endPage; page++)
+            {
+                using (var pageData = new PageData(_document, _form, page))
+                {
+                    NativeMethods.FPDF_SEARCH_FLAGS flags = 0;
+                    if (matchCase)
+                        flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHCASE;
+                    if (wholeWord)
+                        flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHWHOLEWORD;
+
+                    var handle = NativeMethods.FPDFText_FindStart(pageData.TextPage, FPDFEncoding.GetBytes(text), flags, 0);
+
+                    try
+                    {
+                        while (NativeMethods.FPDFText_FindNext(handle))
+                        {
+                            int index = NativeMethods.FPDFText_GetSchResultIndex(handle);
+
+                            int matchLength = NativeMethods.FPDFText_GetSchCount(handle);
+
+                            var result = new byte[(matchLength + 1) * 2];
+                            NativeMethods.FPDFText_GetText(pageData.TextPage, index, matchLength, result);
+                            string match = FPDFEncoding.GetString(result, 0, matchLength * 2);
+
+                            double left, right, bottom, top;
+                            NativeMethods.FPDFText_GetCharBox(pageData.TextPage, index, out left, out right, out bottom, out top);
+
+                            matches.Add(new PdfMatch(
+                                new PointF((float)left, (float)top),
+                                match,
+                                page
+                            ));
+                        }
+                    }
+                    finally
+                    {
+                        NativeMethods.FPDFText_FindClose(handle);
+                    }
+                }
+            }
+
+            return new PdfMatches(startPage, endPage, matches);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -165,7 +181,6 @@ namespace PdfiumViewer
 
         private class PageData : IDisposable
         {
-            private int previousSearchIndex = 0;
             private readonly IntPtr _form;
             private bool _disposed;
 
@@ -190,77 +205,6 @@ namespace PdfiumViewer
                 Height = NativeMethods.FPDF_GetPageHeight(Page);
             }
 
-            public SearchResult Search(string text, bool matchCase, bool wholeWord, bool fromStart)
-            {
-                IntPtr pSCHHandle = IntPtr.Zero;
-
-                // Set the find flag 
-                int nFlag = 0;
-
-                double left = 0, right = 0, bottom = 0, top = 0;
-                double x = 0, y = 0;
-                bool result = false;
-                string foundString = null;
-
-                if (matchCase)
-                {
-                    nFlag |= (int)(NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHCASE);
-                }
-
-                if (wholeWord)
-                {
-                    nFlag |= (int)(NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHWHOLEWORD);
-                }
-
-                byte[] bytes = Encoding.Unicode.GetBytes(text);
-
-                if (fromStart)
-                {
-                    previousSearchIndex = 0;
-                }
-
-                // Get the search context handle                
-                pSCHHandle = NativeMethods.FPDFText_FindStart(TextPage, bytes, nFlag, 0);
-
-                // Progress in direction of search up to previousSearchIndex to find next
-                for (int i = 0; i < previousSearchIndex; i++)
-                    result = NativeMethods.FPDFText_FindNext(pSCHHandle);
-
-                // Search the text string. 
-                result = NativeMethods.FPDFText_FindNext(pSCHHandle);
-
-                int index = 0, matchedCount = 0;
-
-                if (result)
-                {
-                    index = NativeMethods.FPDFText_GetSchResultIndex(pSCHHandle);
-
-                    matchedCount = NativeMethods.FPDFText_GetSchCount(pSCHHandle);
-
-                    ushort[] buffer = new ushort[matchedCount];
-                    int extractedCount = NativeMethods.FPDFText_GetText(TextPage, index, matchedCount, buffer);
-
-                    char[] charArray = Array.ConvertAll<ushort, char>(buffer, new Converter<ushort, char>((input) => { return (char)input; }));
-                    foundString = new string(charArray);
-
-                    NativeMethods.FPDFText_GetCharBox(TextPage, index, ref left, ref right, ref bottom, ref top);
-
-                    previousSearchIndex++;
-                }
-
-                NativeMethods.FPDFText_FindClose(pSCHHandle);
-
-                return new SearchResult()
-                {
-                    IsFound = result,
-                    StartIndex = index,
-                    Count = matchedCount,
-                    X = left,
-                    Y = top,
-                    Text = foundString
-                };
-            }
-
             public void Dispose()
             {
                 if (!_disposed)
@@ -274,15 +218,5 @@ namespace PdfiumViewer
                 }
             }
         }
-    }
-
-    public struct SearchResult
-    {
-        public bool IsFound;
-        public int StartIndex;
-        public int Count;
-        public double X;
-        public double Y;
-        public string Text;
     }
 }

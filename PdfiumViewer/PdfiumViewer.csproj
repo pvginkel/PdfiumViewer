@@ -49,7 +49,6 @@
     <Compile Include="CustomScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="FPDFColor.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
@@ -61,6 +60,7 @@
     <Compile Include="PdfFileStreamFile.cs" />
     <Compile Include="PdfFileHandleFile.cs" />
     <Compile Include="PdfLibrary.cs" />
+    <Compile Include="PdfMatch.cs" />
     <Compile Include="PdfMemoryStreamFile.cs" />
     <Compile Include="PdfPrintDocument.cs">
       <SubType>Component</SubType>
@@ -68,6 +68,7 @@
     <Compile Include="PdfRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PdfMatches.cs" />
     <Compile Include="PdfViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
