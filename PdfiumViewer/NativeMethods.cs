@@ -304,6 +304,16 @@ namespace PdfiumViewer
         [DllImport("gdi32.dll")]
         public static extern bool ModifyWorldTransform(IntPtr hdc, [In] ref XFORM lpXform, uint iMode);
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        [DllImport("gdi32.dll")]
+        public static extern bool SetViewportOrgEx(IntPtr hdc, int X, int Y, out POINT lpPoint);
+
         public const uint SW_ERASE = 0x0004;
         public const uint SW_SMOOTHSCROLL = 0x0010;
         public const int WS_VSCROLL = 0x00200000;

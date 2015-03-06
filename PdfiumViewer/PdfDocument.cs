@@ -107,11 +107,14 @@ namespace PdfiumViewer
                     NativeMethods.ModifyWorldTransform(dc, ref transform, NativeMethods.MWT_LEFTMULTIPLY);
                 }
 
+                var point = new NativeMethods.POINT();
+                NativeMethods.SetViewportOrgEx(dc, bounds.X, bounds.Y, out point);
+
                 bool success = _file.RenderPDFPageToDC(
                     page,
                     dc,
                     (int)dpiX, (int)dpiY,
-                    bounds.X, bounds.Y, bounds.Width, bounds.Height,
+                    0, 0, bounds.Width, bounds.Height,
                     true /* fitToBounds */,
                     true /* stretchToBounds */,
                     true /* keepAspectRatio */,
@@ -119,6 +122,8 @@ namespace PdfiumViewer
                     true /* autoRotate */,
                     forPrinting
                 );
+
+                NativeMethods.SetViewportOrgEx(dc, point.X, point.Y, out point);
 
                 if (!success)
                     throw new Win32Exception();
