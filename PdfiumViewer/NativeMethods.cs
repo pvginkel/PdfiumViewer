@@ -40,9 +40,6 @@ namespace PdfiumViewer
         [DllImport("pdfium.dll")]
         public static extern void FPDF_DestroyLibrary();
 
-        [DllImport("pdfium.dll")]
-        public static extern bool FSDK_SetUnSpObjProcessHandler(UNSUPPORT_INFO unsp_info);
-
         [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]
         public static extern IntPtr FPDF_LoadMemDocument(SafeHandle data_buf, int size, string password);
 
@@ -111,16 +108,6 @@ namespace PdfiumViewer
 
         [DllImport("pdfium.dll")]
         public static extern int FPDF_GetPageSizeByIndex(IntPtr document, int page_index, out double width, out double height);
-
-        public delegate void FSDK_UnSupport_Handler(UNSUPPORT_INFO pThis, FPDF_UNSP nType);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class UNSUPPORT_INFO
-        {
-            public int version;
-
-            public FSDK_UnSupport_Handler FSDK_UnSupport_Handler;
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         public class FPDF_FORMFILLINFO
