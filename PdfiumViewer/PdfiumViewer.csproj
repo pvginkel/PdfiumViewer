@@ -49,6 +49,7 @@
     <Compile Include="CustomScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="FPDFColor.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
