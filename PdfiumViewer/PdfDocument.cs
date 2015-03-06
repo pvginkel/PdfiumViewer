@@ -116,11 +116,6 @@ namespace PdfiumViewer
                     dc,
                     (int)dpiX, (int)dpiY,
                     0, 0, bounds.Width, bounds.Height,
-                    true /* fitToBounds */,
-                    true /* stretchToBounds */,
-                    true /* keepAspectRatio */,
-                    true /* centerInBounds */,
-                    true /* autoRotate */,
                     forPrinting
                 );
 
@@ -181,11 +176,6 @@ namespace PdfiumViewer
                         handle,
                         (int)dpiX, (int)dpiY,
                         0, 0, width, height,
-                        true /* fitToBounds */,
-                        true /* stretchToBounds */,
-                        true /* keepAspectRatio */,
-                        true /* centerInBounds */,
-                        true /* autoRotate */,
                         forPrinting
                     );
 

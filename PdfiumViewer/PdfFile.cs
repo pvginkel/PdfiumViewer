@@ -34,7 +34,7 @@ namespace PdfiumViewer
             PdfLibrary.EnsureLoaded();
         }
 
-        public bool RenderPDFPageToDC(int pageNumber, IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool fitToBounds, bool stretchToBounds, bool keepAspectRation, bool centerInBounds, bool autoRotate, bool forPrinting)
+        public bool RenderPDFPageToDC(int pageNumber, IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool forPrinting)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -47,7 +47,7 @@ namespace PdfiumViewer
             return true;
         }
 
-        public bool RenderPDFPageToBitmap(int pageNumber, IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool fitToBounds, bool stretchToBounds, bool keepAspectRation, bool centerInBounds, bool autoRotate, bool forPrinting)
+        public bool RenderPDFPageToBitmap(int pageNumber, IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, bool forPrinting)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
