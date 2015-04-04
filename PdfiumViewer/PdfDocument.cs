@@ -84,6 +84,20 @@ namespace PdfiumViewer
         /// <param name="forPrinting">Render the page for printing.</param>
         public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool forPrinting)
         {
+            Render(page, graphics, dpiX, dpiY, bounds, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to the provided graphics instance.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="graphics">Graphics instance to render the page on.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="bounds">Bounds to render the page in.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, PdfRenderFlags flags)
+        {
             if (graphics == null)
                 throw new ArgumentNullException("graphics");
             if (_disposed)
@@ -116,7 +130,7 @@ namespace PdfiumViewer
                     dc,
                     (int)dpiX, (int)dpiY,
                     0, 0, bounds.Width, bounds.Height,
-                    forPrinting
+                    FlagsToFPDFFlags(flags)
                 );
 
                 NativeMethods.SetViewportOrgEx(dc, point.X, point.Y, out point);
@@ -149,6 +163,21 @@ namespace PdfiumViewer
         /// Renders a page of the PDF document to an image.
         /// </summary>
         /// <param name="page">Number of the page to render.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <returns>The rendered image.</returns>
+        public Image Render(int page, float dpiX, float dpiY, PdfRenderFlags flags)
+        {
+            var size = PageSizes[page];
+
+            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, flags);
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
         /// <param name="width">Width of the rendered image.</param>
         /// <param name="height">Height of the rendered image.</param>
         /// <param name="dpiX">Horizontal DPI.</param>
@@ -156,6 +185,21 @@ namespace PdfiumViewer
         /// <param name="forPrinting">Render the page for printing.</param>
         /// <returns>The rendered image.</returns>
         public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
+        {
+            return Render(page, width, height, dpiX, dpiY, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="width">Width of the rendered image.</param>
+        /// <param name="height">Height of the rendered image.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <returns>The rendered image.</returns>
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRenderFlags flags)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -169,14 +213,16 @@ namespace PdfiumViewer
 
                 try
                 {
-                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, 0xFFFFFFFF);
+                    uint background = (flags & PdfRenderFlags.Transparent) == 0 ? 0xFFFFFFFF : 0x00FFFFFF;
+
+                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, background);
 
                     bool success = _file.RenderPDFPageToBitmap(
                         page,
                         handle,
                         (int)dpiX, (int)dpiY,
                         0, 0, width, height,
-                        forPrinting
+                        FlagsToFPDFFlags(flags)
                     );
 
                     if (!success)
@@ -193,6 +239,11 @@ namespace PdfiumViewer
             }
 
             return bitmap;
+        }
+
+        private NativeMethods.FPDF FlagsToFPDFFlags(PdfRenderFlags flags)
+        {
+            return (NativeMethods.FPDF)(flags & ~PdfRenderFlags.Transparent);
         }
 
         /// <summary>

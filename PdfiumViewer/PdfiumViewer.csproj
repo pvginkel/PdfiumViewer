@@ -60,6 +60,7 @@
     <Compile Include="PdfFile.cs" />
     <Compile Include="PdfFileStreamFile.cs" />
     <Compile Include="PdfFileHandleFile.cs" />
+    <Compile Include="PdfRenderFlags.cs" />
     <Compile Include="PdfLibrary.cs" />
     <Compile Include="PdfMatch.cs" />
     <Compile Include="PdfMemoryStreamFile.cs" />
