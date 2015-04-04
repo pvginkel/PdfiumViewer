@@ -6,7 +6,7 @@
     <title>PdfiumViewer</title>
     <authors>Pieter van Ginkel</authors>
     <owners>Pieter van Ginkel</owners>
-    <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.txt</licenseUrl>
+    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>http://github.com/pvginkel/PdfiumViewer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>PDF viewer based on the PDFium project.</description>
