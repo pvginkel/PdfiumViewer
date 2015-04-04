@@ -10,7 +10,7 @@
     <projectUrl>http://github.com/pvginkel/PdfiumViewer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>PDF viewer based on the PDFium project.</description>
-    <copyright>Pieter van Ginkel © 2012-2014</copyright>
+    <copyright>Pieter van Ginkel © 2012-2015</copyright>
     <tags>pdf viewer pdfium</tags>
   </metadata>
   <files>
