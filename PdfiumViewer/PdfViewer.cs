@@ -33,6 +33,14 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Get the <see cref="PdfRenderer"/> that renders the PDF document.
+        /// </summary>
+        public PdfRenderer Renderer
+        {
+            get { return _renderer; }
+        }
+
+        /// <summary>
         /// Gets or sets the default document name used when saving the document.
         /// </summary>
         public string DefaultDocumentName { get; set; }
