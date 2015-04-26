@@ -26,6 +26,15 @@ namespace PdfiumViewer
                 ev(this, se);
         }
 
+        public event EventHandler DisplayRectangleChanged;
+
+        protected virtual void OnDisplayRectangleChanged(EventArgs e)
+        {
+            var ev = DisplayRectangleChanged;
+            if (ev != null)
+                ev(this, e);
+        }
+
         protected override CreateParams CreateParams
         {
             get
@@ -266,6 +275,8 @@ namespace PdfiumViewer
                     NativeMethods.SW_INVALIDATE | NativeMethods.SW_SCROLLCHILDREN
                 );
             }
+
+            OnDisplayRectangleChanged(EventArgs.Empty);
         }
 
         private int ScrollThumbPosition(int fnBar)

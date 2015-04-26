@@ -40,6 +40,53 @@ namespace PdfiumViewer
             set { base.TabStop = value; }
         }
 
+        public int Page
+        {
+            get
+            {
+                if (_document == null)
+                    return 0;
+
+                int top = -DisplayRectangle.Top + ClientSize.Height / 2;
+
+                int offset = 0;
+
+                for (int page = 0; page < _document.PageCount; page++)
+                {
+                    int height = (int)(_maxHeight * _scaleFactor);
+                    int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+
+                    if (top >= offset && top < offset + fullHeight)
+                        return page;
+
+                    offset += fullHeight;
+                }
+
+                return _document.PageCount - 1;
+            }
+            set
+            {
+                if (_document == null)
+                {
+                    SetDisplayRectLocation(new Point(0, 0));
+                }
+                else
+                {
+                    int top = 0;
+
+                    for (int page = 0; page < value; page++)
+                    {
+                        int height = (int)(_maxHeight * _scaleFactor);
+                        int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+
+                        top += fullHeight;
+                    }
+
+                    SetDisplayRectLocation(new Point(0, -top));
+                }
+            }
+        }
+
         /// <summary>
         /// Gets or sets the way the document should be zoomed initially.
         /// </summary>

@@ -20,6 +20,13 @@ namespace PdfiumViewer.Demo
             InitializeComponent();
 
             renderToBitmapsToolStripMenuItem.Enabled = false;
+
+            pdfViewer1.Renderer.DisplayRectangleChanged += Renderer_DisplayRectangleChanged;
+        }
+
+        void Renderer_DisplayRectangleChanged(object sender, EventArgs e)
+        {
+            _page.Text = (pdfViewer1.Renderer.Page + 1).ToString();
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -88,6 +95,23 @@ namespace PdfiumViewer.Demo
                     image.Save(Path.Combine(path, "Page " + i + ".png"));
                 }
             }
+        }
+
+        private void _page_TextChanged(object sender, EventArgs e)
+        {
+            int page;
+            if (int.TryParse(_page.Text, out page))
+                pdfViewer1.Renderer.Page = page - 1;
+        }
+
+        private void toolStripButton1_Click_1(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.Page--;
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.Page++;
         }
     }
 }
