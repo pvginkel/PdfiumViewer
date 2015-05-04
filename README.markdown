@@ -1,6 +1,6 @@
 # PdfiumViewer
 
-LGPL License.
+Apache 2.0 License.
 
 [Download from NuGet](http://nuget.org/packages/PdfiumViewer).
 
@@ -132,4 +132,4 @@ Bugs should be reported through github at
 
 ## License
 
-PdfiumViewer is licensed under the LGPL 3. See the license details for how PDFium is licensed.
+PdfiumViewer is licensed under the Apache 2.0 license. See the license details for how PDFium is licensed.
