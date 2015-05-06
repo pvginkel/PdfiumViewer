@@ -16,7 +16,7 @@ namespace PdfiumViewer
         {
             // Load the platform dependent Pdfium.dll if it exists.
 
-            string path = Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location);
+            string path = AppDomain.CurrentDomain.RelativeSearchPath ?? Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location);
 
             if (IntPtr.Size == 4)
                 path = Path.Combine(path, "x86");
