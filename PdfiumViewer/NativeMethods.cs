@@ -6,6 +6,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Text;
+using System.Windows.Forms;
 using Microsoft.Win32.SafeHandles;
 
 namespace PdfiumViewer
@@ -16,17 +17,20 @@ namespace PdfiumViewer
         {
             // Load the platform dependent Pdfium.dll if it exists.
 
-            string path = AppDomain.CurrentDomain.RelativeSearchPath ?? Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location);
+            if (!TryLoadNativeLibrary(AppDomain.CurrentDomain.RelativeSearchPath))
+                TryLoadNativeLibrary(Path.GetDirectoryName(typeof (NativeMethods).Assembly.Location));
+        }
 
-            if (IntPtr.Size == 4)
-                path = Path.Combine(path, "x86");
-            else
-                path = Path.Combine(path, "x64");
+        private static bool TryLoadNativeLibrary(string path)
+        {
+            if (path == null)
+                return false;
+
+            path = Path.Combine(path, IntPtr.Size == 4 ? "x86" : "x64");
 
             path = Path.Combine(path, "Pdfium.dll");
 
-            if (File.Exists(path))
-                LoadLibrary(path);
+            return File.Exists(path) && LoadLibrary(path) != IntPtr.Zero;
         }
 
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
