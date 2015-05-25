@@ -35,6 +35,15 @@ namespace PdfiumViewer
                 ev(this, e);
         }
 
+        public event SetCursorEventHandler SetCursor;
+
+        protected virtual void OnSetCursor(SetCursorEventArgs e)
+        {
+            var handler = SetCursor;
+            if (handler != null)
+                handler(this, e);
+        }
+
         protected override CreateParams CreateParams
         {
             get
@@ -623,10 +632,22 @@ namespace PdfiumViewer
                     WmHScroll(ref m);
                     break;
 
+                case NativeMethods.WM_SETCURSOR:
+                    WmSetCursor(ref m);
+                    break;
+
+
                 default:
                     base.WndProc(ref m);
                     break;
             }
+        }
+
+        private void WmSetCursor(ref Message m)
+        {
+            var e = new SetCursorEventArgs(PointToClient(Cursor.Position));
+            OnSetCursor(e);
+            Cursor.Current = e.Cursor ?? Cursor;
         }
 
         /// <summary>

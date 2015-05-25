@@ -165,6 +165,7 @@ namespace PdfiumViewer
         public const int SB_ENDSCROLL = 8;
         public const int WM_HSCROLL = 0x114;
         public const int WM_VSCROLL = 0x115;
+        public const int WM_SETCURSOR = 0x20;
         public const int SIF_TRACKPOS = 0x10;
         public const int SIF_RANGE = 0x1;
         public const int SIF_POS = 0x4;

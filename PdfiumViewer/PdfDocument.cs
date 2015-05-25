@@ -297,6 +297,11 @@ namespace PdfiumViewer
             return new PdfPrintDocument(this);
         }
 
+        public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)
+        {
+            return _file.GetPageLinks(pageNumber, pageSize);
+        }
+
         public void Dispose()
         {
             Dispose(true);

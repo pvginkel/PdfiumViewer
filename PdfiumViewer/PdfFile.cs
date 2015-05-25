@@ -60,6 +60,84 @@ namespace PdfiumViewer
             return true;
         }
 
+        public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            var links = new List<PdfPageLink>();
+
+            using (var pageData = new PageData(_document, _form, pageNumber))
+            {
+                int link = 0;
+                IntPtr annotation;
+
+                while (NativeMethods.FPDFLink_Enumerate(pageData.Page, ref link, out annotation))
+                {
+                    var destination = NativeMethods.FPDFLink_GetDest(_document, annotation);
+                    int? target = null;
+                    string uri = null;
+
+                    if (destination != IntPtr.Zero)
+                        target = (int)NativeMethods.FPDFDest_GetPageIndex(_document, destination);
+
+                    var action = NativeMethods.FPDFLink_GetAction(annotation);
+                    if (action != IntPtr.Zero)
+                    {
+                        const uint length = 1024;
+                        var sb = new StringBuilder(1024);
+                        NativeMethods.FPDFAction_GetURIPath(_document, action, sb, length);
+
+                        uri = sb.ToString();
+                    }
+
+                    var rect = new NativeMethods.FS_RECTF();
+
+                    if (NativeMethods.FPDFLink_GetAnnotRect(annotation, rect) && (target.HasValue || uri != null))
+                    {
+                        int deviceX1;
+                        int deviceY1;
+                        int deviceX2;
+                        int deviceY2;
+
+                        NativeMethods.FPDF_PageToDevice(
+                            pageData.Page,
+                            0,
+                            0,
+                            pageSize.Width,
+                            pageSize.Height,
+                            0,
+                            rect.left,
+                            rect.top,
+                            out deviceX1,
+                            out deviceY1
+                        );
+
+                        NativeMethods.FPDF_PageToDevice(
+                            pageData.Page,
+                            0,
+                            0,
+                            pageSize.Width,
+                            pageSize.Height,
+                            0,
+                            rect.right,
+                            rect.bottom,
+                            out deviceX2,
+                            out deviceY2
+                        );
+
+                        links.Add(new PdfPageLink(
+                            new Rectangle(deviceX1, deviceY1, deviceX2 - deviceX1, deviceY2 - deviceY1),
+                            target,
+                            uri
+                        ));
+                    }
+                }
+            }
+
+            return new PdfPageLinks(links);
+        }
+
         public List<SizeF> GetPDFDocInfo()
         {
             if (_disposed)

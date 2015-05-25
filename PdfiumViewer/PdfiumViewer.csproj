@@ -60,6 +60,8 @@
     <Compile Include="PdfFile.cs" />
     <Compile Include="PdfFileStreamFile.cs" />
     <Compile Include="PdfFileHandleFile.cs" />
+    <Compile Include="PdfPageLink.cs" />
+    <Compile Include="PdfPageLinks.cs" />
     <Compile Include="PdfRenderFlags.cs" />
     <Compile Include="PdfLibrary.cs" />
     <Compile Include="PdfMatch.cs" />
@@ -85,6 +87,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ScrollAction.cs" />
+    <Compile Include="SetCursorEventHandler.cs" />
     <Compile Include="ShadeBorder.cs" />
     <Compile Include="StreamExtensions.cs" />
   </ItemGroup>

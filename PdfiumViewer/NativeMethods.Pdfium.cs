@@ -303,6 +303,62 @@ namespace PdfiumViewer
             }
         }
 
+        public static bool FPDFLink_Enumerate(IntPtr page, ref int startPos, out IntPtr linkAnnot)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFLink_Enumerate(page, ref startPos, out linkAnnot);
+            }
+        }
+
+        public static IntPtr FPDFLink_GetDest(IntPtr document, IntPtr link)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFLink_GetDest(document, link);
+            }
+        }
+
+        public static uint FPDFDest_GetPageIndex(IntPtr document, IntPtr dest)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFDest_GetPageIndex(document, dest);
+            }
+        }
+
+        public static bool FPDFLink_GetAnnotRect(IntPtr linkAnnot, FS_RECTF rect)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFLink_GetAnnotRect(linkAnnot, rect);
+            }
+        }
+
+        public static void FPDF_PageToDevice(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, double page_x, double page_y, out int device_x, out int device_y)
+        {
+            lock (LockString)
+            {
+                Imports.FPDF_PageToDevice(page, start_x, start_y, size_x, size_y, rotate, page_x, page_y, out device_x, out device_y);
+            }
+        }
+
+        public static IntPtr FPDFLink_GetAction(IntPtr link)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFLink_GetAction(link);
+            }
+        }
+
+        public static uint FPDFAction_GetURIPath(IntPtr document, IntPtr action, StringBuilder buffer, uint buflen)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFAction_GetURIPath(document, action, buffer, buflen);
+            }
+        }
+
         private static class Imports
         {
             [DllImport("pdfium.dll")]
@@ -412,6 +468,27 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern void FPDFText_FindClose(IntPtr handle);
+
+            [DllImport("pdfium.dll")]
+            public static extern bool FPDFLink_Enumerate(IntPtr page, ref int startPos, out IntPtr linkAnnot);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFLink_GetDest(IntPtr document, IntPtr link);
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDFDest_GetPageIndex(IntPtr document, IntPtr dest);
+
+            [DllImport("pdfium.dll")]
+            public static extern bool FPDFLink_GetAnnotRect(IntPtr linkAnnot, FS_RECTF rect);
+
+            [DllImport("pdfium.dll")]
+            public static extern void FPDF_PageToDevice(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, double page_x, double page_y, out int device_x, out int device_y);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFLink_GetAction(IntPtr link);
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDFAction_GetURIPath(IntPtr document, IntPtr action, StringBuilder buffer, uint buflen);
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -506,6 +583,15 @@ namespace PdfiumViewer
         {
             FPDF_MATCHCASE = 1,
             FPDF_MATCHWHOLEWORD = 2
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class FS_RECTF
+        {
+            public float left;
+            public float top;
+            public float right;
+            public float bottom;
         }
     }
 }

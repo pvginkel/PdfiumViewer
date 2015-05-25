@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -24,6 +25,12 @@ namespace PdfiumViewer
         private PdfDocument _document;
         private ToolTip _toolTip;
         private PdfViewerZoomMode _zoomMode;
+        private bool _pageCacheValid;
+        private readonly List<PageCache> _pageCache = new List<PageCache>();
+        private int _visiblePageStart;
+        private int _visiblePageEnd;
+        private PdfPageLink _cachedLink;
+        private DragState _dragState;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -44,24 +51,16 @@ namespace PdfiumViewer
         {
             get
             {
-                if (_document == null)
+                if (_document == null || !_pageCacheValid)
                     return 0;
 
                 int top = -DisplayRectangle.Top + ClientSize.Height / 2;
 
-                int offset = 0;
-
                 for (int page = 0; page < _document.PageSizes.Count; page++)
                 {
-                    var size = _document.PageSizes[page];
-
-                    int height = (int)(size.Height * _scaleFactor);
-                    int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-
-                    if (top >= offset && top < offset + fullHeight)
+                    var pageCache = _pageCache[page].OuterBounds;
+                    if (top >= pageCache.Top && top < pageCache.Bottom)
                         return page;
-
-                    offset += fullHeight;
                 }
 
                 return _document.PageCount - 1;
@@ -74,19 +73,9 @@ namespace PdfiumViewer
                 }
                 else
                 {
-                    int top = 0;
+                    int page = Math.Min(Math.Max(value, 0), _document.PageCount - 1);
 
-                    for (int page = 0; page < value; page++)
-                    {
-                        var size = _document.PageSizes[page];
-
-                        int height = (int)(size.Height * _scaleFactor);
-                        int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-
-                        top += fullHeight;
-                    }
-
-                    SetDisplayRectLocation(new Point(0, -top));
+                    SetDisplayRectLocation(new Point(0, -_pageCache[page].OuterBounds.Top));
                 }
             }
         }
@@ -193,6 +182,64 @@ namespace PdfiumViewer
             {
                 _suspendPaintCount--;
             }
+
+            RebuildPageCache();
+        }
+
+        private void RebuildPageCache()
+        {
+            if (_document == null || _suspendPaintCount > 0)
+                return;
+
+            _pageCacheValid = true;
+
+            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            int leftOffset = -maxWidth / 2;
+
+            int offset = 0;
+
+            for (int page = 0; page < _document.PageSizes.Count; page++)
+            {
+                var size = _document.PageSizes[page];
+                int height = (int)(size.Height * _scaleFactor);
+                int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+                int width = (int)(size.Width * _scaleFactor);
+                int maxFullWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                int thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2;
+
+                while (_pageCache.Count <= page)
+                {
+                    _pageCache.Add(new PageCache());
+                }
+
+                var pageCache = _pageCache[page];
+
+                pageCache.Links = null;
+                pageCache.Bounds = new Rectangle(
+                    thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
+                    offset + ShadeBorder.Size.Top + PageMargin.Top,
+                    width,
+                    height
+                );
+                pageCache.OuterBounds = new Rectangle(
+                    thisLeftOffset,
+                    offset,
+                    width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal,
+                    height + ShadeBorder.Size.Vertical + PageMargin.Vertical
+                );
+
+                offset += fullHeight;
+            }
+        }
+
+        private PdfPageLinks GetPageLinks(int page)
+        {
+            var pageCache = _pageCache[page];
+            if (pageCache.Links == null)
+                pageCache.Links = _document.GetPageLinks(page, pageCache.Bounds.Size);
+
+            return pageCache.Links;
         }
 
         private Rectangle GetScrollClientArea()
@@ -252,9 +299,8 @@ namespace PdfiumViewer
                 return;
 
             var bounds = GetScrollClientArea();
-
             int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-            int leftOffset = HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2;
+            int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
             int topOffset = VScroll ? DisplayRectangle.Y : 0;
 
             using (var brush = new SolidBrush(BackColor))
@@ -262,33 +308,24 @@ namespace PdfiumViewer
                 e.Graphics.FillRectangle(brush, e.ClipRectangle);
             }
 
-            int offset = 0;
+            _visiblePageStart = -1;
+            _visiblePageEnd = -1;
 
             for (int page = 0; page < _document.PageSizes.Count; page++)
             {
-                var size = _document.PageSizes[page];
-                int height = (int)(size.Height * _scaleFactor);
-                int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                int width = (int)(size.Width * _scaleFactor);
-                int maxFullWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-                int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-                int thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2;
+                var pageCache = _pageCache[page];
+                var rectangle = pageCache.OuterBounds;
+                rectangle.Offset(leftOffset, topOffset);
 
-                var rectangle = new Rectangle(
-                    thisLeftOffset,
-                    offset + topOffset,
-                    fullWidth,
-                    fullHeight
-                );
+                if (_visiblePageStart == -1 && rectangle.Bottom >= 0)
+                    _visiblePageStart = page;
+                if (_visiblePageEnd == -1 && rectangle.Top > bounds.Height)
+                    _visiblePageEnd = page - 1;
 
                 if (e.ClipRectangle.IntersectsWith(rectangle))
                 {
-                    var pageBounds = new Rectangle(
-                        thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
-                        offset + topOffset + ShadeBorder.Size.Top + PageMargin.Top,
-                        width,
-                        height
-                    );
+                    var pageBounds = pageCache.Bounds;
+                    pageBounds.Offset(leftOffset, topOffset);
 
                     e.Graphics.FillRectangle(Brushes.White, pageBounds);
 
@@ -296,9 +333,12 @@ namespace PdfiumViewer
 
                     _shadeBorder.Draw(e.Graphics, pageBounds);
                 }
-
-                offset += fullHeight;
             }
+
+            if (_visiblePageStart == -1)
+                _visiblePageStart = 0;
+            if (_visiblePageEnd == -1)
+                _visiblePageEnd = _document.PageCount - 1;
         }
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds)
@@ -332,6 +372,99 @@ namespace PdfiumViewer
             );
         }
 
+        protected override void OnSetCursor(SetCursorEventArgs e)
+        {
+            _cachedLink = null;
+
+            if (_pageCacheValid)
+            {
+                var bounds = GetScrollClientArea();
+                int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
+
+                var displayLocation = DisplayRectangle.Location;
+
+                var location = new Point(
+                    e.Location.X - displayLocation.X,
+                    e.Location.Y - displayLocation.Y
+                );
+
+                for (int page = _visiblePageStart; page <= _visiblePageEnd; page++)
+                {
+                    var links = GetPageLinks(page);
+
+                    var pageLocation = location;
+                    var pageBounds = _pageCache[page].Bounds;
+                    pageLocation.X -= leftOffset + pageBounds.Left;
+                    pageLocation.Y -= pageBounds.Top;
+
+                    foreach (var link in links.Links)
+                    {
+                        if (link.Bounds.Contains(pageLocation))
+                        {
+                            _cachedLink = link;
+                            e.Cursor = Cursors.Hand;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            base.OnSetCursor(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            _dragState = null;
+
+            if (_cachedLink != null)
+            {
+                _dragState = new DragState
+                {
+                    Link = _cachedLink,
+                    Location = e.Location
+                };
+            }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            if (_dragState == null)
+                return;
+
+            int dx = Math.Abs(e.Location.X - _dragState.Location.X);
+            int dy = Math.Abs(e.Location.Y - _dragState.Location.Y);
+
+            var link = _dragState.Link;
+            _dragState = null;
+
+            if (link == null)
+                return;
+
+            if (dx <= SystemInformation.DragSize.Width && dy <= SystemInformation.DragSize.Height)
+            {
+                if (link.TargetPage.HasValue)
+                    Page = link.TargetPage.Value;
+
+                if (link.Uri != null)
+                {
+                    try
+                    {
+                        Process.Start(link.Uri);
+                    }
+                    catch
+                    {
+                        // Some browsers (Firefox) will cause an exception to
+                        // be thrown (when it auto-updates).
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Releases the unmanaged resources used by the <see cref="T:System.Windows.Forms.Control"/> and its child controls and optionally releases the managed resources.
         /// </summary>
@@ -356,6 +489,19 @@ namespace PdfiumViewer
             }
 
             base.Dispose(disposing);
+        }
+
+        private class PageCache
+        {
+            public PdfPageLinks Links { get; set; }
+            public Rectangle Bounds { get; set; }
+            public Rectangle OuterBounds { get; set; }
+        }
+
+        private class DragState
+        {
+            public PdfPageLink Link { get; set; }
+            public Point Location { get; set; }
         }
     }
 }
