@@ -385,7 +385,7 @@ namespace PdfiumViewer
                 var displayLocation = DisplayRectangle.Location;
 
                 var location = new Point(
-                    e.Location.X - displayLocation.X,
+                    e.Location.X,
                     e.Location.Y - displayLocation.Y
                 );
 
