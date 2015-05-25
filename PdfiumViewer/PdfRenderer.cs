@@ -15,8 +15,8 @@ namespace PdfiumViewer
         private static readonly Padding PageMargin = new Padding(4);
 
         private int _height;
-        private int _maxHeight;
         private int _maxWidth;
+        private int _maxHeight;
         private bool _disposed;
         private double _scaleFactor;
         private ShadeBorder _shadeBorder = new ShadeBorder();
@@ -51,9 +51,11 @@ namespace PdfiumViewer
 
                 int offset = 0;
 
-                for (int page = 0; page < _document.PageCount; page++)
+                for (int page = 0; page < _document.PageSizes.Count; page++)
                 {
-                    int height = (int)(_maxHeight * _scaleFactor);
+                    var size = _document.PageSizes[page];
+
+                    int height = (int)(size.Height * _scaleFactor);
                     int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
 
                     if (top >= offset && top < offset + fullHeight)
@@ -76,7 +78,9 @@ namespace PdfiumViewer
 
                     for (int page = 0; page < value; page++)
                     {
-                        int height = (int)(_maxHeight * _scaleFactor);
+                        var size = _document.PageSizes[page];
+
+                        int height = (int)(size.Height * _scaleFactor);
                         int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
 
                         top += fullHeight;
@@ -144,14 +148,14 @@ namespace PdfiumViewer
             SetDisplayRectLocation(new Point(0, 0));
 
             _height = 0;
-            _maxHeight = 0;
             _maxWidth = 0;
+            _maxHeight = 0;
 
             foreach (var size in _document.PageSizes)
             {
                 _height += (int)size.Height;
-                _maxHeight = Math.Max((int)size.Height, _maxHeight);
                 _maxWidth = Math.Max((int)size.Width, _maxWidth);
+                _maxHeight = Math.Max((int)size.Height, _maxHeight);
             }
 
             UpdateScrollbars();
@@ -260,23 +264,27 @@ namespace PdfiumViewer
 
             int offset = 0;
 
-            for (int page = 0; page < _document.PageCount; page++)
+            for (int page = 0; page < _document.PageSizes.Count; page++)
             {
-                int height = (int)(_maxHeight * _scaleFactor);
+                var size = _document.PageSizes[page];
+                int height = (int)(size.Height * _scaleFactor);
                 int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                int width = (int)(_maxWidth * _scaleFactor);
+                int width = (int)(size.Width * _scaleFactor);
+                int maxFullWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
                 int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                int thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2;
 
                 var rectangle = new Rectangle(
-                    leftOffset,
+                    thisLeftOffset,
                     offset + topOffset,
                     fullWidth,
                     fullHeight
-                    );
+                );
+
                 if (e.ClipRectangle.IntersectsWith(rectangle))
                 {
                     var pageBounds = new Rectangle(
-                        leftOffset + ShadeBorder.Size.Left + PageMargin.Left,
+                        thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
                         offset + topOffset + ShadeBorder.Size.Top + PageMargin.Top,
                         width,
                         height
@@ -300,7 +308,7 @@ namespace PdfiumViewer
 
         protected override Rectangle GetDocumentBounds()
         {
-            int height = (int)(_maxHeight * _document.PageCount * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+            int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
             int width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
             
             var center = new Point(
