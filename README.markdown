@@ -20,9 +20,7 @@ PdfiumViewer provides a number of components to work with PDF files:
 ## Compatibility
 
 The PdfiumViewer library has been tested with Windows XP and Windows 8, and
-is fully compatible with both. The PDFium library included in this project
-is a 32-bit version, so your .NET application need to be 32-bit too. It works
-without problems on 64-bit Windows though.
+is fully compatible with both. 
 
 ## Using the library
 
