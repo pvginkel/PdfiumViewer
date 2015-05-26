@@ -9,14 +9,16 @@ namespace PdfiumViewer
     internal class PdfPrintDocument : PrintDocument
     {
         private readonly PdfDocument _document;
+        private readonly PdfPrintMode _printMode;
         private int _currentPage;
 
-        public PdfPrintDocument(PdfDocument document)
+        public PdfPrintDocument(PdfDocument document, PdfPrintMode printMode)
         {
             if (document == null)
                 throw new ArgumentNullException("document");
 
             _document = document;
+            _printMode = printMode;
         }
 
         protected override void OnBeginPrint(PrintEventArgs e)
@@ -39,14 +41,35 @@ namespace PdfiumViewer
 
                 e.PageSettings.Landscape = pageOrientation == Orientation.Landscape;
 
-                int width = e.PageBounds.Width;
-                int height = e.PageBounds.Height;
+                double left;
+                double top;
+                double width;
+                double height;
+
+                if (_printMode == PdfPrintMode.ShrinkToMargin)
+                {
+                    left = 0;
+                    top = 0;
+                    width = e.PageBounds.Width - e.PageSettings.HardMarginX * 2;
+                    height = e.PageBounds.Height - e.PageSettings.HardMarginY * 2;
+                }
+                else
+                {
+                    left = -e.PageSettings.HardMarginX;
+                    top = -e.PageSettings.HardMarginY;
+                    width = e.PageBounds.Width;
+                    height = e.PageBounds.Height;
+                }
 
                 if (pageOrientation != printOrientation)
                 {
-                    int tmp = width;
+                    double tmp = width;
                     width = height;
                     height = tmp;
+
+                    tmp = left;
+                    left = top;
+                    top = tmp;
                 }
 
                 _document.Render(
@@ -55,10 +78,10 @@ namespace PdfiumViewer
                     e.Graphics.DpiX,
                     e.Graphics.DpiY,
                     new Rectangle(
-                        0,
-                        0,
-                        (int)((width / 100.0) * e.Graphics.DpiX),
-                        (int)((height / 100.0) * e.Graphics.DpiY)
+                        AdjustDpi(e.Graphics.DpiX, left),
+                        AdjustDpi(e.Graphics.DpiY, top),
+                        AdjustDpi(e.Graphics.DpiX, width),
+                        AdjustDpi(e.Graphics.DpiY, height)
                     ),
                     true
                 );
@@ -70,6 +93,11 @@ namespace PdfiumViewer
                 : Math.Min(PrinterSettings.ToPage, _document.PageCount);
 
             e.HasMorePages = _currentPage < pageCount;
+        }
+
+        private static int AdjustDpi(double value, double dpi)
+        {
+            return (int)((value / 100.0) * dpi);
         }
 
         private Orientation GetOrientation(SizeF pageSize)

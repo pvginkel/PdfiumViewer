@@ -294,7 +294,18 @@ namespace PdfiumViewer
         /// <returns></returns>
         public PrintDocument CreatePrintDocument()
         {
-            return new PdfPrintDocument(this);
+            return CreatePrintDocument(PdfPrintMode.CutMargin);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="PrintDocument"/> for the PDF document.
+        /// </summary>
+        /// <param name="printMode">Specifies the mode for printing. The default
+        /// value for this parameter is CutMargin.</param>
+        /// <returns></returns>
+        public PrintDocument CreatePrintDocument(PdfPrintMode printMode)
+        {
+            return new PdfPrintDocument(this, printMode);
         }
 
         public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)

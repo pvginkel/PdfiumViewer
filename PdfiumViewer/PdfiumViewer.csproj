@@ -62,6 +62,7 @@
     <Compile Include="PdfFileHandleFile.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />
+    <Compile Include="PdfPrintMode.cs" />
     <Compile Include="PdfRenderFlags.cs" />
     <Compile Include="PdfLibrary.cs" />
     <Compile Include="PdfMatch.cs" />

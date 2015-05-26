@@ -22,6 +22,8 @@ namespace PdfiumViewer.Demo
             renderToBitmapsToolStripMenuItem.Enabled = false;
 
             pdfViewer1.Renderer.DisplayRectangleChanged += Renderer_DisplayRectangleChanged;
+
+            cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
         }
 
         void Renderer_DisplayRectangleChanged(object sender, EventArgs e)
@@ -112,6 +114,22 @@ namespace PdfiumViewer.Demo
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             pdfViewer1.Renderer.Page++;
+        }
+
+        private void cutMarginsWhenPrintingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cutMarginsWhenPrintingToolStripMenuItem.Checked = true;
+            shrinkToMarginsWhenPrintingToolStripMenuItem.Checked = false;
+
+            pdfViewer1.DefaultPrintMode = PdfPrintMode.CutMargin;
+        }
+
+        private void shrinkToMarginsWhenPrintingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            shrinkToMarginsWhenPrintingToolStripMenuItem.Checked = true;
+            cutMarginsWhenPrintingToolStripMenuItem.Checked = false;
+
+            pdfViewer1.DefaultPrintMode = PdfPrintMode.ShrinkToMargin;
         }
     }
 }

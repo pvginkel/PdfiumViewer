@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Windows.Forms;
 
@@ -46,6 +47,12 @@ namespace PdfiumViewer
         public string DefaultDocumentName { get; set; }
 
         /// <summary>
+        /// Gets or sets the default print mode.
+        /// </summary>
+        [DefaultValue(PdfPrintMode.CutMargin)]
+        public PdfPrintMode DefaultPrintMode { get; set; }
+
+        /// <summary>
         /// Gets or sets the way the document should be zoomed initially.
         /// </summary>
         public PdfViewerZoomMode ZoomMode
@@ -59,6 +66,8 @@ namespace PdfiumViewer
         /// </summary>
         public PdfViewer()
         {
+            DefaultPrintMode = PdfPrintMode.CutMargin;
+
             InitializeComponent();
 
             UpdateEnabled();
@@ -112,7 +121,7 @@ namespace PdfiumViewer
         private void _printButton_Click(object sender, EventArgs e)
         {
             using (var form = new PrintDialog())
-            using (var document = _document.CreatePrintDocument())
+            using (var document = _document.CreatePrintDocument(DefaultPrintMode))
             {
                 form.AllowSomePages = true;
                 form.Document = document;
