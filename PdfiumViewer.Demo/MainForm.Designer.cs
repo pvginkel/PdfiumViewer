@@ -40,6 +40,9 @@ namespace PdfiumViewer.Demo
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToBitmapsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.cutMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this._page = new System.Windows.Forms.ToolStripTextBox();
@@ -47,9 +50,8 @@ namespace PdfiumViewer.Demo
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.pdfViewer1 = new PdfiumViewer.PdfViewer();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.cutMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -70,6 +72,8 @@ namespace PdfiumViewer.Demo
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.toolStripMenuItem1,
+            this.printPreviewToolStripMenuItem,
+            this.toolStripMenuItem3,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -79,20 +83,20 @@ namespace PdfiumViewer.Demo
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(143, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -113,6 +117,25 @@ namespace PdfiumViewer.Demo
             this.renderToBitmapsToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.renderToBitmapsToolStripMenuItem.Text = "&Render to Bitmaps";
             this.renderToBitmapsToolStripMenuItem.Click += new System.EventHandler(this.renderToBitmapsToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(241, 6);
+            // 
+            // cutMarginsWhenPrintingToolStripMenuItem
+            // 
+            this.cutMarginsWhenPrintingToolStripMenuItem.Name = "cutMarginsWhenPrintingToolStripMenuItem";
+            this.cutMarginsWhenPrintingToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.cutMarginsWhenPrintingToolStripMenuItem.Text = "Cut margins when printing";
+            this.cutMarginsWhenPrintingToolStripMenuItem.Click += new System.EventHandler(this.cutMarginsWhenPrintingToolStripMenuItem_Click);
+            // 
+            // shrinkToMarginsWhenPrintingToolStripMenuItem
+            // 
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Name = "shrinkToMarginsWhenPrintingToolStripMenuItem";
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Text = "Shrink to margins when printing";
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Click += new System.EventHandler(this.shrinkToMarginsWhenPrintingToolStripMenuItem_Click);
             // 
             // toolStrip1
             // 
@@ -176,24 +199,17 @@ namespace PdfiumViewer.Demo
             this.pdfViewer1.TabIndex = 0;
             this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
             // 
-            // toolStripMenuItem2
+            // printPreviewToolStripMenuItem
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(241, 6);
+            this.printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
+            this.printPreviewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.printPreviewToolStripMenuItem.Text = "Print Preview";
+            this.printPreviewToolStripMenuItem.Click += new System.EventHandler(this.printPreviewToolStripMenuItem_Click);
             // 
-            // cutMarginsWhenPrintingToolStripMenuItem
+            // toolStripMenuItem3
             // 
-            this.cutMarginsWhenPrintingToolStripMenuItem.Name = "cutMarginsWhenPrintingToolStripMenuItem";
-            this.cutMarginsWhenPrintingToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.cutMarginsWhenPrintingToolStripMenuItem.Text = "Cut margins when printing";
-            this.cutMarginsWhenPrintingToolStripMenuItem.Click += new System.EventHandler(this.cutMarginsWhenPrintingToolStripMenuItem_Click);
-            // 
-            // shrinkToMarginsWhenPrintingToolStripMenuItem
-            // 
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Name = "shrinkToMarginsWhenPrintingToolStripMenuItem";
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Text = "Shrink to margins when printing";
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem.Click += new System.EventHandler(this.shrinkToMarginsWhenPrintingToolStripMenuItem_Click);
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
             // 
             // MainForm
             // 
@@ -235,6 +251,8 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem cutMarginsWhenPrintingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem shrinkToMarginsWhenPrintingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem printPreviewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
 
     }
 }

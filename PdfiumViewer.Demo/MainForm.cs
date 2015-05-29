@@ -131,5 +131,14 @@ namespace PdfiumViewer.Demo
 
             pdfViewer1.DefaultPrintMode = PdfPrintMode.ShrinkToMargin;
         }
+
+        private void printPreviewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new PrintPreviewDialog())
+            {
+                form.Document = pdfViewer1.Document.CreatePrintDocument(pdfViewer1.DefaultPrintMode);
+                form.ShowDialog(this);
+            }
+        }
     }
 }
