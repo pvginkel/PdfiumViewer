@@ -179,5 +179,15 @@ namespace PdfiumViewer.Demo
                     pdfViewer1.Renderer.Zoom = zoom;
             }
         }
+
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.ZoomIn();
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.ZoomOut();
+        }
     }
 }

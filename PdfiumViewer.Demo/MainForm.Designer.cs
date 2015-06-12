@@ -54,9 +54,13 @@ namespace PdfiumViewer.Demo
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this._fitWidth = new System.Windows.Forms.ToolStripButton();
             this._fitHeight = new System.Windows.Forms.ToolStripButton();
-            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this._zoom = new System.Windows.Forms.ToolStripTextBox();
+            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -159,12 +163,16 @@ namespace PdfiumViewer.Demo
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this._page,
-            this.toolStripLabel2,
-            this._zoom,
             this.toolStripSeparator1,
             this.toolStripButton1,
             this.toolStripButton2,
             this.toolStripSeparator2,
+            this.toolStripLabel2,
+            this._zoom,
+            this.toolStripSeparator4,
+            this.toolStripButton4,
+            this.toolStripButton3,
+            this.toolStripSeparator3,
             this._fitWidth,
             this._fitHeight});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
@@ -235,17 +243,6 @@ namespace PdfiumViewer.Demo
             this._fitHeight.Text = "Fit Height";
             this._fitHeight.Click += new System.EventHandler(this._fitHeight_Click);
             // 
-            // pdfViewer1
-            // 
-            this.pdfViewer1.DefaultDocumentName = null;
-            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pdfViewer1.Document = null;
-            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
-            this.pdfViewer1.Name = "pdfViewer1";
-            this.pdfViewer1.Size = new System.Drawing.Size(585, 546);
-            this.pdfViewer1.TabIndex = 0;
-            this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
-            // 
             // toolStripLabel2
             // 
             this.toolStripLabel2.Name = "toolStripLabel2";
@@ -257,6 +254,47 @@ namespace PdfiumViewer.Demo
             this._zoom.Name = "_zoom";
             this._zoom.Size = new System.Drawing.Size(100, 25);
             this._zoom.KeyDown += new System.Windows.Forms.KeyEventHandler(this._zoom_KeyDown);
+            // 
+            // pdfViewer1
+            // 
+            this.pdfViewer1.DefaultDocumentName = null;
+            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pdfViewer1.Document = null;
+            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
+            this.pdfViewer1.Name = "pdfViewer1";
+            this.pdfViewer1.Size = new System.Drawing.Size(585, 546);
+            this.pdfViewer1.TabIndex = 0;
+            this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButton3
+            // 
+            this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
+            this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton3.Name = "toolStripButton3";
+            this.toolStripButton3.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton3.Text = "-";
+            this.toolStripButton3.Click += new System.EventHandler(this.toolStripButton3_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButton4
+            // 
+            this.toolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton4.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton4.Image")));
+            this.toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton4.Name = "toolStripButton4";
+            this.toolStripButton4.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton4.Text = "+";
+            this.toolStripButton4.Click += new System.EventHandler(this.toolStripButton4_Click);
             // 
             // MainForm
             // 
@@ -305,6 +343,10 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripButton _fitHeight;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
         private System.Windows.Forms.ToolStripTextBox _zoom;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripButton toolStripButton4;
+        private System.Windows.Forms.ToolStripButton toolStripButton3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 
     }
 }
