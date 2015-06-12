@@ -140,5 +140,23 @@ namespace PdfiumViewer.Demo
                 form.ShowDialog(this);
             }
         }
+
+        private void _fitWidth_Click(object sender, EventArgs e)
+        {
+            FitPage(PdfViewerZoomMode.FitWidth);
+        }
+
+        private void FitPage(PdfViewerZoomMode zoomMode)
+        {
+            int page = pdfViewer1.Renderer.Page;
+            pdfViewer1.ZoomMode = zoomMode;
+            pdfViewer1.Renderer.Zoom = 1;
+            pdfViewer1.Renderer.Page = page;
+        }
+
+        private void _fitHeight_Click(object sender, EventArgs e)
+        {
+            FitPage(PdfViewerZoomMode.FitHeight);
+        }
     }
 }
