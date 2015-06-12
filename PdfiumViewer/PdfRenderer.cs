@@ -54,7 +54,7 @@ namespace PdfiumViewer
                 if (_document == null || !_pageCacheValid)
                     return 0;
 
-                int top = -DisplayRectangle.Top + ClientSize.Height / 2;
+                int top = -DisplayRectangle.Top + (int)(ClientSize.Height * Zoom) / 2;
 
                 for (int page = 0; page < _document.PageSizes.Count; page++)
                 {
@@ -118,6 +118,8 @@ namespace PdfiumViewer
 
         protected override void OnZoomChanged(EventArgs e)
         {
+            base.OnZoomChanged(e);
+
             UpdateScrollbars();
         }
 

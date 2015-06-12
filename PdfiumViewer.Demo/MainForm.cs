@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
@@ -22,8 +18,16 @@ namespace PdfiumViewer.Demo
             renderToBitmapsToolStripMenuItem.Enabled = false;
 
             pdfViewer1.Renderer.DisplayRectangleChanged += Renderer_DisplayRectangleChanged;
+            pdfViewer1.Renderer.ZoomChanged += Renderer_ZoomChanged;
 
             cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
+
+            _zoom.Text = pdfViewer1.Renderer.Zoom.ToString();
+        }
+
+        void Renderer_ZoomChanged(object sender, EventArgs e)
+        {
+            _zoom.Text = pdfViewer1.Renderer.Zoom.ToString();
         }
 
         void Renderer_DisplayRectangleChanged(object sender, EventArgs e)
@@ -99,13 +103,6 @@ namespace PdfiumViewer.Demo
             }
         }
 
-        private void _page_TextChanged(object sender, EventArgs e)
-        {
-            int page;
-            if (int.TryParse(_page.Text, out page))
-                pdfViewer1.Renderer.Page = page - 1;
-        }
-
         private void toolStripButton1_Click_1(object sender, EventArgs e)
         {
             pdfViewer1.Renderer.Page--;
@@ -157,6 +154,30 @@ namespace PdfiumViewer.Demo
         private void _fitHeight_Click(object sender, EventArgs e)
         {
             FitPage(PdfViewerZoomMode.FitHeight);
+        }
+
+        private void _page_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+
+                int page;
+                if (int.TryParse(_page.Text, out page))
+                    pdfViewer1.Renderer.Page = page - 1;
+            }
+        }
+
+        private void _zoom_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+
+                float zoom;
+                if (float.TryParse(_zoom.Text, out zoom))
+                    pdfViewer1.Renderer.Zoom = zoom;
+            }
         }
     }
 }

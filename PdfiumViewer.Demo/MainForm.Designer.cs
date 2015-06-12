@@ -52,9 +52,11 @@ namespace PdfiumViewer.Demo
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this._fitHeight = new System.Windows.Forms.ToolStripButton();
             this._fitWidth = new System.Windows.Forms.ToolStripButton();
+            this._fitHeight = new System.Windows.Forms.ToolStripButton();
             this.pdfViewer1 = new PdfiumViewer.PdfViewer();
+            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
+            this._zoom = new System.Windows.Forms.ToolStripTextBox();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -157,6 +159,8 @@ namespace PdfiumViewer.Demo
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this._page,
+            this.toolStripLabel2,
+            this._zoom,
             this.toolStripSeparator1,
             this.toolStripButton1,
             this.toolStripButton2,
@@ -179,7 +183,7 @@ namespace PdfiumViewer.Demo
             // 
             this._page.Name = "_page";
             this._page.Size = new System.Drawing.Size(100, 25);
-            this._page.TextChanged += new System.EventHandler(this._page_TextChanged);
+            this._page.KeyDown += new System.Windows.Forms.KeyEventHandler(this._page_KeyDown);
             // 
             // toolStripSeparator1
             // 
@@ -211,16 +215,6 @@ namespace PdfiumViewer.Demo
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // _fitHeight
-            // 
-            this._fitHeight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this._fitHeight.Image = ((System.Drawing.Image)(resources.GetObject("_fitHeight.Image")));
-            this._fitHeight.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this._fitHeight.Name = "_fitHeight";
-            this._fitHeight.Size = new System.Drawing.Size(63, 22);
-            this._fitHeight.Text = "Fit Height";
-            this._fitHeight.Click += new System.EventHandler(this._fitHeight_Click);
-            // 
             // _fitWidth
             // 
             this._fitWidth.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -230,6 +224,16 @@ namespace PdfiumViewer.Demo
             this._fitWidth.Size = new System.Drawing.Size(59, 22);
             this._fitWidth.Text = "Fit Width";
             this._fitWidth.Click += new System.EventHandler(this._fitWidth_Click);
+            // 
+            // _fitHeight
+            // 
+            this._fitHeight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this._fitHeight.Image = ((System.Drawing.Image)(resources.GetObject("_fitHeight.Image")));
+            this._fitHeight.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._fitHeight.Name = "_fitHeight";
+            this._fitHeight.Size = new System.Drawing.Size(63, 22);
+            this._fitHeight.Text = "Fit Height";
+            this._fitHeight.Click += new System.EventHandler(this._fitHeight_Click);
             // 
             // pdfViewer1
             // 
@@ -241,6 +245,18 @@ namespace PdfiumViewer.Demo
             this.pdfViewer1.Size = new System.Drawing.Size(585, 546);
             this.pdfViewer1.TabIndex = 0;
             this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
+            // 
+            // toolStripLabel2
+            // 
+            this.toolStripLabel2.Name = "toolStripLabel2";
+            this.toolStripLabel2.Size = new System.Drawing.Size(42, 22);
+            this.toolStripLabel2.Text = "Zoom:";
+            // 
+            // _zoom
+            // 
+            this._zoom.Name = "_zoom";
+            this._zoom.Size = new System.Drawing.Size(100, 25);
+            this._zoom.KeyDown += new System.Windows.Forms.KeyEventHandler(this._zoom_KeyDown);
             // 
             // MainForm
             // 
@@ -287,6 +303,8 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton _fitWidth;
         private System.Windows.Forms.ToolStripButton _fitHeight;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
+        private System.Windows.Forms.ToolStripTextBox _zoom;
 
     }
 }
