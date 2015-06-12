@@ -147,6 +147,14 @@ namespace PdfiumViewer
                     PerformScroll(ScrollAction.LineDown, Orientation.Vertical);
                     return true;
 
+                case Keys.Left:
+                    PerformScroll(ScrollAction.LineUp, Orientation.Horizontal);
+                    return true;
+
+                case Keys.Right:
+                    PerformScroll(ScrollAction.LineDown, Orientation.Horizontal);
+                    return true;
+
                 case Keys.PageUp:
                     PerformScroll(ScrollAction.PageUp, Orientation.Vertical);
                     return true;
