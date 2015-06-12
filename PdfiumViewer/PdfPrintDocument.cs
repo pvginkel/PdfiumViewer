@@ -29,7 +29,18 @@ namespace PdfiumViewer
         protected override void OnQueryPageSettings(QueryPageSettingsEventArgs e)
         {
             if (_currentPage < _document.PageCount)
-                e.PageSettings.Landscape = GetOrientation(_document.PageSizes[_currentPage]) == Orientation.Landscape;
+            {
+                // Some printers misreport landscape. The below check verifies
+                // whether the page rotation matches the landscape setting.
+                bool inverseLandscape = e.PageSettings.Bounds.Width > e.PageSettings.Bounds.Height != e.PageSettings.Landscape;
+
+                bool landscape = GetOrientation(_document.PageSizes[_currentPage]) == Orientation.Landscape;
+
+                if (inverseLandscape)
+                    landscape = !landscape;
+
+                e.PageSettings.Landscape = landscape;
+            }
         }
 
         protected override void OnPrintPage(PrintPageEventArgs e)
