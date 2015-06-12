@@ -28,7 +28,8 @@ namespace PdfiumViewer
 
         protected override void OnQueryPageSettings(QueryPageSettingsEventArgs e)
         {
-            if (_currentPage < _document.PageCount)
+            var checkLandscape = (e.PageSettings.Bounds.Width > e.PageSettings.Bounds.Height) == e.PageSettings.Landscape;
+            if (currentPage < document.PageCount && checkLandscape)
                 e.PageSettings.Landscape = GetOrientation(_document.PageSizes[_currentPage]) == Orientation.Landscape;
         }
 
