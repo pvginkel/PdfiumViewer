@@ -73,6 +73,22 @@ namespace PdfiumViewer
             UpdateEnabled();
         }
 
+        /// <summary>
+        /// Hides the save button. Default is false
+        /// </summary>
+        public bool SaveButtonDisabled
+        {
+            set { _saveButton.Visible = value; }
+        }
+
+        /// <summary>
+        /// Hides the print button. Default is false
+        /// </summary>
+        public bool PrintButtonDisabled
+        {
+            set { _printButton.Visible = value; }
+        }
+
         private void UpdateEnabled()
         {
             _toolStrip.Enabled = _document != null;
