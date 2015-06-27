@@ -74,6 +74,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="PdfMatches.cs" />
+    <Compile Include="PdfRotation.cs" />
     <Compile Include="PdfViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>

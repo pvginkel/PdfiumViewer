@@ -31,6 +31,7 @@ namespace PdfiumViewer
         private int _visiblePageEnd;
         private PdfPageLink _cachedLink;
         private DragState _dragState;
+        private PdfRotation _rotation;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -94,6 +95,22 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Gets or sets the current rotation of the PDF document.
+        /// </summary>
+        public PdfRotation Rotation
+        {
+            get { return _rotation; }
+            set
+            {
+                if (_rotation != value)
+                {
+                    _rotation = value;
+                    ResetFromRotation();
+                }
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
         public PdfRenderer()
@@ -138,15 +155,21 @@ namespace PdfiumViewer
 
             SetDisplayRectLocation(new Point(0, 0));
 
+            ReloadDocument();
+        }
+
+        private void ReloadDocument()
+        {
             _height = 0;
             _maxWidth = 0;
             _maxHeight = 0;
 
             foreach (var size in _document.PageSizes)
             {
-                _height += (int)size.Height;
-                _maxWidth = Math.Max((int)size.Width, _maxWidth);
-                _maxHeight = Math.Max((int)size.Height, _maxHeight);
+                var translated = TranslateSize(size);
+                _height += (int)translated.Height;
+                _maxWidth = Math.Max((int)translated.Width, _maxWidth);
+                _maxHeight = Math.Max((int)translated.Height, _maxHeight);
             }
 
             UpdateScrollbars();
@@ -202,7 +225,7 @@ namespace PdfiumViewer
 
             for (int page = 0; page < _document.PageSizes.Count; page++)
             {
-                var size = _document.PageSizes[page];
+                var size = TranslateSize(_document.PageSizes[page]);
                 int height = (int)(size.Height * _scaleFactor);
                 int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
                 int width = (int)(size.Width * _scaleFactor);
@@ -345,7 +368,49 @@ namespace PdfiumViewer
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds)
         {
-            _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, false);
+            if (Rotation == PdfRotation.Rotate0)
+            {
+                _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, false);
+            }
+            else
+            {
+                // This is not ideal. Rather than this, we should set a world
+                // transform in PdfDocument.Render to natively rotate the output.
+                // However, this does not work, and the control isn't updated
+                // anymore. So we fall back to rendering to a Bitmap and rotating
+                // that.
+
+                RotateFlipType type;
+                Size size;
+
+                switch (Rotation)
+                {
+                    case PdfRotation.Rotate90:
+                        type = RotateFlipType.Rotate90FlipNone;
+                        size = new Size(pageBounds.Height, pageBounds.Width);
+                        break;
+                    case PdfRotation.Rotate180:
+                        type = RotateFlipType.Rotate180FlipNone;
+                        size = pageBounds.Size;
+                        break;
+                    case PdfRotation.Rotate270:
+                        type = RotateFlipType.Rotate270FlipNone;
+                        size = new Size(pageBounds.Height, pageBounds.Width);
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+
+                using (var rendered = _document.Render(page, size.Width, size.Height, graphics.DpiX, graphics.DpiY, false))
+                {
+                    rendered.RotateFlip(type);
+
+                    graphics.DrawImageUnscaled(
+                        rendered,
+                        pageBounds.Location
+                    );
+                }
+            }
         }
 
         protected override Rectangle GetDocumentBounds()
@@ -464,6 +529,48 @@ namespace PdfiumViewer
                         // be thrown (when it auto-updates).
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Rotate the PDF document left.
+        /// </summary>
+        public void RotateLeft()
+        {
+            Rotation = (PdfRotation)(((int)Rotation + 3) % 4);
+        }
+
+        /// <summary>
+        /// Rotate the PDF document right.
+        /// </summary>
+        public void RotateRight()
+        {
+            Rotation = (PdfRotation)(((int)Rotation + 1) % 4);
+        }
+
+        private void ResetFromRotation()
+        {
+            var offsetX = (double)DisplayRectangle.Left / DisplayRectangle.Width;
+            var offsetY = (double)DisplayRectangle.Top / DisplayRectangle.Height;
+
+            ReloadDocument();
+
+            SetDisplayRectLocation(new Point(
+                (int)(DisplayRectangle.Width * offsetX),
+                (int)(DisplayRectangle.Height * offsetY)
+            ));
+        }
+
+        private SizeF TranslateSize(SizeF size)
+        {
+            switch (Rotation)
+            {
+                case PdfRotation.Rotate90:
+                case PdfRotation.Rotate270:
+                    return new SizeF(size.Height, size.Width);
+
+                default:
+                    return size;
             }
         }
 

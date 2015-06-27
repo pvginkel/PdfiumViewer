@@ -189,5 +189,15 @@ namespace PdfiumViewer.Demo
         {
             pdfViewer1.Renderer.ZoomOut();
         }
+
+        private void _rotateLeft_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.RotateLeft();
+        }
+
+        private void _rotateRight_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.RotateRight();
+        }
     }
 }
