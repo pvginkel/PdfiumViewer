@@ -42,6 +42,29 @@ your application, either in the root or the `x86` or `x64` sub directory.
 The easiest way to accomplish this is by changing the properties of that file,
 changing the Copy to Output Directory setting to Copy always.
 
+## Note on the `PdfViewer` control
+
+The PdfiumViewer library primarily consists out of three components:
+
+* The `PdfViewer` control. This control provides a host for the `PdfRenderer`
+  control and has a default toolbar with limited functionality;
+* The `PdfRenderer` control. This control implements the raw PDF renderer.
+  This control displays a PDF document, provides zooming and scrolling
+  functionality and exposes methods to perform more advanced actions;
+* The `PdfDocument` class provides access to the PDF document and wraps
+  the Pdfium library.
+
+The `PdfViewer` control should only be used when you have a very simple use
+case and where the buttons available on the toolbar provide enough functionality
+for you. This toolbar will not be extended with new buttons or with functionality
+to hide buttons. The reason for this is that the `PdfViewer` control is just
+meant to get you started. If you need more advanced functionality, you should
+create your own control with your own toolbar, e.g. by starting out with
+the `PdfViewer` control. Also, because people currently are already using the
+`PdfViewer` control, adding more functionality to this toolbar would be
+a breaking change. See [issue #41](https://github.com/pvginkel/PdfiumViewer/issues/41)
+for more information.
+
 ## Building PDFium
 
 To build PDFium for Windows, you need Visual Studio.
