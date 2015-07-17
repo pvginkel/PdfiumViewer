@@ -134,6 +134,11 @@
       <Link>x86\pdfium.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\rotate_right.png" />
+    <None Include="Resources\rotate_left.png" />
+    <None Include="Resources\fit_width.png" />
+    <None Include="Resources\fit_height.png" />
+    <None Include="Resources\fit_best.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
