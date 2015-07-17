@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PdfiumViewer
+﻿namespace PdfiumViewer
 {
     public enum PdfViewerZoomMode
     {
         FitHeight,
-        FitWidth
+        FitWidth,
+        FitBest
     }
 }

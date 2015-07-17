@@ -156,6 +156,11 @@ namespace PdfiumViewer.Demo
             FitPage(PdfViewerZoomMode.FitHeight);
         }
 
+        private void _fitBest_Click(object sender, EventArgs e)
+        {
+            FitPage(PdfViewerZoomMode.FitBest);
+        }
+
         private void _page_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -199,5 +204,6 @@ namespace PdfiumViewer.Demo
         {
             pdfViewer1.Renderer.RotateRight();
         }
+
     }
 }
