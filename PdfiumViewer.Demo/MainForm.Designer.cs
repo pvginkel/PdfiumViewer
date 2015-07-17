@@ -60,10 +60,11 @@ namespace PdfiumViewer.Demo
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this._fitWidth = new System.Windows.Forms.ToolStripButton();
             this._fitHeight = new System.Windows.Forms.ToolStripButton();
-            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
+            this._fitBest = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this._rotateLeft = new System.Windows.Forms.ToolStripButton();
             this._rotateRight = new System.Windows.Forms.ToolStripButton();
+            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -178,6 +179,7 @@ namespace PdfiumViewer.Demo
             this.toolStripSeparator3,
             this._fitWidth,
             this._fitHeight,
+            this._fitBest,
             this.toolStripSeparator5,
             this._rotateLeft,
             this._rotateRight});
@@ -291,16 +293,15 @@ namespace PdfiumViewer.Demo
             this._fitHeight.Text = "Fit Height";
             this._fitHeight.Click += new System.EventHandler(this._fitHeight_Click);
             // 
-            // pdfViewer1
+            // _fitBest
             // 
-            this.pdfViewer1.DefaultDocumentName = null;
-            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pdfViewer1.Document = null;
-            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
-            this.pdfViewer1.Name = "pdfViewer1";
-            this.pdfViewer1.Size = new System.Drawing.Size(710, 546);
-            this.pdfViewer1.TabIndex = 0;
-            this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
+            this._fitBest.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this._fitBest.Image = ((System.Drawing.Image)(resources.GetObject("_fitBest.Image")));
+            this._fitBest.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._fitBest.Name = "_fitBest";
+            this._fitBest.Size = new System.Drawing.Size(49, 22);
+            this._fitBest.Text = "Fit Best";
+            this._fitBest.Click += new System.EventHandler(this._fitBest_Click);
             // 
             // toolStripSeparator5
             // 
@@ -323,9 +324,20 @@ namespace PdfiumViewer.Demo
             this._rotateRight.Image = ((System.Drawing.Image)(resources.GetObject("_rotateRight.Image")));
             this._rotateRight.ImageTransparentColor = System.Drawing.Color.Magenta;
             this._rotateRight.Name = "_rotateRight";
-            this._rotateRight.Size = new System.Drawing.Size(76, 22);
+            this._rotateRight.Size = new System.Drawing.Size(76, 19);
             this._rotateRight.Text = "Rotate Right";
             this._rotateRight.Click += new System.EventHandler(this._rotateRight_Click);
+            // 
+            // pdfViewer1
+            // 
+            this.pdfViewer1.DefaultDocumentName = null;
+            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pdfViewer1.Document = null;
+            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
+            this.pdfViewer1.Name = "pdfViewer1";
+            this.pdfViewer1.Size = new System.Drawing.Size(710, 546);
+            this.pdfViewer1.TabIndex = 0;
+            this.pdfViewer1.ZoomMode = PdfiumViewer.PdfViewerZoomMode.FitHeight;
             // 
             // MainForm
             // 
@@ -381,6 +393,7 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton _rotateLeft;
         private System.Windows.Forms.ToolStripButton _rotateRight;
+        private System.Windows.Forms.ToolStripButton _fitBest;
 
     }
 }
