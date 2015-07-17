@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PdfiumViewer
@@ -141,37 +143,5 @@ namespace PdfiumViewer
                 }
             }
         }
-
-        private void _fitWidthButton_Click(object sender, EventArgs e)
-        {
-            UpdateZoomMode(PdfViewerZoomMode.FitWidth);
-        }
-
-        private void UpdateZoomMode(PdfViewerZoomMode zoomMode)
-        {
-            var page = Renderer.Page;
-            ZoomMode = zoomMode;
-            Renderer.Zoom = 1D;
-            Renderer.Page = page;
-        }
-
-        private void _fitHeightButton_Click(object sender, EventArgs e)
-        {
-            UpdateZoomMode(PdfViewerZoomMode.FitHeight);
-        }
-
-        private void _fitBestButton_Click(object sender, EventArgs e)
-        {
-            UpdateZoomMode(PdfViewerZoomMode.FitBest);
-        }
-
-        private void _rotateLeftButton_Click(object sender, EventArgs e) {
-            Renderer.RotateLeft();
-        }
-
-        private void _rotateRightButton_Click(object sender, EventArgs e) {
-            Renderer.RotateRight();
-        }
-
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PdfiumViewer
@@ -17,7 +18,6 @@ namespace PdfiumViewer
         private int _height;
         private int _maxWidth;
         private int _maxHeight;
-        private double _documentScaleFactor;
         private bool _disposed;
         private double _scaleFactor;
         private ShadeBorder _shadeBorder = new ShadeBorder();
@@ -172,8 +172,6 @@ namespace PdfiumViewer
                 _maxHeight = Math.Max((int)translated.Height, _maxHeight);
             }
 
-            _documentScaleFactor = _maxHeight != 0 ? (double)_maxWidth / _maxHeight : 0D;
-
             UpdateScrollbars();
 
             Invalidate();
@@ -302,9 +300,7 @@ namespace PdfiumViewer
             // Scale factor determines what we need to multiply the dimensions
             // of the metafile with to get the size in the control.
 
-            var zoomMode = CalculateZoomMode(bounds);
-
-            if (zoomMode == PdfViewerZoomMode.FitHeight)
+            if (ZoomMode == PdfViewerZoomMode.FitHeight)
             {
                 int height = bounds.Height - ShadeBorder.Size.Vertical - PageMargin.Vertical;
 
@@ -316,18 +312,6 @@ namespace PdfiumViewer
 
                 _scaleFactor = ((double)width / _maxWidth) * Zoom;
             }
-        }
-
-        private PdfViewerZoomMode CalculateZoomMode(Rectangle bounds)
-        {
-            if (ZoomMode != PdfViewerZoomMode.FitBest)
-            {
-                return ZoomMode;
-            }
-
-            var controlFactor = (double)bounds.Width/bounds.Height;
-
-            return controlFactor >= _documentScaleFactor ? PdfViewerZoomMode.FitHeight : PdfViewerZoomMode.FitWidth;
         }
 
         /// <summary>
