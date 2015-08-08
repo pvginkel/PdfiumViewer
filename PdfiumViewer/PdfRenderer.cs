@@ -386,7 +386,7 @@ namespace PdfiumViewer
         {
             if (Rotation == PdfRotation.Rotate0)
             {
-                _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, false);
+                _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, PdfRenderFlags.Annotations);
             }
             else
             {
@@ -417,7 +417,7 @@ namespace PdfiumViewer
                         throw new InvalidOperationException();
                 }
 
-                using (var rendered = _document.Render(page, size.Width, size.Height, graphics.DpiX, graphics.DpiY, false))
+                using (var rendered = _document.Render(page, size.Width, size.Height, graphics.DpiX, graphics.DpiY, PdfRenderFlags.Annotations))
                 {
                     rendered.RotateFlip(type);
 
