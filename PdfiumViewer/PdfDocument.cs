@@ -205,6 +205,8 @@ namespace PdfiumViewer
                 throw new ObjectDisposedException(GetType().Name);
 
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            bitmap.SetResolution(dpiX, dpiY);
+
             var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
             try

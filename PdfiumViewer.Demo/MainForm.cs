@@ -81,6 +81,18 @@ namespace PdfiumViewer.Demo
 
         private void renderToBitmapsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            int dpiX;
+            int dpiY;
+
+            using (var form = new ExportBitmapsForm())
+            {
+                if (form.ShowDialog() != DialogResult.OK)
+                    return;
+
+                dpiX = form.DpiX;
+                dpiY = form.DpiY;
+            }
+
             string path;
 
             using (var form = new FolderBrowserDialog())
@@ -95,8 +107,7 @@ namespace PdfiumViewer.Demo
 
             for (int i = 0; i < document.PageCount; i++ )
             {
-                using (var image = document.Render(
-                        i, (int)document.PageSizes[i].Width, (int)document.PageSizes[i].Height, 96, 96, false))
+                using (var image = document.Render(i, (int)document.PageSizes[i].Width, (int)document.PageSizes[i].Height, dpiX, dpiY, false))
                 {
                     image.Save(Path.Combine(path, "Page " + i + ".png"));
                 }
