@@ -102,32 +102,49 @@ user32.lib
 advapi32.lib
 gdi32.lib
 winmm.lib
+$(OutDir)\lib\bigint.lib
 $(OutDir)\lib\fdrm.lib
-$(OutDir)\lib\fpdfdoc.lib
-$(OutDir)\lib\fpdfapi.lib
-$(OutDir)\lib\fpdftext.lib
 $(OutDir)\lib\formfiller.lib
+$(OutDir)\lib\fpdfapi.lib
+$(OutDir)\lib\fpdfdoc.lib
+$(OutDir)\lib\fpdftext.lib
+$(OutDir)\lib\fx_agg.lib
+$(OutDir)\lib\fx_freetype.lib
+$(OutDir)\lib\fx_lcms2.lib
+$(OutDir)\lib\fx_libjpeg.lib
+$(OutDir)\lib\fx_libopenjpeg.lib
+$(OutDir)\lib\fx_lpng.lib
+$(OutDir)\lib\fx_zlib.lib
 $(OutDir)\lib\fxcodec.lib
 $(OutDir)\lib\fxcrt.lib
 $(OutDir)\lib\fxedit.lib
 $(OutDir)\lib\fxge.lib
-$(OutDir)\lib\javascript.lib
-$(OutDir)\lib\v8_base.lib
-$(OutDir)\lib\v8_libbase.lib
-$(OutDir)\lib\v8_libplatform.lib
+$(OutDir)\lib\gmock.lib
+$(OutDir)\lib\gtest.lib
+$(OutDir)\lib\gtest_main.lib
 $(OutDir)\lib\icui18n.lib
 $(OutDir)\lib\icuuc.lib
-$(OutDir)\lib\v8_snapshot.lib
+$(OutDir)\lib\javascript.lib
 $(OutDir)\lib\jsapi.lib
 $(OutDir)\lib\pdfwindow.lib
-$(OutDir)\lib\freetype.lib
+$(OutDir)\lib\v8_base_0.lib
+$(OutDir)\lib\v8_base_1.lib
+$(OutDir)\lib\v8_base_2.lib
+$(OutDir)\lib\v8_base_3.lib
+$(OutDir)\lib\v8_libbase.lib
+$(OutDir)\lib\v8_libplatform.lib
+$(OutDir)\lib\v8_nosnapshot.lib
+$(OutDir)\lib\v8_snapshot.lib
 ```
 
 * The platform toolset must be set to support Windows XP. The easiest way to do this is by
-  performing a search and replace on all .vcxproj files in the PDFium source directory,
-  replacing `<PlatformToolset>v120</PlatformToolset>` with `<PlatformToolset>v120_xp</PlatformToolset>`.
-  I believe you only need to do this for Visual Studio 2013, but I don't have access to a
-  previous version of Visual Studio, so I cannot verify this;
+  performing a search and replace on all .vcxproj files in the PDFium source directory.
+  For Visual Studio 2013 you need to replace `<PlatformToolset>v120</PlatformToolset>` with
+  `<PlatformToolset>v120_xp</PlatformToolset>`. For Visual Studio 2015 you need to replace
+  `<PlatformToolset>v140</PlatformToolset>` with `<PlatformToolset>v140_xp</PlatformToolset>`.
+  You may need to install extra Visual Studio components. When you load the project (you
+  can force this by right clicking ont he project and choosing Reload), Visual Studio
+  will prompt you if necessary;
 
 * A few methods need to be added to allow Pdfium to correctly initialize Pdfium. This file can
   be found in the `Contrib` directory and must be copied to the `pdfium\fpdfsdk\src` directory.
