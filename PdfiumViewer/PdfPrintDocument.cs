@@ -94,7 +94,7 @@ namespace PdfiumViewer
                         AdjustDpi(e.Graphics.DpiX, width),
                         AdjustDpi(e.Graphics.DpiY, height)
                     ),
-                    true
+                    PdfRenderFlags.ForPrinting | PdfRenderFlags.Annotations
                 );
             }
 
