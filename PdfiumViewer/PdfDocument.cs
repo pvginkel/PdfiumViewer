@@ -45,6 +45,19 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Bookmarks stored in this PdfFile
+        /// </summary>
+        public PdfBookmarks Bookmarks
+        {
+            get
+            {
+                if (_file != null)
+                    return _file.Bookmarks;
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Size of each page in the PDF document.
         /// </summary>
         public IList<SizeF> PageSizes { get; private set; }

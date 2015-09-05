@@ -105,7 +105,7 @@ namespace PdfiumViewer.Demo
 
             var document = pdfViewer1.Document;
 
-            for (int i = 0; i < document.PageCount; i++ )
+            for (int i = 0; i < document.PageCount; i++)
             {
                 using (var image = document.Render(i, (int)document.PageSizes[i].Width, (int)document.PageSizes[i].Height, dpiX, dpiY, false))
                 {
@@ -214,6 +214,16 @@ namespace PdfiumViewer.Demo
         private void _rotateRight_Click(object sender, EventArgs e)
         {
             pdfViewer1.Renderer.RotateRight();
+        }
+
+        private void _hideToolbar_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.HideToolbar = _hideToolbar.Checked;
+        }
+
+        private void _hideBookmarks_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.HideBookmarks = _hideBookmarks.Checked;
         }
 
     }

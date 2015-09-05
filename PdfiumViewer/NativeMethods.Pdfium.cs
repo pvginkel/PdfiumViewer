@@ -359,6 +359,42 @@ namespace PdfiumViewer
             }
         }
 
+        public static IntPtr FPDF_BookmarkGetFirstChild(IntPtr document, IntPtr bookmark)
+        {
+            lock (LockString)
+                return Imports.FPDFBookmark_GetFirstChild(document, bookmark);
+        }
+
+        public static IntPtr FPDF_BookmarkGetNextSibling(IntPtr document, IntPtr bookmark)
+        {
+            lock (LockString)
+                return Imports.FPDFBookmark_GetNextSibling(document, bookmark);
+        }
+
+        public static uint FPDF_BookmarkGetTitle(IntPtr bookmark, byte[] buffer, uint buflen)
+        {
+            lock (LockString)
+                return Imports.FPDFBookmark_GetTitle(bookmark, buffer, buflen);
+        }
+
+        public static IntPtr FPDF_BookmarkGetAction(IntPtr bookmark)
+        {
+            lock (LockString)
+                return Imports.FPDFBookmark_GetAction(bookmark);
+        }
+
+        public static IntPtr FPDF_BookmarkGetDest(IntPtr document, IntPtr bookmark)
+        {
+            lock (LockString)
+                return Imports.FPDFBookmark_GetDest(document, bookmark);
+        }
+
+        public static uint FPDF_ActionGetType(IntPtr action)
+        {
+            lock (LockString)
+                return Imports.FPDFAction_GetType(action);
+        }
+
         private static class Imports
         {
             [DllImport("pdfium.dll")]
@@ -489,6 +525,24 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern uint FPDFAction_GetURIPath(IntPtr document, IntPtr action, StringBuilder buffer, uint buflen);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFBookmark_GetFirstChild(IntPtr document, IntPtr bookmark);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFBookmark_GetNextSibling(IntPtr document, IntPtr bookmark);
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDFBookmark_GetTitle(IntPtr bookmark, byte[] buffer, uint buflen);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFBookmark_GetAction(IntPtr bookmark);
+
+            [DllImport("pdfium.dll")]
+            public static extern IntPtr FPDFBookmark_GetDest(IntPtr document, IntPtr bookmark);
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDFAction_GetType(IntPtr action);
         }
 
         [StructLayout(LayoutKind.Sequential)]

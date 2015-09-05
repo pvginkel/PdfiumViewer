@@ -26,7 +26,23 @@ namespace PdfiumViewer
                     _document = value;
 
                     if (_document != null)
+                    {
+                        if (_document.Bookmarks != null && _document.Bookmarks.TotalCount > 0 && _bookmarks.Visible)
+                        {
+                            splitContainer1.SplitterDistance = 200;
+                            splitContainer1.Panel1Collapsed = false;
+
+                            _bookmarks.Nodes.Clear();
+                            foreach (var bookmark in _document.Bookmarks)
+                                _bookmarks.Nodes.Add(GetBookmarkNode(bookmark));
+                        }
+                        else
+                        {
+                            splitContainer1.SplitterDistance = 0;
+                            splitContainer1.Panel1Collapsed = true;
+                        }
                         _renderer.Load(_document);
+                    }
 
                     UpdateEnabled();
                 }
@@ -59,6 +75,23 @@ namespace PdfiumViewer
         {
             get { return _renderer.ZoomMode; }
             set { _renderer.ZoomMode = value; }
+        }
+
+        public bool HideToolbar
+        {
+            get { return !_toolStrip.Visible; }
+            set { _toolStrip.Visible = !value; }
+        }
+
+        public bool HideBookmarks
+        {
+            get { return !_bookmarks.Visible; }
+            set
+            {
+                _bookmarks.Visible = !value;
+                splitContainer1.Panel1Collapsed = value;
+                this.Refresh();
+            }
         }
 
         /// <summary>
@@ -142,6 +175,29 @@ namespace PdfiumViewer
                     }
                 }
             }
+        }
+
+        private TreeNode GetBookmarkNode(PdfBookmark bookmark)
+        {
+            TreeNode node = new TreeNode(bookmark.Title);
+            node.Tag = bookmark;
+            if (bookmark.Children != null)
+            {
+                foreach (var child in bookmark.Children)
+                    node.Nodes.Add(GetBookmarkNode(child));
+            }
+            return node;
+        }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+            this.Refresh();
+        }
+
+        private void _bookmarks_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            PdfBookmark bookmark = (PdfBookmark)e.Node.Tag;
+            _renderer.Page = (int)bookmark.PageIndex;
         }
     }
 }
