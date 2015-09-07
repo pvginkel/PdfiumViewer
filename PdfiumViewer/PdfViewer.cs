@@ -27,9 +27,8 @@ namespace PdfiumViewer
 
                     if (_document != null)
                     {
-                        if (_document.Bookmarks != null && _document.Bookmarks.TotalCount > 0 && _bookmarks.Visible)
+                        if (_document.Bookmarks != null && _document.Bookmarks.TotalCount > 0 && !_hideBookmarks)
                         {
-                            splitContainer1.SplitterDistance = 200;
                             splitContainer1.Panel1Collapsed = false;
 
                             _bookmarks.Nodes.Clear();
@@ -38,7 +37,6 @@ namespace PdfiumViewer
                         }
                         else
                         {
-                            splitContainer1.SplitterDistance = 0;
                             splitContainer1.Panel1Collapsed = true;
                         }
                         _renderer.Load(_document);
@@ -83,14 +81,16 @@ namespace PdfiumViewer
             set { _toolStrip.Visible = !value; }
         }
 
+        private bool _hideBookmarks;
         public bool HideBookmarks
         {
-            get { return !_bookmarks.Visible; }
+            get { return _hideBookmarks; }
             set
             {
                 _bookmarks.Visible = !value;
                 splitContainer1.Panel1Collapsed = value;
                 this.Refresh();
+                _hideBookmarks = value;
             }
         }
 

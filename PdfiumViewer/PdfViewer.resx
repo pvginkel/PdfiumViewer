@@ -186,6 +186,9 @@
   <data name="splitContainer1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
   </data>
+  <data name="splitContainer1.IsSplitterFixed" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
   <data name="splitContainer1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 25</value>
   </data>
@@ -196,7 +199,7 @@
     <value>0, 0</value>
   </data>
   <data name="_bookmarks.Size" type="System.Drawing.Size, System.Drawing">
-    <value>196, 413</value>
+    <value>200, 413</value>
   </data>
   <data name="_bookmarks.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -205,7 +208,7 @@
     <value>_bookmarks</value>
   </data>
   <data name="&gt;&gt;_bookmarks.Type" xml:space="preserve">
-    <value>PdfiumViewer.NativeTreeView, PdfiumViewer, Version=2.6.1.0, Culture=neutral, PublicKeyToken=91e4789cfb0609e0</value>
+    <value>PdfiumViewer.NativeTreeView, PdfiumViewer, Version=2.6.1.1, Culture=neutral, PublicKeyToken=91e4789cfb0609e0</value>
   </data>
   <data name="&gt;&gt;_bookmarks.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -232,7 +235,7 @@
     <value>0, 0</value>
   </data>
   <data name="_renderer.Size" type="System.Drawing.Size, System.Drawing">
-    <value>388, 413</value>
+    <value>384, 413</value>
   </data>
   <data name="_renderer.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -244,7 +247,7 @@
     <value>_renderer</value>
   </data>
   <data name="&gt;&gt;_renderer.Type" xml:space="preserve">
-    <value>PdfiumViewer.PdfRenderer, PdfiumViewer, Version=2.6.1.0, Culture=neutral, PublicKeyToken=91e4789cfb0609e0</value>
+    <value>PdfiumViewer.PdfRenderer, PdfiumViewer, Version=2.6.1.1, Culture=neutral, PublicKeyToken=91e4789cfb0609e0</value>
   </data>
   <data name="&gt;&gt;_renderer.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -268,7 +271,7 @@
     <value>588, 413</value>
   </data>
   <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>196</value>
+    <value>200</value>
   </data>
   <data name="splitContainer1.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
