@@ -34,6 +34,8 @@ namespace PdfiumViewer
             PdfLibrary.EnsureLoaded();
         }
 
+        public PdfBookmarks Bookmarks { get; private set; }
+
         public bool RenderPDFPageToDC(int pageNumber, IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
         {
             if (_disposed)
@@ -176,6 +178,8 @@ namespace PdfiumViewer
 
             NativeMethods.FORM_DoDocumentJSAction(_form);
             NativeMethods.FORM_DoDocumentOpenAction(_form);
+
+            Bookmarks = new PdfBookmarks(_document);
         }
 
         public PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage)

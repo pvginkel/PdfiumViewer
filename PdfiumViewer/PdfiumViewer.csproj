@@ -51,9 +51,13 @@
     </Compile>
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeMethods.Pdfium.cs" />
+    <Compile Include="NativeTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PdfBookmarks.cs" />
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfBufferFile.cs" />
     <Compile Include="PdfDocument.cs" />
