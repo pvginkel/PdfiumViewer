@@ -34,7 +34,7 @@ namespace PdfiumViewer
             PdfLibrary.EnsureLoaded();
         }
 
-        public PdfBookmarks Bookmarks { get; private set; }
+        public PdfBookmarkCollection Bookmarks { get; private set; }
 
         public bool RenderPDFPageToDC(int pageNumber, IntPtr dc, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
         {
@@ -179,7 +179,57 @@ namespace PdfiumViewer
             NativeMethods.FORM_DoDocumentJSAction(_form);
             NativeMethods.FORM_DoDocumentOpenAction(_form);
 
-            Bookmarks = new PdfBookmarks(_document);
+            Bookmarks = new PdfBookmarkCollection();
+
+            LoadBookmarks(Bookmarks, NativeMethods.FPDF_BookmarkGetFirstChild(document, IntPtr.Zero));
+        }
+
+        private void LoadBookmarks(PdfBookmarkCollection bookmarks, IntPtr bookmark)
+        {
+            if (bookmark == IntPtr.Zero)
+                return;
+
+            bookmarks.Add(LoadBookmark(bookmark));
+            while ((bookmark = NativeMethods.FPDF_BookmarkGetNextSibling(_document, bookmark)) != IntPtr.Zero)
+                bookmarks.Add(LoadBookmark(bookmark));
+        }
+
+        private PdfBookmark LoadBookmark(IntPtr bookmark)
+        {
+            var result = new PdfBookmark
+            {
+                Title = GetBookmarkTitle(bookmark),
+                PageIndex = (int)GetBookmarkPageIndex(bookmark)
+            };
+
+            //Action = NativeMethods.FPDF_BookmarkGetAction(_bookmark);
+            //if (Action != IntPtr.Zero)
+            //    ActionType = NativeMethods.FPDF_ActionGetType(Action);
+
+            var child = NativeMethods.FPDF_BookmarkGetFirstChild(_document, bookmark);
+            if (child != IntPtr.Zero)
+                LoadBookmarks(result.Children, child);
+
+            return result;
+        }
+
+        private string GetBookmarkTitle(IntPtr bookmark)
+        {
+            uint length = NativeMethods.FPDF_BookmarkGetTitle(bookmark, null, 0);
+            byte[] buffer = new byte[length];
+            NativeMethods.FPDF_BookmarkGetTitle(bookmark, buffer, length);
+
+            string result = Encoding.Unicode.GetString(buffer);
+            return result.Substring(0, result.Length - 1);
+        }
+
+        private uint GetBookmarkPageIndex(IntPtr bookmark)
+        {
+            IntPtr dest = NativeMethods.FPDF_BookmarkGetDest(_document, bookmark);
+            if (dest != IntPtr.Zero)
+                return NativeMethods.FPDFDest_GetPageIndex(_document, dest);
+
+            return 0;
         }
 
         public PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage)

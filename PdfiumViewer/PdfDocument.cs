@@ -47,14 +47,9 @@ namespace PdfiumViewer
         /// <summary>
         /// Bookmarks stored in this PdfFile
         /// </summary>
-        public PdfBookmarks Bookmarks
+        public PdfBookmarkCollection Bookmarks
         {
-            get
-            {
-                if (_file != null)
-                    return _file.Bookmarks;
-                return null;
-            }
+            get { return _file.Bookmarks; }
         }
 
         /// <summary>

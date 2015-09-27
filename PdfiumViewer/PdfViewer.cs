@@ -12,10 +12,12 @@ namespace PdfiumViewer
     public partial class PdfViewer : UserControl
     {
         private PdfDocument _document;
+        private bool _showBookmarks;
 
         /// <summary>
         /// Gets or sets the PDF document.
         /// </summary>
+        [DefaultValue(null)]
         public PdfDocument Document
         {
             get { return _document; }
@@ -27,18 +29,7 @@ namespace PdfiumViewer
 
                     if (_document != null)
                     {
-                        if (_document.Bookmarks != null && _document.Bookmarks.TotalCount > 0 && !_hideBookmarks)
-                        {
-                            splitContainer1.Panel1Collapsed = false;
-
-                            _bookmarks.Nodes.Clear();
-                            foreach (var bookmark in _document.Bookmarks)
-                                _bookmarks.Nodes.Add(GetBookmarkNode(bookmark));
-                        }
-                        else
-                        {
-                            splitContainer1.Panel1Collapsed = true;
-                        }
+                        UpdateBookmarks();
                         _renderer.Load(_document);
                     }
 
@@ -58,6 +49,7 @@ namespace PdfiumViewer
         /// <summary>
         /// Gets or sets the default document name used when saving the document.
         /// </summary>
+        [DefaultValue(null)]
         public string DefaultDocumentName { get; set; }
 
         /// <summary>
@@ -69,28 +61,44 @@ namespace PdfiumViewer
         /// <summary>
         /// Gets or sets the way the document should be zoomed initially.
         /// </summary>
+        [DefaultValue(PdfViewerZoomMode.FitHeight)]
         public PdfViewerZoomMode ZoomMode
         {
             get { return _renderer.ZoomMode; }
             set { _renderer.ZoomMode = value; }
         }
 
-        public bool HideToolbar
+        [DefaultValue(true)]
+        public bool ShowToolbar
         {
-            get { return !_toolStrip.Visible; }
-            set { _toolStrip.Visible = !value; }
+            get { return _toolStrip.Visible; }
+            set { _toolStrip.Visible = value; }
         }
 
-        private bool _hideBookmarks;
-        public bool HideBookmarks
+        [DefaultValue(true)]
+        public bool ShowBookmarks
         {
-            get { return _hideBookmarks; }
+            get { return _showBookmarks; }
             set
             {
-                _bookmarks.Visible = !value;
-                splitContainer1.Panel1Collapsed = value;
-                this.Refresh();
-                _hideBookmarks = value;
+                _showBookmarks = value;
+                UpdateBookmarks();
+            }
+        }
+
+        private void UpdateBookmarks()
+        {
+            bool visible = _showBookmarks && _document != null && _document.Bookmarks.Count > 0;
+
+            _container.Panel1Collapsed = !visible;
+
+            if (visible)
+            {
+                _container.Panel1Collapsed = false;
+
+                _bookmarks.Nodes.Clear();
+                foreach (var bookmark in _document.Bookmarks)
+                    _bookmarks.Nodes.Add(GetBookmarkNode(bookmark));
             }
         }
 
@@ -102,6 +110,9 @@ namespace PdfiumViewer
             DefaultPrintMode = PdfPrintMode.CutMargin;
 
             InitializeComponent();
+
+            ShowToolbar = true;
+            ShowBookmarks = true;
 
             UpdateEnabled();
         }
@@ -189,15 +200,9 @@ namespace PdfiumViewer
             return node;
         }
 
-        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        private void _bookmarks_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            this.Refresh();
-        }
-
-        private void _bookmarks_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            PdfBookmark bookmark = (PdfBookmark)e.Node.Tag;
-            _renderer.Page = (int)bookmark.PageIndex;
+            _renderer.Page = ((PdfBookmark)e.Node.Tag).PageIndex;
         }
     }
 }

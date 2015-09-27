@@ -57,7 +57,7 @@
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PdfBookmarks.cs" />
+    <Compile Include="PdfBookmarkCollection.cs" />
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfBufferFile.cs" />
     <Compile Include="PdfDocument.cs" />

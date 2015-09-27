@@ -48,6 +48,9 @@ namespace PdfiumViewer.Demo
             {
                 OpenFile();
             }
+
+            _showBookmarks.Checked = pdfViewer1.ShowBookmarks;
+            _showToolbar.Checked = pdfViewer1.ShowToolbar;
         }
 
         private void OpenFile()
@@ -218,13 +221,12 @@ namespace PdfiumViewer.Demo
 
         private void _hideToolbar_Click(object sender, EventArgs e)
         {
-            pdfViewer1.HideToolbar = _hideToolbar.Checked;
+            pdfViewer1.ShowToolbar = _showToolbar.Checked;
         }
 
         private void _hideBookmarks_Click(object sender, EventArgs e)
         {
-            pdfViewer1.HideBookmarks = _hideBookmarks.Checked;
+            pdfViewer1.ShowBookmarks = _showBookmarks.Checked;
         }
-
     }
 }
