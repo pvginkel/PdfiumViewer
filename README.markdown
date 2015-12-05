@@ -76,7 +76,9 @@ https://code.google.com/p/pdfium/wiki/Build.
 One addition to the instructions on the website is that the `build\gyp_pdfium` command is a
 Python script. To execute this, execute `python build\gyp_pdfium`. Also, one of the projects
 require the Python executable to be in the `PATH`. `depot_tools` has a Python which can be
-used for this.
+used for this. The build scripts have changed to use Ninja by default. To change this,
+execute `set GYP_GENERATORS=msvs` before you run `gyp_pdfium`. To create the 64-bit versions
+of the project, call `python build/gyp_pdfium -D target_arch=x64`.
 
 After this, you can open the `all.sln` solution from the `build` directory. The project
 is configured to create static libraries. However, we need a dynamic library for PdfiumViewer.
@@ -111,22 +113,18 @@ $(OutDir)\lib\fpdftext.lib
 $(OutDir)\lib\fx_agg.lib
 $(OutDir)\lib\fx_freetype.lib
 $(OutDir)\lib\fx_lcms2.lib
-$(OutDir)\lib\fx_libjpeg.lib
 $(OutDir)\lib\fx_libopenjpeg.lib
-$(OutDir)\lib\fx_lpng.lib
 $(OutDir)\lib\fx_zlib.lib
 $(OutDir)\lib\fxcodec.lib
 $(OutDir)\lib\fxcrt.lib
 $(OutDir)\lib\fxedit.lib
 $(OutDir)\lib\fxge.lib
-$(OutDir)\lib\gmock.lib
-$(OutDir)\lib\gtest.lib
-$(OutDir)\lib\gtest_main.lib
 $(OutDir)\lib\icui18n.lib
 $(OutDir)\lib\icuuc.lib
 $(OutDir)\lib\javascript.lib
-$(OutDir)\lib\jsapi.lib
+$(OutDir)\lib\libjpeg.lib
 $(OutDir)\lib\pdfwindow.lib
+$(OutDir)\lib\test_support.lib
 $(OutDir)\lib\v8_base_0.lib
 $(OutDir)\lib\v8_base_1.lib
 $(OutDir)\lib\v8_base_2.lib
@@ -134,17 +132,7 @@ $(OutDir)\lib\v8_base_3.lib
 $(OutDir)\lib\v8_libbase.lib
 $(OutDir)\lib\v8_libplatform.lib
 $(OutDir)\lib\v8_nosnapshot.lib
-$(OutDir)\lib\v8_snapshot.lib
 ```
-
-* The platform toolset must be set to support Windows XP. The easiest way to do this is by
-  performing a search and replace on all .vcxproj files in the PDFium source directory.
-  For Visual Studio 2013 you need to replace `<PlatformToolset>v120</PlatformToolset>` with
-  `<PlatformToolset>v120_xp</PlatformToolset>`. For Visual Studio 2015 you need to replace
-  `<PlatformToolset>v140</PlatformToolset>` with `<PlatformToolset>v140_xp</PlatformToolset>`.
-  You may need to install extra Visual Studio components. When you load the project (you
-  can force this by right clicking ont he project and choosing Reload), Visual Studio
-  will prompt you if necessary;
 
 * A few methods need to be added to allow Pdfium to correctly initialize Pdfium. This file can
   be found in the `Contrib` directory and must be copied to the `pdfium\fpdfsdk\src` directory.
@@ -158,10 +146,9 @@ correctly. For me, the second time the build completes successfully.
 After you've made these changes and compiled the solution, you will get a valid DLL
 which can be copied into the "Libraries/Pdfium" directory of the project.
 
-To build the 64-bit version of the Pdfium library, drop down the `Release` option in the toolbar
-and open the `Configuration Manager`. There, change the `Active solution platform` to `x64`.
-The steps to update the project configuration explained above need to be performed again because
-they are dependent on the platform.
+To build the 64-bit version of the Pdfium library, re-run `gyp_pdfium` with the target architecture
+set as described above. The steps to update the project configuration explained above need to be
+performed again because they are dependent on the platform.
 
 ## Bugs
 

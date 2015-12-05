@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "../../fpdfsdk/include/fpdfview.h"
+#include "../../public/fpdfview.h"
 #include "../../v8/include/v8.h"
 #include "../../v8/include/libplatform/libplatform.h"
 
