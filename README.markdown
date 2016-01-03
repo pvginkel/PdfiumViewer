@@ -67,88 +67,11 @@ for more information.
 
 ## Building PDFium
 
-To build PDFium for Windows, you need Visual Studio.
-
-The PDFium source code does not have project files for Visual Studio. The full instructions
-to get to a project you can open in Visual Studio, you need to follow the steps at
-https://code.google.com/p/pdfium/wiki/Build.
-
-One addition to the instructions on the website is that the `build\gyp_pdfium` command is a
-Python script. To execute this, execute `python build\gyp_pdfium`. Also, one of the projects
-require the Python executable to be in the `PATH`. `depot_tools` has a Python which can be
-used for this. The build scripts have changed to use Ninja by default. To change this,
-execute `set GYP_GENERATORS=msvs` before you run `gyp_pdfium`. To create the 64-bit versions
-of the project, call `python build/gyp_pdfium -D target_arch=x64`.
-
-After this, you can open the `all.sln` solution from the `build` directory. The project
-is configured to create static libraries. However, we need a dynamic library for PdfiumViewer.
-To have it generate a dynamic library, the following changes must be made to the configuration
-of the `pdfium` project:
-
-* Before opening the project properties, first set the Configuration to Release;
-
-* In the General tab, Configuration Type must be set to Dynamic Library (.dll);
-
-* In the C/C++ | General tab, the Additional Include Directories must get the extra directory
-  `v8`. The full value should become `third_party\freetype\include;v8;v8\include;%(AdditionalIncludeDirectories)`;
-
-* In the C/C++ | Preprocessor tab, the Preprocessor Definition `FPDFSDK_EXPORTS` must be
-  added to have the DLL export the correct symbols;
-
-* In the Linker | Input tab, the Additional Dependencies must be set to. This dialog appears
-  after you've saved and re-opened the project configuration:
-
-```
-kernel32.lib
-user32.lib
-advapi32.lib
-gdi32.lib
-winmm.lib
-$(OutDir)\lib\bigint.lib
-$(OutDir)\lib\fdrm.lib
-$(OutDir)\lib\formfiller.lib
-$(OutDir)\lib\fpdfapi.lib
-$(OutDir)\lib\fpdfdoc.lib
-$(OutDir)\lib\fpdftext.lib
-$(OutDir)\lib\fx_agg.lib
-$(OutDir)\lib\fx_freetype.lib
-$(OutDir)\lib\fx_lcms2.lib
-$(OutDir)\lib\fx_libopenjpeg.lib
-$(OutDir)\lib\fx_zlib.lib
-$(OutDir)\lib\fxcodec.lib
-$(OutDir)\lib\fxcrt.lib
-$(OutDir)\lib\fxedit.lib
-$(OutDir)\lib\fxge.lib
-$(OutDir)\lib\icui18n.lib
-$(OutDir)\lib\icuuc.lib
-$(OutDir)\lib\javascript.lib
-$(OutDir)\lib\libjpeg.lib
-$(OutDir)\lib\pdfwindow.lib
-$(OutDir)\lib\test_support.lib
-$(OutDir)\lib\v8_base_0.lib
-$(OutDir)\lib\v8_base_1.lib
-$(OutDir)\lib\v8_base_2.lib
-$(OutDir)\lib\v8_base_3.lib
-$(OutDir)\lib\v8_libbase.lib
-$(OutDir)\lib\v8_libplatform.lib
-$(OutDir)\lib\v8_nosnapshot.lib
-```
-
-* A few methods need to be added to allow Pdfium to correctly initialize Pdfium. This file can
-  be found in the `Contrib` directory and must be copied to the `pdfium\fpdfsdk\src` directory.
-  After the file has been copied, it must be added to the project by right clicking on the `src`
-  directory in the `pdfium` project and then choosing Add | Existing item. Select the copied source file
-  and add it to the project.
-
-You may have to run the build a few times because the dependencies don't appear to be resolved
-correctly. For me, the second time the build completes successfully.
-
-After you've made these changes and compiled the solution, you will get a valid DLL
-which can be copied into the "Libraries/Pdfium" directory of the project.
-
-To build the 64-bit version of the Pdfium library, re-run `gyp_pdfium` with the target architecture
-set as described above. The steps to update the project configuration explained above need to be
-performed again because they are dependent on the platform.
+Instructions to build the PDFium library can be found on the [Building PDFium](https://github.com/pvginkel/PdfiumViewer/wiki/Building-PDFium)
+wiki page. However, if you are just looking to use the PdfiumViewer component
+or looking for a compiled version of PDFium, these steps are not required.
+A compiled version of the PDFium library is included in the NuGet package
+and precompiled libraries can be found at [https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium](https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium).
 
 ## Bugs
 
