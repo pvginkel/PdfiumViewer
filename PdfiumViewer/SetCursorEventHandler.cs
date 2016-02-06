@@ -10,11 +10,14 @@ namespace PdfiumViewer
     {
         public Point Location { get; private set; }
 
+        public HitTest HitTest { get; private set; }
+
         public Cursor Cursor { get; set; }
 
-        public SetCursorEventArgs(Point location)
+        public SetCursorEventArgs(Point location, HitTest hitTest)
         {
             Location = location;
+            HitTest = hitTest;
         }
     }
 

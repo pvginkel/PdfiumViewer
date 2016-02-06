@@ -645,7 +645,10 @@ namespace PdfiumViewer
 
         private void WmSetCursor(ref Message m)
         {
-            var e = new SetCursorEventArgs(PointToClient(Cursor.Position));
+            var e = new SetCursorEventArgs(
+                PointToClient(Cursor.Position),
+                (HitTest)(m.LParam.ToInt32() & 0xffff)
+            );
             OnSetCursor(e);
             Cursor.Current = e.Cursor ?? Cursor;
         }

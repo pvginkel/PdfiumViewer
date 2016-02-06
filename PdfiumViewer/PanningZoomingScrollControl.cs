@@ -188,11 +188,17 @@ namespace PdfiumViewer
             }
         }
 
+        protected override void OnSetCursor(SetCursorEventArgs e)
+        {
+            if (_canPan && e.HitTest == HitTest.Client)
+                e.Cursor = PanCursor;
+
+            base.OnSetCursor(e);
+        }
+
         protected override void OnLayout(LayoutEventArgs levent)
         {
             _canPan = DisplayRectangle.Width > ClientSize.Width || DisplayRectangle.Height > ClientSize.Height;
-
-            Cursor = _canPan ? PanCursor : Cursors.Default;
 
             base.OnLayout(levent);
         }
