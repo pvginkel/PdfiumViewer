@@ -12,6 +12,24 @@ namespace PdfiumViewer
         private readonly PdfPrintMode _printMode;
         private int _currentPage;
 
+        public event QueryPageSettingsEventHandler BeforeQueryPageSettings;
+
+        protected virtual void OnBeforeQueryPageSettings(QueryPageSettingsEventArgs e)
+        {
+            var ev = BeforeQueryPageSettings;
+            if (ev != null)
+                ev(this, e);
+        }
+
+        public event PrintPageEventHandler BeforePrintPage;
+
+        protected virtual void OnBeforePrintPage(PrintPageEventArgs e)
+        {
+            var ev = BeforePrintPage;
+            if (ev != null)
+                ev(this, e);
+        }
+
         public PdfPrintDocument(PdfDocument document, PdfPrintMode printMode)
         {
             if (document == null)
@@ -24,10 +42,14 @@ namespace PdfiumViewer
         protected override void OnBeginPrint(PrintEventArgs e)
         {
             _currentPage = PrinterSettings.FromPage == 0 ? 0 : PrinterSettings.FromPage - 1;
+
+            base.OnBeginPrint(e);
         }
 
         protected override void OnQueryPageSettings(QueryPageSettingsEventArgs e)
         {
+            OnBeforeQueryPageSettings(e);
+
             if (_currentPage < _document.PageCount)
             {
                 // Some printers misreport landscape. The below check verifies
@@ -41,10 +63,14 @@ namespace PdfiumViewer
 
                 e.PageSettings.Landscape = landscape;
             }
+
+            base.OnQueryPageSettings(e);
         }
 
         protected override void OnPrintPage(PrintPageEventArgs e)
         {
+            OnBeforePrintPage(e);
+
             if (_currentPage < _document.PageCount)
             {
                 var pageOrientation = GetOrientation(_document.PageSizes[_currentPage]);
@@ -104,6 +130,8 @@ namespace PdfiumViewer
                 : Math.Min(PrinterSettings.ToPage, _document.PageCount);
 
             e.HasMorePages = _currentPage < pageCount;
+
+            base.OnPrintPage(e);
         }
 
         private static int AdjustDpi(double value, double dpi)
