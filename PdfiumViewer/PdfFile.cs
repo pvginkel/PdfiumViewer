@@ -7,7 +7,7 @@ using System.Text;
 
 namespace PdfiumViewer
 {
-    internal abstract class PdfFile : IDisposable
+    internal class PdfFile : IDisposable
     {
         private static readonly Encoding FPDFEncoding = new UnicodeEncoding(false, false, false);
 
@@ -16,22 +16,25 @@ namespace PdfiumViewer
         private bool _disposed;
         private NativeMethods.FPDF_FORMFILLINFO _formCallbacks;
         private GCHandle _formCallbacksHandle;
+        private Stream _srcStream;
+        private IntPtr _streamptr;
 
         public static PdfFile Create(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            if (stream is MemoryStream)
-                return new PdfMemoryStreamFile((MemoryStream)stream);
-            if (stream is FileStream)
-                return new PdfFileStreamFile((FileStream)stream);
-            return new PdfBufferFile(StreamExtensions.ToByteArray(stream));
+            return new PdfFile(stream);
         }
 
-        protected PdfFile()
+        protected PdfFile(Stream srcStream)
         {
             PdfLibrary.EnsureLoaded();
+            _srcStream = srcStream;
+
+            IntPtr ptr;
+            LoadDocument(NativeMethods.FPDF_LoadCustomDocument(srcStream, null, out ptr));
+            _streamptr = ptr;
         }
 
         public PdfBookmarkCollection Bookmarks { get; private set; }
@@ -322,6 +325,12 @@ namespace PdfiumViewer
 
                 if (_formCallbacksHandle.IsAllocated)
                     _formCallbacksHandle.Free();
+
+                if (_streamptr != IntPtr.Zero)
+                {
+                    Marshal.Release(_streamptr);
+                    _streamptr = IntPtr.Zero;
+                }
 
                 _disposed = true;
             }

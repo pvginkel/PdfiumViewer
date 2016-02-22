@@ -60,18 +60,14 @@
     </Compile>
     <Compile Include="PdfBookmarkCollection.cs" />
     <Compile Include="PdfException.cs" />
-    <Compile Include="PdfBufferFile.cs" />
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
-    <Compile Include="PdfFileStreamFile.cs" />
-    <Compile Include="PdfFileHandleFile.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />
     <Compile Include="PdfPrintMode.cs" />
     <Compile Include="PdfRenderFlags.cs" />
     <Compile Include="PdfLibrary.cs" />
     <Compile Include="PdfMatch.cs" />
-    <Compile Include="PdfMemoryStreamFile.cs" />
     <Compile Include="PdfPrintDocument.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -495,9 +495,11 @@ namespace PdfiumViewer
         #endregion
 
         #region Custom Load/Save Logic
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int FPDF_GetBlockDelegate(IntPtr param, uint position, IntPtr buffer, uint size);
         private static FPDF_GetBlockDelegate _getBlockDelegate = new FPDF_GetBlockDelegate(FPDF_GetBlock);
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int FPDF_SaveBlockDelegate(IntPtr fileWrite, IntPtr data, uint size);
         private static FPDF_SaveBlockDelegate _saveBlockDelegate = new FPDF_SaveBlockDelegate(FPDF_SaveBlock);
 
