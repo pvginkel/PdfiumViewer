@@ -19,23 +19,6 @@ namespace PdfiumViewer
             _stream = stream;
         }
 
-        public override void Save(Stream stream)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            long offset = _stream.Position;
-
-            try
-            {
-                StreamExtensions.CopyStream(_stream, stream);
-            }
-            finally
-            {
-                _stream.Position = offset;
-            }
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!_disposed && disposing)

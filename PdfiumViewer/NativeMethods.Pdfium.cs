@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace PdfiumViewer
 {
@@ -395,6 +396,150 @@ namespace PdfiumViewer
                 return Imports.FPDFAction_GetType(action);
         }
 
+        /// <summary>
+        /// Opens a document using a .NET Stream. Allows opening huge
+        /// PDFs without loading them into memory first.
+        /// </summary>
+        /// <param name="input">The input Stream. Don't dispose prior to closing the pdf.</param>
+        /// <param name="password">Password, if the PDF is protected. Can be null.</param>
+        /// <param name="streamPtr">Retrieves an IntPtr to the COM object for the Stream. The caller must release this with Marshal.Release prior to Disposing the Stream.</param>
+        /// <returns>An IntPtr to the FPDF_DOCUMENT object.</returns>
+        public static IntPtr FPDF_LoadCustomDocument(Stream input, string password, out IntPtr streamPtr)
+        {
+            streamPtr = Marshal.GetIUnknownForObject(input);
+
+            IntPtr getBlock = Marshal.GetFunctionPointerForDelegate(_getBlockDelegate);
+            IntPtr result;
+
+            FPDF_FILEACCESS access = new FPDF_FILEACCESS
+            {
+                m_FileLen = (uint)input.Length,
+                m_GetBlock = getBlock,
+                m_Param = streamPtr
+            };
+
+            lock (LockString)
+            {
+                result = Imports.FPDF_LoadCustomDocument(access, password);
+            }
+
+            return result;
+        }
+
+        #region Save / Edit Methods
+
+        public static void FPDF_RotatePage(IntPtr page, int rotation)
+        {
+            lock (LockString)
+            {
+                Imports.FPDFPage_SetRotation(page, rotation);
+            }
+        }
+
+        public static bool FPDFPage_GenerateContent(IntPtr page)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFPage_GenerateContent(page);
+            }
+        }
+
+        public static void FPDF_Delete(IntPtr doc, int pageNo)
+        {
+            lock (LockString)
+            {
+                Imports.FPDFPage_Delete(doc, pageNo);
+            }
+        }
+
+        public static bool FPDF_SaveAsCopy(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags)
+        {
+            IntPtr streamPtr = Marshal.GetIUnknownForObject(output);
+
+            FPDF_FILEWRITE write = new FPDF_FILEWRITE
+            {
+                stream = streamPtr,
+                version = 1,
+                WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
+            };
+
+            bool result = false;
+            lock (LockString)
+            {
+                result = Imports.FPDF_SaveAsCopy(doc, write, flags);
+            }
+            Marshal.Release(streamPtr);
+            output.Flush();
+            return result;
+        }
+
+        public static bool FPDF_SaveWithVersion(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags, int fileVersion)
+        {
+            IntPtr streamPtr = Marshal.GetIUnknownForObject(output);
+            FPDF_FILEWRITE write = new FPDF_FILEWRITE
+            {
+                stream = streamPtr,
+                version = 1,
+                WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
+            };
+
+            bool result = false;
+            lock (LockString)
+            {
+                result = Imports.FPDF_SaveWithVersion(doc, write, flags, fileVersion);
+            }
+            Marshal.Release(streamPtr);
+            output.Flush();
+            return result;
+        }
+        #endregion
+
+        #region Custom Load/Save Logic
+        private delegate int FPDF_GetBlockDelegate(IntPtr param, uint position, IntPtr buffer, uint size);
+        private static FPDF_GetBlockDelegate _getBlockDelegate = new FPDF_GetBlockDelegate(FPDF_GetBlock);
+
+        private delegate int FPDF_SaveBlockDelegate(IntPtr fileWrite, IntPtr data, uint size);
+        private static FPDF_SaveBlockDelegate _saveBlockDelegate = new FPDF_SaveBlockDelegate(FPDF_SaveBlock);
+
+        private static int FPDF_GetBlock(IntPtr param, uint position, IntPtr buffer, uint size)
+        {
+            var stream = Marshal.GetObjectForIUnknown(param) as Stream;
+            if (stream == null)
+                return 0;
+            byte[] managedBuffer = new byte[size];
+
+            stream.Position = position;
+            int read = stream.Read(managedBuffer, 0, (int)size);
+            if (read != size)
+                return 0;
+
+            Marshal.Copy(managedBuffer, 0, buffer, (int)size);
+            return 1;
+        }
+
+        private static int FPDF_SaveBlock(IntPtr fileWrite, IntPtr data, uint size)
+        {
+            FPDF_FILEWRITE write = new FPDF_FILEWRITE();
+            Marshal.PtrToStructure(fileWrite, write);
+
+            Stream stream = Marshal.GetObjectForIUnknown(write.stream) as Stream;
+            if (stream == null) return 0;
+
+            byte[] buffer = new byte[size];
+            Marshal.Copy(data, buffer, 0, (int)size);
+
+            try
+            {
+                stream.Write(buffer, 0, (int)size);
+                return (int)size;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        #endregion
+
         private static class Imports
         {
             [DllImport("pdfium.dll")]
@@ -402,6 +547,9 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern void FPDF_Release();
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]            
+            public static extern IntPtr FPDF_LoadCustomDocument([MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEACCESS access, string password);
 
             [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]
             public static extern IntPtr FPDF_LoadMemDocument(SafeHandle data_buf, int size, string password);
@@ -543,6 +691,54 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern uint FPDFAction_GetType(IntPtr action);
+
+            #region Save/Edit APIs
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDF_ImportPages", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FPDF_ImportPages(IntPtr destDoc, IntPtr srcDoc, [MarshalAs(UnmanagedType.LPStr)]string pageRange, int index);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDF_SaveAsCopy", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FPDF_SaveAsCopy(IntPtr doc,
+                [MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEWRITE writer,
+                [MarshalAs(UnmanagedType.I4)]FPDF_SAVE_FLAGS flag);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDF_SaveWithVersion", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FPDF_SaveWithVersion(IntPtr doc,
+                [MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEWRITE writer,
+                [MarshalAs(UnmanagedType.I4)]FPDF_SAVE_FLAGS flags,
+                int fileVersion);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_New", CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr FPDFPage_New(IntPtr doc, int index, double width, double height);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_Delete", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FPDFPage_Delete(IntPtr doc, int index);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_GetRotation", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int FPDFPage_GetRotation(IntPtr page);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_SetRotation", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FPDFPage_SetRotation(IntPtr page, int rotate);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDF_CreateNewDocument", CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr FPDF_CreateNewDocument();
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPageObj_NewImgeObj", CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr FPDFPageObj_NewImgeObj(IntPtr document);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFImageObj_SetBitmap", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FPDFImageObj_SetBitmap(IntPtr pages, int count, IntPtr imageObject, IntPtr bitmap);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPageObj_Transform", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FPDFPageObj_Transform(IntPtr page, double a, double b, double c, double d, double e, double f);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_InsertObject", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FPDFPage_InsertObject(IntPtr page, IntPtr pageObject);
+
+            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_GenerateContent", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FPDFPage_GenerateContent(IntPtr page);
+
+            #endregion
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -647,5 +843,31 @@ namespace PdfiumViewer
             public float right;
             public float bottom;
         }
+
+        #region Save/Edit Structs and Flags
+        [Flags]
+        public enum FPDF_SAVE_FLAGS
+        {
+            FPDF_INCREMENTAL = 1,
+            FPDF_NO_INCREMENTAL = 2,
+            FPDF_REMOVE_SECURITY = 3
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class FPDF_FILEACCESS
+        {
+            public uint m_FileLen;
+            public IntPtr m_GetBlock;
+            public IntPtr m_Param;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class FPDF_FILEWRITE
+        {
+            public int version;
+            public IntPtr WriteBlock;
+            public IntPtr stream;
+        }
+        #endregion
     }
 }

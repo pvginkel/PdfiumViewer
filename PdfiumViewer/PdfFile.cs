@@ -160,7 +160,10 @@ namespace PdfiumViewer
             return result;
         }
 
-        public abstract void Save(Stream stream);
+        public void Save(Stream stream)
+        {
+            NativeMethods.FPDF_SaveAsCopy(_document, stream, NativeMethods.FPDF_SAVE_FLAGS.FPDF_NO_INCREMENTAL);
+        }
 
         protected void LoadDocument(IntPtr document)
         {
@@ -278,6 +281,19 @@ namespace PdfiumViewer
             }
 
             return new PdfMatches(startPage, endPage, matches);
+        }
+
+        public void DeletePage (int pageNumber)
+        {
+            NativeMethods.FPDF_Delete(_document, pageNumber);
+        }
+
+        public void RotatePage (int pageNumber, int rotation)
+        {
+            using (var pageData = new PageData(_document, _form, pageNumber))
+            {
+                NativeMethods.FPDF_RotatePage(pageData.Page, rotation);
+            }
         }
 
         public void Dispose()

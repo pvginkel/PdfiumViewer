@@ -26,12 +26,5 @@ namespace PdfiumViewer
             LoadDocument(NativeMethods.FPDF_LoadMemDocument(_buffer, length, null));
         }
 
-        public override void Save(Stream stream)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            stream.Write(_buffer, 0, _length);
-        }
     }
 }
