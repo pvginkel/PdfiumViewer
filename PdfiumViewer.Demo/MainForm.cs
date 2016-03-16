@@ -67,6 +67,11 @@ namespace PdfiumViewer.Demo
                     return;
                 }
 
+                if (pdfViewer1.Document != null)
+                {
+                    pdfViewer1.Document.Dispose();
+                }
+
                 pdfViewer1.Document = PdfDocument.Load(form.FileName);
                 renderToBitmapsToolStripMenuItem.Enabled = true;
             }
