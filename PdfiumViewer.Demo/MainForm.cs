@@ -23,6 +23,13 @@ namespace PdfiumViewer.Demo
             cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
 
             _zoom.Text = pdfViewer1.Renderer.Zoom.ToString();
+
+            Disposed += (s, e) =>
+            {
+                var document = pdfViewer1.Document;
+                if (document != null)
+                    document.Dispose();
+            };
         }
 
         void Renderer_ZoomChanged(object sender, EventArgs e)
