@@ -39,7 +39,7 @@ namespace PdfiumViewer
             }
         }
 
-        public static IntPtr FPDF_LoadMemDocument(byte[] data_buf, int size, string password)
+        public static IntPtr FPDF_LoadMemDocument(IntPtr data_buf, int size, string password)
         {
             lock (LockString)
             {
@@ -407,7 +407,7 @@ namespace PdfiumViewer
             public static extern IntPtr FPDF_LoadMemDocument(SafeHandle data_buf, int size, string password);
 
             [DllImport("pdfium.dll", CharSet = CharSet.Ansi)]
-            public static extern IntPtr FPDF_LoadMemDocument(byte[] data_buf, int size, string password);
+            public static extern IntPtr FPDF_LoadMemDocument(IntPtr data_buf, int size, string password);
 
             [DllImport("pdfium.dll")]
             public static extern void FPDF_CloseDocument(IntPtr document);
