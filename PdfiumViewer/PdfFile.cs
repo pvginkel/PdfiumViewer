@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -226,7 +227,10 @@ namespace PdfiumViewer
             NativeMethods.FPDF_BookmarkGetTitle(bookmark, buffer, length);
 
             string result = Encoding.Unicode.GetString(buffer);
-            return result.Substring(0, result.Length - 1);
+            if (result.Length > 0 && result[result.Length - 1] == 0)
+                result = result.Substring(0, result.Length - 1);
+
+            return result;
         }
 
         private uint GetBookmarkPageIndex(IntPtr bookmark)
