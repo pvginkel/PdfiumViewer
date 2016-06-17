@@ -299,7 +299,7 @@ namespace PdfiumViewer
             NativeMethods.FPDFPage_Delete(_document, pageNumber);
         }
 
-        public void RotatePage (int pageNumber, PdfPageRotation rotation)
+        public void RotatePage (int pageNumber, PdfRotation rotation)
         {
             using (var pageData = new PageData(_document, _form, pageNumber))
             {

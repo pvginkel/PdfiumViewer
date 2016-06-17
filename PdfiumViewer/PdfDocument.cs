@@ -409,7 +409,7 @@ namespace PdfiumViewer
             _pageSizes.RemoveAt(pageNumber);
         }
 
-        public void RotatePage(int pageNumber, PdfPageRotation rotation)
+        public void RotatePage(int pageNumber, PdfRotation rotation)
         {
             _file.RotatePage(pageNumber, rotation);
             _pageSizes[pageNumber] = _file.GetPDFDocInfo(pageNumber);

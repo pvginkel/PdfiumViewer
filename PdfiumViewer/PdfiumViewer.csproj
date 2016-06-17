@@ -70,7 +70,6 @@
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
-    <Compile Include="PdfPageRotation.cs" />
     <Compile Include="StreamManager.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />

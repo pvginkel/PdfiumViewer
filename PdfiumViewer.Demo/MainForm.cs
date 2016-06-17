@@ -261,25 +261,25 @@ namespace PdfiumViewer.Demo
 
         private void rotate0ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Rotate(PdfPageRotation.Rotate0);
+            Rotate(PdfRotation.Rotate0);
         }
 
         private void rotate90ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Rotate(PdfPageRotation.Rotate90);
+            Rotate(PdfRotation.Rotate90);
         }
 
         private void rotate180ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Rotate(PdfPageRotation.Rotate180);
+            Rotate(PdfRotation.Rotate180);
         }
 
         private void rotate270ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Rotate(PdfPageRotation.Rotate270);
+            Rotate(PdfRotation.Rotate270);
         }
 
-        private void Rotate(PdfPageRotation rotate)
+        private void Rotate(PdfRotation rotate)
         {
             // PdfRenderer does not support changes to the loaded document,
             // so we fake it by reloading the document into the renderer.

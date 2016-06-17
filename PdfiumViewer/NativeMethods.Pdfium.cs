@@ -431,7 +431,7 @@ namespace PdfiumViewer
 
         #region Save / Edit Methods
 
-        public static void FPDFPage_SetRotation(IntPtr page, PdfPageRotation rotation)
+        public static void FPDFPage_SetRotation(IntPtr page, PdfRotation rotation)
         {
             lock (LockString)
             {
