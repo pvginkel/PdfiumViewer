@@ -41,6 +41,7 @@ namespace PdfiumViewer.Demo
 
             if (args.Length > 1)
             {
+                pdfViewer1.Document?.Dispose();
                 pdfViewer1.Document = PdfDocument.Load(args[1]);
                 renderToBitmapsToolStripMenuItem.Enabled = true;
             }
@@ -67,6 +68,7 @@ namespace PdfiumViewer.Demo
                     return;
                 }
 
+                pdfViewer1.Document?.Dispose();
                 pdfViewer1.Document = PdfDocument.Load(form.FileName);
                 renderToBitmapsToolStripMenuItem.Enabled = true;
             }

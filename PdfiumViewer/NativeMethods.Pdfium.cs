@@ -404,26 +404,21 @@ namespace PdfiumViewer
         /// <param name="password">Password, if the PDF is protected. Can be null.</param>
         /// <param name="streamPtr">Retrieves an IntPtr to the COM object for the Stream. The caller must release this with Marshal.Release prior to Disposing the Stream.</param>
         /// <returns>An IntPtr to the FPDF_DOCUMENT object.</returns>
-        public static IntPtr FPDF_LoadCustomDocument(Stream input, string password, out IntPtr streamPtr)
+        public static IntPtr FPDF_LoadCustomDocument(Stream input, string password, int id)
         {
-            streamPtr = Marshal.GetIUnknownForObject(input);
+            var getBlock = Marshal.GetFunctionPointerForDelegate(_getBlockDelegate);
 
-            IntPtr getBlock = Marshal.GetFunctionPointerForDelegate(_getBlockDelegate);
-            IntPtr result;
-
-            FPDF_FILEACCESS access = new FPDF_FILEACCESS
+            var access = new FPDF_FILEACCESS
             {
                 m_FileLen = (uint)input.Length,
                 m_GetBlock = getBlock,
-                m_Param = streamPtr
+                m_Param = (IntPtr)id
             };
 
             lock (LockString)
             {
-                result = Imports.FPDF_LoadCustomDocument(access, password);
+                return Imports.FPDF_LoadCustomDocument(access, password);
             }
-
-            return result;
         }
 
         #region Save / Edit Methods
@@ -454,58 +449,67 @@ namespace PdfiumViewer
 
         public static bool FPDF_SaveAsCopy(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags)
         {
-            IntPtr streamPtr = Marshal.GetIUnknownForObject(output);
+            int id = StreamManager.Register(output);
 
-            FPDF_FILEWRITE write = new FPDF_FILEWRITE
+            try
             {
-                stream = streamPtr,
-                version = 1,
-                WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
-            };
+                var write = new FPDF_FILEWRITE
+                {
+                    stream = (IntPtr)id,
+                    version = 1,
+                    WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
+                };
 
-            bool result = false;
-            lock (LockString)
-            {
-                result = Imports.FPDF_SaveAsCopy(doc, write, flags);
+                lock (LockString)
+                {
+                    return Imports.FPDF_SaveAsCopy(doc, write, flags);
+                }
             }
-            Marshal.Release(streamPtr);
-            output.Flush();
-            return result;
+            finally
+            {
+                StreamManager.Unregister(id);
+            }
         }
 
         public static bool FPDF_SaveWithVersion(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags, int fileVersion)
         {
-            IntPtr streamPtr = Marshal.GetIUnknownForObject(output);
-            FPDF_FILEWRITE write = new FPDF_FILEWRITE
-            {
-                stream = streamPtr,
-                version = 1,
-                WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
-            };
+            int id = StreamManager.Register(output);
 
-            bool result = false;
-            lock (LockString)
+            try
             {
-                result = Imports.FPDF_SaveWithVersion(doc, write, flags, fileVersion);
+                var write = new FPDF_FILEWRITE
+                {
+                    stream = (IntPtr)id,
+                    version = 1,
+                    WriteBlock = Marshal.GetFunctionPointerForDelegate(_saveBlockDelegate)
+                };
+
+                lock (LockString)
+                {
+                    return Imports.FPDF_SaveWithVersion(doc, write, flags, fileVersion);
+                }
             }
-            Marshal.Release(streamPtr);
-            output.Flush();
-            return result;
+            finally
+            {
+                StreamManager.Unregister(id);
+            }
         }
         #endregion
 
         #region Custom Load/Save Logic
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int FPDF_GetBlockDelegate(IntPtr param, uint position, IntPtr buffer, uint size);
-        private static FPDF_GetBlockDelegate _getBlockDelegate = new FPDF_GetBlockDelegate(FPDF_GetBlock);
+
+        private static readonly FPDF_GetBlockDelegate _getBlockDelegate = FPDF_GetBlock;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int FPDF_SaveBlockDelegate(IntPtr fileWrite, IntPtr data, uint size);
-        private static FPDF_SaveBlockDelegate _saveBlockDelegate = new FPDF_SaveBlockDelegate(FPDF_SaveBlock);
+
+        private static readonly FPDF_SaveBlockDelegate _saveBlockDelegate = FPDF_SaveBlock;
 
         private static int FPDF_GetBlock(IntPtr param, uint position, IntPtr buffer, uint size)
         {
-            var stream = Marshal.GetObjectForIUnknown(param) as Stream;
+            var stream = StreamManager.Get((int)param);
             if (stream == null)
                 return 0;
             byte[] managedBuffer = new byte[size];
@@ -521,11 +525,12 @@ namespace PdfiumViewer
 
         private static int FPDF_SaveBlock(IntPtr fileWrite, IntPtr data, uint size)
         {
-            FPDF_FILEWRITE write = new FPDF_FILEWRITE();
+            var write = new FPDF_FILEWRITE();
             Marshal.PtrToStructure(fileWrite, write);
 
-            Stream stream = Marshal.GetObjectForIUnknown(write.stream) as Stream;
-            if (stream == null) return 0;
+            var stream = StreamManager.Get((int)write.stream);
+            if (stream == null)
+                return 0;
 
             byte[] buffer = new byte[size];
             Marshal.Copy(data, buffer, 0, (int)size);

@@ -16,25 +16,20 @@ namespace PdfiumViewer
         private bool _disposed;
         private NativeMethods.FPDF_FORMFILLINFO _formCallbacks;
         private GCHandle _formCallbacksHandle;
-        private Stream _srcStream;
-        private IntPtr _streamptr;
+        private readonly int _id;
+        private Stream _stream;
 
-        public static PdfFile Create(Stream stream)
+        public PdfFile(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
-            return new PdfFile(stream);
-        }
-
-        protected PdfFile(Stream srcStream)
-        {
             PdfLibrary.EnsureLoaded();
-            _srcStream = srcStream;
 
-            IntPtr ptr;
-            LoadDocument(NativeMethods.FPDF_LoadCustomDocument(srcStream, null, out ptr));
-            _streamptr = ptr;
+            _stream = stream;
+            _id = StreamManager.Register(stream);
+
+            LoadDocument(NativeMethods.FPDF_LoadCustomDocument(stream, null, _id));
         }
 
         public PdfBookmarkCollection Bookmarks { get; private set; }
@@ -310,6 +305,8 @@ namespace PdfiumViewer
         {
             if (!_disposed)
             {
+                StreamManager.Unregister(_id);
+
                 if (_form != IntPtr.Zero)
                 {
                     NativeMethods.FORM_DoDocumentAAction(_form, NativeMethods.FPDFDOC_AACTION.WC);
@@ -326,10 +323,10 @@ namespace PdfiumViewer
                 if (_formCallbacksHandle.IsAllocated)
                     _formCallbacksHandle.Free();
 
-                if (_streamptr != IntPtr.Zero)
+                if (_stream != null)
                 {
-                    Marshal.Release(_streamptr);
-                    _streamptr = IntPtr.Zero;
+                    _stream.Dispose();
+                    _stream = null;
                 }
 
                 _disposed = true;

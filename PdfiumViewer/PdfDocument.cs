@@ -58,7 +58,7 @@ namespace PdfiumViewer
         public IList<SizeF> PageSizes { get; private set; }
 
         private PdfDocument(Stream stream)
-            : this(PdfFile.Create(stream))
+            : this(new PdfFile(stream))
         {
         }
 
