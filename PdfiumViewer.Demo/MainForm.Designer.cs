@@ -45,6 +45,13 @@ namespace PdfiumViewer.Demo
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.cutMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.shrinkToMarginsWhenPrintingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+            this.deleteCurrentPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rotateCurrentPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rotate0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rotate90ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rotate180ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rotate270ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this._page = new System.Windows.Forms.ToolStripTextBox();
@@ -134,7 +141,10 @@ namespace PdfiumViewer.Demo
             this.renderToBitmapsToolStripMenuItem,
             this.toolStripMenuItem2,
             this.cutMarginsWhenPrintingToolStripMenuItem,
-            this.shrinkToMarginsWhenPrintingToolStripMenuItem});
+            this.shrinkToMarginsWhenPrintingToolStripMenuItem,
+            this.toolStripMenuItem4,
+            this.deleteCurrentPageToolStripMenuItem,
+            this.rotateCurrentPageToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -164,6 +174,57 @@ namespace PdfiumViewer.Demo
             this.shrinkToMarginsWhenPrintingToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.shrinkToMarginsWhenPrintingToolStripMenuItem.Text = "Shrink to margins when printing";
             this.shrinkToMarginsWhenPrintingToolStripMenuItem.Click += new System.EventHandler(this.shrinkToMarginsWhenPrintingToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(241, 6);
+            // 
+            // deleteCurrentPageToolStripMenuItem
+            // 
+            this.deleteCurrentPageToolStripMenuItem.Name = "deleteCurrentPageToolStripMenuItem";
+            this.deleteCurrentPageToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.deleteCurrentPageToolStripMenuItem.Text = "Delete Current Page";
+            this.deleteCurrentPageToolStripMenuItem.Click += new System.EventHandler(this.deleteCurrentPageToolStripMenuItem_Click);
+            // 
+            // rotateCurrentPageToolStripMenuItem
+            // 
+            this.rotateCurrentPageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rotate0ToolStripMenuItem,
+            this.rotate90ToolStripMenuItem,
+            this.rotate180ToolStripMenuItem,
+            this.rotate270ToolStripMenuItem});
+            this.rotateCurrentPageToolStripMenuItem.Name = "rotateCurrentPageToolStripMenuItem";
+            this.rotateCurrentPageToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.rotateCurrentPageToolStripMenuItem.Text = "Rotate Current Page";
+            // 
+            // rotate0ToolStripMenuItem
+            // 
+            this.rotate0ToolStripMenuItem.Name = "rotate0ToolStripMenuItem";
+            this.rotate0ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate0ToolStripMenuItem.Text = "Rotate 0°";
+            this.rotate0ToolStripMenuItem.Click += new System.EventHandler(this.rotate0ToolStripMenuItem_Click);
+            // 
+            // rotate90ToolStripMenuItem
+            // 
+            this.rotate90ToolStripMenuItem.Name = "rotate90ToolStripMenuItem";
+            this.rotate90ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate90ToolStripMenuItem.Text = "Rotate 90°";
+            this.rotate90ToolStripMenuItem.Click += new System.EventHandler(this.rotate90ToolStripMenuItem_Click);
+            // 
+            // rotate180ToolStripMenuItem
+            // 
+            this.rotate180ToolStripMenuItem.Name = "rotate180ToolStripMenuItem";
+            this.rotate180ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate180ToolStripMenuItem.Text = "Rotate 180°";
+            this.rotate180ToolStripMenuItem.Click += new System.EventHandler(this.rotate180ToolStripMenuItem_Click);
+            // 
+            // rotate270ToolStripMenuItem
+            // 
+            this.rotate270ToolStripMenuItem.Name = "rotate270ToolStripMenuItem";
+            this.rotate270ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate270ToolStripMenuItem.Text = "Rotate 270°";
+            this.rotate270ToolStripMenuItem.Click += new System.EventHandler(this.rotate270ToolStripMenuItem_Click);
             // 
             // toolStrip1
             // 
@@ -427,6 +488,13 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton _showToolbar;
         private System.Windows.Forms.ToolStripButton _showBookmarks;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem deleteCurrentPageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotateCurrentPageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotate0ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotate90ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotate180ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotate270ToolStripMenuItem;
     }
 }
 

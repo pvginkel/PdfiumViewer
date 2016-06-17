@@ -17,6 +17,7 @@ namespace PdfiumViewer
     {
         private bool _disposed;
         private PdfFile _file;
+        private List<SizeF> _pageSizes;
 
         /// <summary>
         /// Initializes a new instance of the PdfDocument class with the provided path.
@@ -24,6 +25,9 @@ namespace PdfiumViewer
         /// <param name="path"></param>
         public static PdfDocument Load(string path)
         {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
             return new PdfDocument(path);
         }
 
@@ -33,6 +37,9 @@ namespace PdfiumViewer
         /// <param name="stream"></param>
         public static PdfDocument Load(Stream stream)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
             return new PdfDocument(stream);
         }
 
@@ -58,7 +65,7 @@ namespace PdfiumViewer
         public IList<SizeF> PageSizes { get; private set; }
 
         private PdfDocument(Stream stream)
-            : this(PdfFile.Create(stream))
+            : this(new PdfFile(stream))
         {
         }
 
@@ -74,11 +81,11 @@ namespace PdfiumViewer
 
             _file = file;
 
-            var pageSizes = file.GetPDFDocInfo();
-            if (pageSizes == null)
+            _pageSizes = file.GetPDFDocInfo();
+            if (_pageSizes == null)
                 throw new Win32Exception();
 
-            PageSizes = new ReadOnlyCollection<SizeF>(pageSizes);
+            PageSizes = new ReadOnlyCollection<SizeF>(_pageSizes);
         }
 
         /// <summary>
@@ -321,6 +328,18 @@ namespace PdfiumViewer
         public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)
         {
             return _file.GetPageLinks(pageNumber, pageSize);
+        }
+
+        public void DeletePage(int pageNumber)
+        {
+            _file.DeletePage(pageNumber);
+            _pageSizes.RemoveAt(pageNumber);
+        }
+
+        public void RotatePage(int pageNumber, PdfPageRotation rotation)
+        {
+            _file.RotatePage(pageNumber, rotation);
+            _pageSizes[pageNumber] = _file.GetPDFDocInfo(pageNumber);
         }
 
         public void Dispose()
