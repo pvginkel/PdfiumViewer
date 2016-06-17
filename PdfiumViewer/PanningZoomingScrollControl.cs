@@ -73,8 +73,8 @@ namespace PdfiumViewer
         protected PanningZoomingScrollControl()
         {
             ZoomFactor = DefaultZoomFactor;
-            ZoomMin = DefaultZoomMin;
-            ZoomMax = DefaultZoomMax;
+            _zoomMin = DefaultZoomMin;
+            _zoomMax = DefaultZoomMax;
         }
 
         [DefaultValue(DefaultZoomMin)]
@@ -115,13 +115,31 @@ namespace PdfiumViewer
             Zoom /= ZoomFactor;
         }
 
+        [DefaultValue(MouseWheelMode.PanAndZoom)]
+        public MouseWheelMode MouseWheelMode { get; set; }
+
         /// <summary>
         /// Raises the <see cref="E:System.Windows.Forms.Control.MouseWheel"/> event.
         /// </summary>
         /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            if ((ModifierKeys & Keys.Control) != 0)
+            bool doZoom;
+
+            switch (MouseWheelMode)
+            {
+                case MouseWheelMode.PanAndZoom:
+                    doZoom = (ModifierKeys & Keys.Control) != 0;
+                    break;
+                case MouseWheelMode.Zoom:
+                    doZoom = true;
+                    break;
+                default:
+                    doZoom = false;
+                    break;
+            }
+
+            if (doZoom)
             {
                 double zoom = _zoom;
 
@@ -232,15 +250,9 @@ namespace PdfiumViewer
             if (!Capture)
                 return;
 
-            var offset = new Point(
-                e.Location.X - _dragStart.X,
-                e.Location.Y - _dragStart.Y
-            );
+            var offset = new Point(e.Location.X - _dragStart.X, e.Location.Y - _dragStart.Y);
 
-            SetDisplayRectLocation(new Point(
-                _startOffset.X + offset.X,
-                _startOffset.Y + offset.Y
-            ));
+            SetDisplayRectLocation(new Point(_startOffset.X + offset.X, _startOffset.Y + offset.Y));
         }
 
         protected override void OnMouseUp(MouseEventArgs e)

@@ -50,6 +50,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="HitTest.cs" />
+    <Compile Include="MouseWheelMode.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeMethods.Pdfium.cs" />
     <Compile Include="NativeTreeView.cs">
