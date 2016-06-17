@@ -9,9 +9,9 @@ namespace PdfiumViewer
 {
     public abstract class PanningZoomingScrollControl : CustomScrollControl
     {
-        private const double ZoomMin = 0.1;
-        private const double ZoomMax = 5;
-        private const double DefaultZoomFactor = 1.2;
+        public const double DefaultZoomMin = 0.1;
+        public const double DefaultZoomMax = 5;
+        public const double DefaultZoomFactor = 1.2;
 
         private static readonly Cursor PanCursor;
 
@@ -29,6 +29,8 @@ namespace PdfiumViewer
         private bool _canPan;
         private Point _dragStart;
         private Point _startOffset;
+        private double _zoomMax;
+        private double _zoomMin;
 
         public event EventHandler ZoomChanged;
 
@@ -71,6 +73,30 @@ namespace PdfiumViewer
         protected PanningZoomingScrollControl()
         {
             ZoomFactor = DefaultZoomFactor;
+            ZoomMin = DefaultZoomMin;
+            ZoomMax = DefaultZoomMax;
+        }
+
+        [DefaultValue(DefaultZoomMin)]
+        public double ZoomMin
+        {
+            get { return _zoomMin; }
+            set
+            {
+                _zoomMin = value;
+                Zoom = Zoom;
+            }
+        }
+
+        [DefaultValue(DefaultZoomMax)]
+        public double ZoomMax
+        {
+            get { return _zoomMax; }
+            set
+            {
+                _zoomMax = value;
+                Zoom = Zoom;
+            }
         }
 
         /// <summary>
