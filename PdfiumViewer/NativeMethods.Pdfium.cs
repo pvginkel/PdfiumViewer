@@ -423,11 +423,11 @@ namespace PdfiumViewer
 
         #region Save / Edit Methods
 
-        public static void FPDF_RotatePage(IntPtr page, int rotation)
+        public static void FPDFPage_SetRotation(IntPtr page, PdfPageRotation rotation)
         {
             lock (LockString)
             {
-                Imports.FPDFPage_SetRotation(page, rotation);
+                Imports.FPDFPage_SetRotation(page, (int)rotation);
             }
         }
 
@@ -439,11 +439,11 @@ namespace PdfiumViewer
             }
         }
 
-        public static void FPDF_Delete(IntPtr doc, int pageNo)
+        public static void FPDFPage_Delete(IntPtr doc, int page)
         {
             lock (LockString)
             {
-                Imports.FPDFPage_Delete(doc, pageNo);
+                Imports.FPDFPage_Delete(doc, page);
             }
         }
 

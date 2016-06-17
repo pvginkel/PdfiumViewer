@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PdfiumViewer
 {
-    internal class StreamManager
+    internal static class StreamManager
     {
         private static readonly object _syncRoot = new object();
         private static int _nextId = 1;

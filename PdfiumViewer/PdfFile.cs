@@ -148,14 +148,19 @@ namespace PdfiumViewer
 
             for (int i = 0; i < pageCount; i++)
             {
-                double height;
-                double width;
-                NativeMethods.FPDF_GetPageSizeByIndex(_document, i, out width, out height);
-
-                result.Add(new SizeF((float)width, (float)height));
+                result.Add(GetPDFDocInfo(i));
             }
 
             return result;
+        }
+
+        public SizeF GetPDFDocInfo(int pageNumber)
+        {
+            double height;
+            double width;
+            NativeMethods.FPDF_GetPageSizeByIndex(_document, pageNumber, out width, out height);
+
+            return new SizeF((float)width, (float)height);
         }
 
         public void Save(Stream stream)
@@ -283,14 +288,14 @@ namespace PdfiumViewer
 
         public void DeletePage (int pageNumber)
         {
-            NativeMethods.FPDF_Delete(_document, pageNumber);
+            NativeMethods.FPDFPage_Delete(_document, pageNumber);
         }
 
-        public void RotatePage (int pageNumber, int rotation)
+        public void RotatePage (int pageNumber, PdfPageRotation rotation)
         {
             using (var pageData = new PageData(_document, _form, pageNumber))
             {
-                NativeMethods.FPDF_RotatePage(pageData.Page, rotation);
+                NativeMethods.FPDFPage_SetRotation(pageData.Page, rotation);
             }
         }
 
