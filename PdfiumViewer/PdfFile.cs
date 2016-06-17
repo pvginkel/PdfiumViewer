@@ -20,7 +20,7 @@ namespace PdfiumViewer
         private readonly int _id;
         private Stream _stream;
 
-        public PdfFile(Stream stream)
+        public PdfFile(Stream stream, string password)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -30,7 +30,11 @@ namespace PdfiumViewer
             _stream = stream;
             _id = StreamManager.Register(stream);
 
-            LoadDocument(NativeMethods.FPDF_LoadCustomDocument(stream, null, _id));
+            var document = NativeMethods.FPDF_LoadCustomDocument(stream, password, _id);
+            if (document == IntPtr.Zero)
+                throw new PdfException((PdfError)NativeMethods.FPDF_GetLastError());
+
+            LoadDocument(document);
         }
 
         public PdfBookmarkCollection Bookmarks { get; private set; }

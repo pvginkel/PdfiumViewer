@@ -44,7 +44,7 @@ namespace PdfiumViewer.Demo
             if (args.Length > 1)
             {
                 pdfViewer1.Document?.Dispose();
-                pdfViewer1.Document = PdfDocument.Load(args[1]);
+                pdfViewer1.Document = OpenDocument(args[1]);
                 renderToBitmapsToolStripMenuItem.Enabled = true;
             }
             else
@@ -54,6 +54,19 @@ namespace PdfiumViewer.Demo
 
             _showBookmarks.Checked = pdfViewer1.ShowBookmarks;
             _showToolbar.Checked = pdfViewer1.ShowToolbar;
+        }
+
+        private PdfDocument OpenDocument(string fileName)
+        {
+            try
+            {
+                return PdfDocument.Load(this, fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
         }
 
         private void OpenFile()
@@ -71,7 +84,7 @@ namespace PdfiumViewer.Demo
                 }
 
                 pdfViewer1.Document?.Dispose();
-                pdfViewer1.Document = PdfDocument.Load(form.FileName);
+                pdfViewer1.Document = OpenDocument(form.FileName);
                 renderToBitmapsToolStripMenuItem.Enabled = true;
             }
         }

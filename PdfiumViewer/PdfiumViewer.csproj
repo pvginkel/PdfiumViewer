@@ -59,7 +59,14 @@
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PasswordForm.Designer.cs">
+      <DependentUpon>PasswordForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PdfBookmarkCollection.cs" />
+    <Compile Include="PdfError.cs" />
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
@@ -113,6 +120,9 @@
     <None Include="Resources\ShadeBorder-NW.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PasswordForm.resx">
+      <DependentUpon>PasswordForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PdfViewer.nl.resx">
       <DependentUpon>PdfViewer.cs</DependentUpon>
     </EmbeddedResource>

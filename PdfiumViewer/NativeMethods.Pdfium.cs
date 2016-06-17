@@ -421,6 +421,14 @@ namespace PdfiumViewer
             }
         }
 
+        public static FPDF_ERR FPDF_GetLastError()
+        {
+            lock (LockString)
+            {
+                return (FPDF_ERR)Imports.FPDF_GetLastError();
+            }
+        }
+
         #region Save / Edit Methods
 
         public static void FPDFPage_SetRotation(IntPtr page, PdfPageRotation rotation)
@@ -699,6 +707,9 @@ namespace PdfiumViewer
             [DllImport("pdfium.dll")]
             public static extern uint FPDFAction_GetType(IntPtr action);
 
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDF_GetLastError();
+
             #region Save/Edit APIs
 
             [DllImport("pdfium.dll", EntryPoint = "FPDF_ImportPages", CallingConvention = CallingConvention.Cdecl)]
@@ -849,6 +860,17 @@ namespace PdfiumViewer
             public float top;
             public float right;
             public float bottom;
+        }
+
+        public enum FPDF_ERR : uint
+        {
+            FPDF_ERR_SUCCESS = 0,		// No error.
+            FPDF_ERR_UNKNOWN = 1,		// Unknown error.
+            FPDF_ERR_FILE = 2,		// File not found or could not be opened.
+            FPDF_ERR_FORMAT = 3,		// File not in PDF format or corrupted.
+            FPDF_ERR_PASSWORD = 4,		// Password required or incorrect password.
+            FPDF_ERR_SECURITY = 5,		// Unsupported security scheme.
+            FPDF_ERR_PAGE = 6		// Page not found or content error.
         }
 
         #region Save/Edit Structs and Flags
