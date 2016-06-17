@@ -52,12 +52,17 @@ namespace PdfiumViewer
             {
                 value = Math.Min(Math.Max(value, ZoomMin), ZoomMax);
 
-                _zoom = value;
-
-                OnZoomChanged(EventArgs.Empty);
-
-                Invalidate();
+                SetZoom(value, null);
             }
+        }
+
+        protected virtual void SetZoom(double value, Point? focus)
+        {
+            _zoom = value;
+
+            OnZoomChanged(EventArgs.Empty);
+
+            Invalidate();
         }
 
         [DefaultValue(DefaultZoomFactor)]
@@ -92,33 +97,16 @@ namespace PdfiumViewer
         {
             if ((ModifierKeys & Keys.Control) != 0)
             {
-                var bounds = GetDocumentBounds();
-
-                var location = new Point(
-                    e.Location.X - bounds.X,
-                    e.Location.Y - bounds.Y
-                );
-
-                double oldScale = _zoom;
+                double zoom = _zoom;
 
                 if (e.Delta > 0)
-                    ZoomIn();
+                    zoom *= ZoomFactor;
                 else
-                    ZoomOut();
+                    zoom /= ZoomFactor;
 
-                var newLocation = new Point(
-                    (int)(location.X * (_zoom / oldScale)),
-                    (int)(location.Y * (_zoom / oldScale))
-                );
+                zoom = Math.Min(Math.Max(zoom, ZoomMin), ZoomMax);
 
-                SetDisplayRectLocation(
-                    new Point(
-                        DisplayRectangle.Left - (newLocation.X - location.X),
-                        DisplayRectangle.Top - (newLocation.Y - location.Y)
-                    ),
-                    false
-                );
-
+                SetZoom(zoom, e.Location);
             }
             else
             {

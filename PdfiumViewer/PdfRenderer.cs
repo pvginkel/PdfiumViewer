@@ -590,6 +590,49 @@ namespace PdfiumViewer
             }
         }
 
+        protected override void SetZoom(double zoom, Point? focus)
+        {
+            Point location;
+
+            if (focus.HasValue)
+            {
+                var bounds = GetDocumentBounds();
+
+                location = new Point(
+                    focus.Value.X - bounds.X,
+                    focus.Value.Y - bounds.Y
+                );
+            }
+            else
+            {
+                var bounds = _pageCacheValid
+                    ? _pageCache[Page].Bounds
+                    : GetDocumentBounds();
+
+                location = new Point(
+                    bounds.X,
+                    bounds.Y
+                );
+            }
+
+            double oldScale = Zoom;
+
+            base.SetZoom(zoom, null);
+
+            var newLocation = new Point(
+                (int)(location.X * (zoom / oldScale)),
+                (int)(location.Y * (zoom / oldScale))
+            );
+
+            SetDisplayRectLocation(
+                new Point(
+                    DisplayRectangle.Left - (newLocation.X - location.X),
+                    DisplayRectangle.Top - (newLocation.Y - location.Y)
+                ),
+                false
+            );
+        }
+
         /// <summary>
         /// Releases the unmanaged resources used by the <see cref="T:System.Windows.Forms.Control"/> and its child controls and optionally releases the managed resources.
         /// </summary>
