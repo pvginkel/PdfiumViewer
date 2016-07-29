@@ -81,6 +81,15 @@ namespace PdfiumViewer
             }
         }
 
+        public Rectangle GetOuterBounds(int page)
+        {
+            if (_document == null || !_pageCacheValid)
+                return Rectangle.Empty;
+
+            page = Math.Min(Math.Max(page, 0), _document.PageCount - 1);
+            return _pageCache[page].OuterBounds;
+        }
+
         /// <summary>
         /// Gets or sets the way the document should be zoomed initially.
         /// </summary>
@@ -433,7 +442,7 @@ namespace PdfiumViewer
         {
             int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
             int width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
-            
+
             var center = new Point(
                 DisplayRectangle.Width / 2,
                 DisplayRectangle.Height / 2
@@ -442,7 +451,8 @@ namespace PdfiumViewer
             if (
                 DisplayRectangle.Width > ClientSize.Width ||
                 DisplayRectangle.Height > ClientSize.Height
-            ) {
+            )
+            {
                 center.X += DisplayRectangle.Left;
                 center.Y += DisplayRectangle.Top;
             }
