@@ -415,6 +415,11 @@ namespace PdfiumViewer
             _pageSizes[pageNumber] = _file.GetPDFDocInfo(pageNumber);
         }
 
+        public PdfInformation GetInformation()
+        {
+            return _file.GetInformation();
+        }
+
         public void Dispose()
         {
             Dispose(true);

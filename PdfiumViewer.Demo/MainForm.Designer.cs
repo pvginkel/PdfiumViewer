@@ -52,6 +52,7 @@ namespace PdfiumViewer.Demo
             this.rotate90ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rotate180ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rotate270ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this._page = new System.Windows.Forms.ToolStripTextBox();
@@ -75,6 +76,7 @@ namespace PdfiumViewer.Demo
             this._showToolbar = new System.Windows.Forms.ToolStripButton();
             this._showBookmarks = new System.Windows.Forms.ToolStripButton();
             this.pdfViewer1 = new PdfiumViewer.PdfViewer();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -144,7 +146,9 @@ namespace PdfiumViewer.Demo
             this.shrinkToMarginsWhenPrintingToolStripMenuItem,
             this.toolStripMenuItem4,
             this.deleteCurrentPageToolStripMenuItem,
-            this.rotateCurrentPageToolStripMenuItem});
+            this.rotateCurrentPageToolStripMenuItem,
+            this.toolStripSeparator7,
+            this.informationToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -201,30 +205,37 @@ namespace PdfiumViewer.Demo
             // rotate0ToolStripMenuItem
             // 
             this.rotate0ToolStripMenuItem.Name = "rotate0ToolStripMenuItem";
-            this.rotate0ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate0ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.rotate0ToolStripMenuItem.Text = "Rotate 0°";
             this.rotate0ToolStripMenuItem.Click += new System.EventHandler(this.rotate0ToolStripMenuItem_Click);
             // 
             // rotate90ToolStripMenuItem
             // 
             this.rotate90ToolStripMenuItem.Name = "rotate90ToolStripMenuItem";
-            this.rotate90ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate90ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.rotate90ToolStripMenuItem.Text = "Rotate 90°";
             this.rotate90ToolStripMenuItem.Click += new System.EventHandler(this.rotate90ToolStripMenuItem_Click);
             // 
             // rotate180ToolStripMenuItem
             // 
             this.rotate180ToolStripMenuItem.Name = "rotate180ToolStripMenuItem";
-            this.rotate180ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate180ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.rotate180ToolStripMenuItem.Text = "Rotate 180°";
             this.rotate180ToolStripMenuItem.Click += new System.EventHandler(this.rotate180ToolStripMenuItem_Click);
             // 
             // rotate270ToolStripMenuItem
             // 
             this.rotate270ToolStripMenuItem.Name = "rotate270ToolStripMenuItem";
-            this.rotate270ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rotate270ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.rotate270ToolStripMenuItem.Text = "Rotate 270°";
             this.rotate270ToolStripMenuItem.Click += new System.EventHandler(this.rotate270ToolStripMenuItem_Click);
+            // 
+            // informationToolStripMenuItem
+            // 
+            this.informationToolStripMenuItem.Name = "informationToolStripMenuItem";
+            this.informationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.informationToolStripMenuItem.Text = "Information";
+            this.informationToolStripMenuItem.Click += new System.EventHandler(this.informationToolStripMenuItem_Click);
             // 
             // toolStrip1
             // 
@@ -430,6 +441,11 @@ namespace PdfiumViewer.Demo
             this.pdfViewer1.Size = new System.Drawing.Size(1128, 546);
             this.pdfViewer1.TabIndex = 0;
             // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(241, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -495,6 +511,8 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripMenuItem rotate90ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rotate180ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rotate270ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem informationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
     }
 }
 
