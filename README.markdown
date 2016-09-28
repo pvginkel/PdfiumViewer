@@ -20,7 +20,14 @@ PdfiumViewer provides a number of components to work with PDF files:
 ## Compatibility
 
 The PdfiumViewer library has been tested with Windows XP and Windows 8, and
-is fully compatible with both. 
+is fully compatible with both. However, do not that the standard DLL's won't
+work on Window XP. To build for Windows XP, you need:
+
+* The DLL's from the directory `Libraries\Pdfium\Without V8`;
+* Also, you need to distribute a recent version of `dbghelp.dll`. These are
+  also located in the `Libraries\Pdfium\Without V8` directory. Note that
+  these are not part of the standard distribution and won't be loaded
+  automatically.
 
 ## Using the library
 
@@ -37,10 +44,14 @@ remove the DLL that won't be used. You can leave this file in the `x86` or `x64`
 directory, or move it to the root of your project. PdfiumViewer will find the DLL
 in both cases.
 
-When building your project, the `pdfiumdll` library(s) must be placed next to
+When building your project, the `pdfium.dll` library(s) must be placed next to
 your application, either in the root or the `x86` or `x64` sub directory.
 The easiest way to accomplish this is by changing the properties of that file,
 changing the Copy to Output Directory setting to Copy always.
+
+Note that in the directory `Libraries\Pdfium\Without V8`, there are versions
+of the Pdfium DLL's without V8 support. These are a lot smaller and work on
+Windows XP. See Compatibility above for instructions on how to use these.
 
 ## Note on the `PdfViewer` control
 
