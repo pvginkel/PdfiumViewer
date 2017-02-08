@@ -378,6 +378,11 @@ namespace PdfiumViewer
             return _file.Search(text, matchCase, wholeWord, startPage, endPage);
         }
 
+        public string GetPDFText(int page)
+        {
+            return _file.GetPDFText(page);
+        }
+
         /// <summary>
         /// Creates a <see cref="PrintDocument"/> for the PDF document.
         /// </summary>

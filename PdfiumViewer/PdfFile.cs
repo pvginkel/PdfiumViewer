@@ -294,6 +294,22 @@ namespace PdfiumViewer
             return new PdfMatches(startPage, endPage, matches);
         }
 
+        public string GetPDFText(int page)
+        {
+            using (var pageData = new PageData(_document, _form, page))
+            {
+                int textLength, matchLength = 2 << 12;
+                byte[] result;
+                do
+                {
+                    matchLength = matchLength << 1;
+                    result = new byte[(matchLength + 1) * 2];
+                    textLength = NativeMethods.FPDFText_GetText(pageData.TextPage, -1, matchLength, result);
+                } while (textLength > matchLength);
+                return FPDFEncoding.GetString(result, 0, textLength * 2);
+            }
+        }
+
         public void DeletePage (int pageNumber)
         {
             NativeMethods.FPDFPage_Delete(_document, pageNumber);
