@@ -110,6 +110,15 @@ namespace PdfiumViewer
             }
         }
 
+        public Rectangle GetOuterBounds(int page)
+        {
+            if (_document == null || !_pageCacheValid)
+                return Rectangle.Empty;
+
+            page = Math.Min(Math.Max(page, 0), _document.PageCount - 1);
+            return _pageCache[page].OuterBounds;
+        }
+
         /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
