@@ -123,6 +123,52 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Converts client coordinates to PDF coordinates.
+        /// </summary>
+        /// <param name="location">Client coordinates to get the PDF location for.</param>
+        /// <returns>The location in a PDF page or null when the coordinates do not match a PDF page.</returns>
+        public PdfPoint PointToPdf(Point location)
+        {
+            if (_document == null)
+                return null;
+
+            var bounds = GetScrollClientArea();
+            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
+            int topOffset = VScroll ? DisplayRectangle.Y : 0;
+
+            for (int page = 0; page < _document.PageSizes.Count; page++)
+            {
+                var pageCache = _pageCache[page];
+                var rectangle = pageCache.OuterBounds;
+                rectangle.Offset(leftOffset, topOffset);
+
+                if (rectangle.Contains(location))
+                {
+                    var pageBounds = pageCache.Bounds;
+                    pageBounds.Offset(leftOffset, topOffset);
+
+                    if (pageBounds.Contains(location))
+                    {
+                        var size = TranslateSize(_document.PageSizes[page]);
+                        location = new Point(location.X - pageBounds.Left, location.Y - pageBounds.Top);
+
+                        var translated = new Point(
+                            (int)(location.X * (size.Width / pageBounds.Width)),
+                            (int)(location.Y * (size.Height / pageBounds.Height))
+                        );
+
+                        return new PdfPoint(page, translated);
+                    }
+
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Raises the <see cref="E:System.Windows.Forms.Control.Layout"/> event.
         /// </summary>
         /// <param name="levent">A <see cref="T:System.Windows.Forms.LayoutEventArgs"/> that contains the event data. </param>

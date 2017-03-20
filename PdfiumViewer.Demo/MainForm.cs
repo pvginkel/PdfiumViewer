@@ -20,11 +20,39 @@ namespace PdfiumViewer.Demo
             pdfViewer1.Renderer.DisplayRectangleChanged += Renderer_DisplayRectangleChanged;
             pdfViewer1.Renderer.ZoomChanged += Renderer_ZoomChanged;
 
+            pdfViewer1.Renderer.MouseMove += Renderer_MouseMove;
+            pdfViewer1.Renderer.MouseLeave += Renderer_MouseLeave;
+            ShowPdfLocation(null);
+
             cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
 
             _zoom.Text = pdfViewer1.Renderer.Zoom.ToString();
 
             Disposed += (s, e) => pdfViewer1.Document?.Dispose();
+        }
+
+        private void Renderer_MouseLeave(object sender, EventArgs e)
+        {
+            ShowPdfLocation(null);
+        }
+
+        private void Renderer_MouseMove(object sender, MouseEventArgs e)
+        {
+            ShowPdfLocation(pdfViewer1.Renderer.PointToPdf(e.Location));
+        }
+
+        private void ShowPdfLocation(PdfPoint point)
+        {
+            if (point == null)
+            {
+                _pageToolStripLabel.Text = null;
+                _coordinatesToolStripLabel.Text = null;
+            }
+            else
+            {
+                _pageToolStripLabel.Text = point.Page.ToString();
+                _coordinatesToolStripLabel.Text = point.Location.X + "," + point.Location.Y;
+            }
         }
 
         void Renderer_ZoomChanged(object sender, EventArgs e)

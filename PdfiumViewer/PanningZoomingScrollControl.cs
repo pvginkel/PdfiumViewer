@@ -124,6 +124,8 @@ namespace PdfiumViewer
         /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data. </param>
         protected override void OnMouseWheel(MouseEventArgs e)
         {
+            base.OnMouseWheel(e);
+
             bool doZoom;
 
             switch (MouseWheelMode)
@@ -237,6 +239,8 @@ namespace PdfiumViewer
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            base.OnMouseDown(e);
+
             if (e.Button != MouseButtons.Left || !_canPan)
                 return;
 
@@ -247,6 +251,8 @@ namespace PdfiumViewer
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            base.OnMouseMove(e);
+
             if (!Capture)
                 return;
 
@@ -257,6 +263,8 @@ namespace PdfiumViewer
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
+            base.OnMouseUp(e);
+
             Capture = false;
         }
 
