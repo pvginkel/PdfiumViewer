@@ -712,48 +712,48 @@ namespace PdfiumViewer
 
             #region Save/Edit APIs
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDF_ImportPages", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern bool FPDF_ImportPages(IntPtr destDoc, IntPtr srcDoc, [MarshalAs(UnmanagedType.LPStr)]string pageRange, int index);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDF_SaveAsCopy", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern bool FPDF_SaveAsCopy(IntPtr doc,
                 [MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEWRITE writer,
                 [MarshalAs(UnmanagedType.I4)]FPDF_SAVE_FLAGS flag);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDF_SaveWithVersion", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern bool FPDF_SaveWithVersion(IntPtr doc,
                 [MarshalAs(UnmanagedType.LPStruct)]FPDF_FILEWRITE writer,
                 [MarshalAs(UnmanagedType.I4)]FPDF_SAVE_FLAGS flags,
                 int fileVersion);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_New", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern IntPtr FPDFPage_New(IntPtr doc, int index, double width, double height);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_Delete", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern void FPDFPage_Delete(IntPtr doc, int index);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_GetRotation", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern int FPDFPage_GetRotation(IntPtr page);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_SetRotation", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern void FPDFPage_SetRotation(IntPtr page, int rotate);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDF_CreateNewDocument", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern IntPtr FPDF_CreateNewDocument();
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPageObj_NewImgeObj", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern IntPtr FPDFPageObj_NewImgeObj(IntPtr document);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFImageObj_SetBitmap", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern bool FPDFImageObj_SetBitmap(IntPtr pages, int count, IntPtr imageObject, IntPtr bitmap);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPageObj_Transform", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern void FPDFPageObj_Transform(IntPtr page, double a, double b, double c, double d, double e, double f);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_InsertObject", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern void FPDFPage_InsertObject(IntPtr page, IntPtr pageObject);
 
-            [DllImport("pdfium.dll", EntryPoint = "FPDFPage_GenerateContent", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("pdfium.dll")]
             public static extern bool FPDFPage_GenerateContent(IntPtr page);
 
             #endregion
