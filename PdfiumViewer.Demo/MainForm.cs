@@ -349,6 +349,23 @@ namespace PdfiumViewer.Demo
                     pdfViewer1.Document = form.Document;
                 }
             }
+		}
+			
+        private void informationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PdfInformation info = pdfViewer1.Document.GetInformation();
+            StringBuilder sz = new StringBuilder();
+            sz.AppendLine($"Author: {info.Author}");
+            sz.AppendLine($"Creator: {info.Creator}");
+            sz.AppendLine($"Keywords: {info.Keywords}");
+            sz.AppendLine($"Producer: {info.Producer}");
+            sz.AppendLine($"Subject: {info.Subject}");
+            sz.AppendLine($"Title: {info.Title}");
+            sz.AppendLine($"Create Date: {info.CreationDate}");
+            sz.AppendLine($"Modified Date: {info.ModificationDate}");
+
+            MessageBox.Show(sz.ToString(), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
         }
     }
 }

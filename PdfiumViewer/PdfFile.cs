@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PdfiumViewer
 {
@@ -308,6 +309,96 @@ namespace PdfiumViewer
             {
                 NativeMethods.FPDFPage_SetRotation(pageData.Page, rotation);
             }
+        }
+
+        public PdfInformation GetInformation()
+        {
+            var pdfInfo = new PdfInformation();
+
+            pdfInfo.Creator = GetMetaText("Creator");
+            pdfInfo.Title = GetMetaText("Title");
+            pdfInfo.Author = GetMetaText("Author");
+            pdfInfo.Subject = GetMetaText("Subject");
+            pdfInfo.Keywords = GetMetaText("Keywords");
+            pdfInfo.Producer = GetMetaText("Producer");
+            pdfInfo.CreationDate = GetMetaTextAsDate("CreationDate");
+            pdfInfo.ModificationDate = GetMetaTextAsDate("ModDate");
+
+            return pdfInfo;
+        }
+
+        private string GetMetaText(string tag)
+        {
+            uint length = NativeMethods.FPDF_GetMetaText(_document, tag, null, 0);
+
+            if (length == 0)
+                return string.Empty;
+
+            byte[] buffer = new byte[length];
+            NativeMethods.FPDF_GetMetaText(_document, tag, buffer, length);
+
+            // The FPDF_GetMetaText method will have a \0 at the end of the string. Strip it.
+
+            string result = Encoding.Unicode.GetString(buffer);
+            if (result.Length > 0 && result[result.Length - 1] == '\0')
+                result = result.Substring(0, result.Length - 1);
+
+            return result;
+        }
+
+        public DateTime? GetMetaTextAsDate(string tag)
+        {
+            string dt = GetMetaText(tag);
+
+            if (string.IsNullOrEmpty(dt))
+                return null;
+
+            Regex dtRegex =
+                new Regex(
+                    @"(?:D:)(?<year>\d\d\d\d)(?<month>\d\d)(?<day>\d\d)(?<hour>\d\d)(?<minute>\d\d)(?<second>\d\d)(?<tz_offset>[+-zZ])?(?<tz_hour>\d\d)?'?(?<tz_minute>\d\d)?'?");
+
+            Match match = dtRegex.Match(dt);
+
+            if (match.Success)
+            {
+                var year = match.Groups["year"].Value;
+                var month = match.Groups["month"].Value;
+                var day = match.Groups["day"].Value;
+                var hour = match.Groups["hour"].Value;
+                var minute = match.Groups["minute"].Value;
+                var second = match.Groups["second"].Value;
+                var tzOffset = match.Groups["tz_offset"]?.Value;
+                var tzHour = match.Groups["tz_hour"]?.Value;
+                var tzMinute = match.Groups["tz_minute"]?.Value;
+
+                string formattedDate = $"{year}-{month}-{day}T{hour}:{minute}:{second}.0000000";
+
+                if (!string.IsNullOrEmpty(tzOffset))
+                {
+                    switch (tzOffset)
+                    {
+                        case "Z":
+                        case "z":
+                            formattedDate += "+0";
+                            break;
+                        case "+":
+                        case "-":
+                            formattedDate += $"{tzOffset}{tzHour}:{tzMinute}";
+                            break;
+                    }
+                }
+
+                try
+                {
+                    return DateTime.Parse(formattedDate);
+                }
+                catch (FormatException)
+                {
+                    return null;
+                }
+            }
+
+            return null;
         }
 
         public void Dispose()

@@ -123,5 +123,6 @@ namespace PdfiumViewer
         PdfPageLinks GetPageLinks(int pageNumber, Size pageSize);
         void DeletePage(int pageNumber);
         void RotatePage(int pageNumber, PdfRotation rotation);
+        PdfInformation GetInformation();
     }
 }

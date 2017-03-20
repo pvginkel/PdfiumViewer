@@ -429,6 +429,14 @@ namespace PdfiumViewer
             }
         }
 
+        public static uint FPDF_GetMetaText(IntPtr document, string tag, byte[] buffer, uint buflen)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDF_GetMetaText(document, tag, buffer, buflen);
+            }
+        }
+
         #region Save / Edit Methods
 
         public static void FPDFPage_SetRotation(IntPtr page, PdfRotation rotation)
@@ -709,6 +717,9 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern uint FPDF_GetLastError();
+
+            [DllImport("pdfium.dll")]
+            public static extern uint FPDF_GetMetaText(IntPtr document, string tag, byte[] buffer, uint buflen);
 
             #region Save/Edit APIs
 
