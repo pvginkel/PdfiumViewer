@@ -50,7 +50,7 @@ namespace PdfiumViewer.Demo
             }
             else
             {
-                _pageToolStripLabel.Text = point.Page.ToString();
+                _pageToolStripLabel.Text = (point.Page + 1).ToString();
                 _coordinatesToolStripLabel.Text = point.Location.X + "," + point.Location.Y;
             }
         }

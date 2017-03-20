@@ -175,7 +175,7 @@ namespace PdfiumViewer
 
                         var translated = new Point(
                             (int)(location.X * (size.Width / pageBounds.Width)),
-                            (int)(location.Y * (size.Height / pageBounds.Height))
+                            (int)((pageBounds.Height - location.Y) * (size.Height / pageBounds.Height))
                         );
 
                         return new PdfPoint(page, translated);
