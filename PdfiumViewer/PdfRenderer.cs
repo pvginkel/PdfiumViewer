@@ -585,22 +585,47 @@ namespace PdfiumViewer
 
             if (dx <= SystemInformation.DragSize.Width && dy <= SystemInformation.DragSize.Height)
             {
-                if (link.TargetPage.HasValue)
-                    Page = link.TargetPage.Value;
+                var linkClickEventArgs = new LinkClickEventArgs(link);
+                HandleLinkClick(linkClickEventArgs);
+            }
+        }
 
-                if (link.Uri != null)
+        private void HandleLinkClick(LinkClickEventArgs e)
+        {
+            OnLinkClick(e);
+
+            if (e.Handled)
+                return;
+
+            if (e.Link.TargetPage.HasValue)
+                Page = e.Link.TargetPage.Value;
+
+            if (e.Link.Uri != null)
+            {
+                try
                 {
-                    try
-                    {
-                        Process.Start(link.Uri);
-                    }
-                    catch
-                    {
-                        // Some browsers (Firefox) will cause an exception to
-                        // be thrown (when it auto-updates).
-                    }
+                    Process.Start(e.Link.Uri);
+                }
+                catch
+                {
+                    // Some browsers (Firefox) will cause an exception to
+                    // be thrown (when it auto-updates).
                 }
             }
+        }
+
+        /// <summary>
+        /// Occurs when a link in the pdf document is clicked.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when a link in the pdf document is clicked.")]
+        public event LinkClickEventHandler LinkClick;
+
+        protected virtual void OnLinkClick(LinkClickEventArgs e)
+        {
+            var handler = LinkClick;
+            if (handler != null)
+                handler(this, e);
         }
 
         /// <summary>

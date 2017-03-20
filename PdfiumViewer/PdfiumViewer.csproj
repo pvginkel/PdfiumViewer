@@ -51,6 +51,7 @@
     </Compile>
     <Compile Include="HitTest.cs" />
     <Compile Include="IPdfDocument.cs" />
+    <Compile Include="LinkClickEventHandler.cs" />
     <Compile Include="MouseWheelMode.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeMethods.Pdfium.cs" />
