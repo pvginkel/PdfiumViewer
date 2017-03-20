@@ -291,5 +291,25 @@ namespace PdfiumViewer.Demo
             pdfViewer1.Document = document;
             pdfViewer1.Renderer.Page = page;
         }
+
+        private void _search_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+
+                var matches = pdfViewer1.Document.Search(_search.Text, false, false);
+                if (matches.Items.Count > 0)
+                {
+                    MessageBox.Show(this, String.Format("{0} matches found.", matches.Items.Count));
+
+                    pdfViewer1.Renderer.Page = matches.Items[0].Page;
+                }
+                else
+                {
+                    MessageBox.Show(this, "No matches found");
+                }
+            }
+        }
     }
 }

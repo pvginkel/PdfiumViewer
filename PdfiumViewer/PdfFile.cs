@@ -250,6 +250,9 @@ namespace PdfiumViewer
         {
             var matches = new List<PdfMatch>();
 
+            if (String.IsNullOrEmpty(text))
+                return new PdfMatches(startPage, endPage, matches);
+
             for (int page = startPage; page <= endPage; page++)
             {
                 using (var pageData = new PageData(_document, _form, page))
