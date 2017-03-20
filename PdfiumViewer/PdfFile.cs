@@ -281,9 +281,12 @@ namespace PdfiumViewer
                             double left, right, bottom, top;
                             NativeMethods.FPDFText_GetCharBox(pageData.TextPage, index, out left, out right, out bottom, out top);
 
+                            var bounds = GetTextBounds(pageData.TextPage, index, matchLength);
+
                             matches.Add(new PdfMatch(
-                                new PointF((float)left, (float)top),
+                                new PointF((float)left, (float)bottom),
                                 match,
+                                bounds,
                                 page
                             ));
                         }
@@ -296,6 +299,65 @@ namespace PdfiumViewer
             }
 
             return new PdfMatches(startPage, endPage, matches);
+        }
+
+        private List<RectangleF> GetTextBounds(IntPtr textPage, int index, int matchLength)
+        {
+            var result = new List<RectangleF>();
+            RectangleF? lastBounds = null;
+
+            for (int i = 0; i < matchLength; i++)
+            {
+                var bounds = GetBounds(textPage, index + i);
+
+                if (bounds.Width == 0 || bounds.Height == 0)
+                    continue;
+
+                if (
+                    lastBounds.HasValue &&
+                    AreClose(lastBounds.Value.Right, bounds.Left) &&
+                    AreClose(lastBounds.Value.Top, bounds.Top) &&
+                    AreClose(lastBounds.Value.Bottom, bounds.Bottom)
+                )
+                {
+                    float top = Math.Min(lastBounds.Value.Top, bounds.Top);
+                    float bottom = Math.Max(lastBounds.Value.Bottom, bounds.Bottom);
+
+                    lastBounds = new RectangleF(
+                        lastBounds.Value.Left,
+                        top,
+                        bounds.Right - lastBounds.Value.Left,
+                        bottom - top
+                    );
+
+                    result[result.Count - 1] = lastBounds.Value;
+                }
+                else
+                {
+                    lastBounds = bounds;
+                    result.Add(bounds);
+                }
+            }
+
+            return result;
+        }
+
+        private bool AreClose(float p1, float p2)
+        {
+            return Math.Abs(p1 - p2) < 4f;
+        }
+
+        private RectangleF GetBounds(IntPtr textPage, int index)
+        {
+            double left, right, bottom, top;
+            NativeMethods.FPDFText_GetCharBox(textPage, index, out left, out right, out bottom, out top);
+
+            return new RectangleF(
+                (float)left,
+                (float)bottom,
+                (float)(right - left),
+                (float)(top - bottom)
+            );
         }
 
         public string GetPDFText(int page)

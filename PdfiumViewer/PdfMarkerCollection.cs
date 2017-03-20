@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+
+namespace PdfiumViewer
+{
+    public class PdfMarkerCollection : Collection<PdfMarker>
+    {
+        public event EventHandler CollectionChanged;
+
+        protected override void ClearItems()
+        {
+            base.ClearItems();
+
+            OnCollectionChanged(EventArgs.Empty);
+        }
+
+        protected override void InsertItem(int index, PdfMarker item)
+        {
+            base.InsertItem(index, item);
+
+            OnCollectionChanged(EventArgs.Empty);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            base.RemoveItem(index);
+
+            OnCollectionChanged(EventArgs.Empty);
+        }
+
+        protected override void SetItem(int index, PdfMarker item)
+        {
+            base.SetItem(index, item);
+
+            OnCollectionChanged(EventArgs.Empty);
+        }
+
+        protected virtual void OnCollectionChanged(EventArgs e)
+        {
+            CollectionChanged?.Invoke(this, e);
+        }
+    }
+}

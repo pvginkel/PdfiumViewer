@@ -32,6 +32,7 @@ namespace PdfiumViewer
         private PdfPageLink _cachedLink;
         private DragState _dragState;
         private PdfRotation _rotation;
+        private List<PdfMarker>[] _markers;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -119,6 +120,8 @@ namespace PdfiumViewer
             }
         }
 
+        public PdfMarkerCollection Markers { get; }
+
         /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
@@ -129,6 +132,14 @@ namespace PdfiumViewer
             TabStop = true;
 
             _toolTip = new ToolTip();
+
+            Markers = new PdfMarkerCollection();
+            Markers.CollectionChanged += Markers_CollectionChanged;
+        }
+
+        private void Markers_CollectionChanged(object sender, EventArgs e)
+        {
+            RedrawMarkers();
         }
 
         /// <summary>
@@ -394,6 +405,8 @@ namespace PdfiumViewer
             if (_document == null || _suspendPaintCount > 0)
                 return;
 
+            EnsureMarkers();
+
             var bounds = GetScrollClientArea();
             int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
             int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
@@ -428,6 +441,8 @@ namespace PdfiumViewer
                     DrawPageImage(e.Graphics, page, pageBounds);
 
                     _shadeBorder.Draw(e.Graphics, pageBounds);
+
+                    DrawMarkers(e.Graphics, page, pageBounds);
                 }
             }
 
@@ -711,6 +726,71 @@ namespace PdfiumViewer
                 ),
                 false
             );
+        }
+
+        private void RedrawMarkers()
+        {
+            _markers = null;
+
+            Invalidate();
+        }
+
+        private void EnsureMarkers()
+        {
+            if (_markers != null)
+                return;
+
+            _markers = new List<PdfMarker>[_pageCache.Count];
+
+            foreach (var marker in Markers)
+            {
+                if (marker.Page < 0 || marker.Page >= _markers.Length)
+                    continue;
+
+                if (_markers[marker.Page] == null)
+                    _markers[marker.Page] = new List<PdfMarker>();
+
+                _markers[marker.Page].Add(marker);
+            }
+        }
+
+        private void DrawMarkers(Graphics graphics, int page, Rectangle pageBounds)
+        {
+            var markers = _markers[page];
+            if (markers == null)
+                return;
+
+            foreach (var marker in markers)
+            {
+                DrawMarker(graphics, marker, page, pageBounds);
+            }
+        }
+
+        private void DrawMarker(Graphics graphics, PdfMarker marker, int page, Rectangle pageBounds)
+        {
+            var size = TranslateSize(_document.PageSizes[page]);
+            double scaleX = pageBounds.Width / size.Width;
+            double scaleY = pageBounds.Height / size.Height;
+
+            var bounds = new RectangleF(
+                (float)(pageBounds.X + marker.Bounds.X * scaleX),
+                (float)(pageBounds.Y + (size.Height - marker.Bounds.Y - marker.Bounds.Height) * scaleY),
+                (float)(marker.Bounds.Width * scaleX),
+                (float)(marker.Bounds.Height * scaleY)
+            );
+
+            using (var brush = new SolidBrush(marker.Color))
+            {
+                graphics.FillRectangle(brush, bounds);
+            }
+
+            if (marker.BorderWidth > 0)
+            {
+                using (var pen = new Pen(marker.BorderColor, marker.BorderWidth))
+                {
+                    graphics.DrawRectangle(pen, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+                }
+            }
         }
 
         /// <summary>

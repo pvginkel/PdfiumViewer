@@ -173,6 +173,7 @@ namespace PdfiumViewer.Demo
                 matches.Add(new PdfMatch(
                     match.Location,
                     match.Text,
+                    match.TextBounds,
                     match.Page + _startPage
                 ));
             }

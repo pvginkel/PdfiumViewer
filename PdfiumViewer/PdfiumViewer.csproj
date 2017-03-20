@@ -72,6 +72,8 @@
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
+    <Compile Include="PdfMarker.cs" />
+    <Compile Include="PdfMarkerCollection.cs" />
     <Compile Include="PdfPoint.cs" />
     <Compile Include="PdfInformation.cs" />
     <Compile Include="StreamManager.cs" />

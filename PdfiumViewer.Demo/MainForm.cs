@@ -326,9 +326,25 @@ namespace PdfiumViewer.Demo
             {
                 e.Handled = true;
 
+                pdfViewer1.Renderer.Markers.Clear();
+
                 var matches = pdfViewer1.Document.Search(_search.Text, false, false);
                 if (matches.Items.Count > 0)
                 {
+                    foreach (var match in matches.Items)
+                    {
+                        foreach (var bounds in match.TextBounds)
+                        {
+                            bounds.Inflate(0.5f, 0.5f);
+
+                            pdfViewer1.Renderer.Markers.Add(new PdfMarker(
+                                match.Page,
+                                bounds,
+                                Color.FromArgb(128, Color.Yellow)
+                            ));
+                        }
+                    }
+
                     MessageBox.Show(this, String.Format("{0} matches found.", matches.Items.Count));
 
                     pdfViewer1.Renderer.Page = matches.Items[0].Page;
