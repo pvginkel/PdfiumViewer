@@ -233,6 +233,11 @@ namespace PdfiumViewer.Demo
             return _document.GetInformation();
         }
 
+        public string GetPDFText(int page)
+        {
+            return _document.GetPDFText(TranslatePage(page));
+        }
+
         private int TranslatePage(int page)
         {
             if (page < 0 || page >= PageCount)
