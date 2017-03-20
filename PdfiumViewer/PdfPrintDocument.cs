@@ -8,7 +8,7 @@ namespace PdfiumViewer
 {
     internal class PdfPrintDocument : PrintDocument
     {
-        private readonly PdfDocument _document;
+        private readonly IPdfDocument _document;
         private readonly PdfPrintMode _printMode;
         private int _currentPage;
 
@@ -30,7 +30,7 @@ namespace PdfiumViewer
                 ev(this, e);
         }
 
-        public PdfPrintDocument(PdfDocument document, PdfPrintMode printMode)
+        public PdfPrintDocument(IPdfDocument document, PdfPrintMode printMode)
         {
             if (document == null)
                 throw new ArgumentNullException("document");

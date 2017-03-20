@@ -13,7 +13,7 @@ namespace PdfiumViewer
 
         public int Page { get; private set; }
 
-        internal PdfMatch(PointF location, string text, int page)
+        public PdfMatch(PointF location, string text, int page)
         {
             Location = location;
             Text = text;

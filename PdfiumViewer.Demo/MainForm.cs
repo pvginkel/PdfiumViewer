@@ -339,5 +339,16 @@ namespace PdfiumViewer.Demo
                 }
             }
         }
+
+        private void showRangeOfPagesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new PageRangeForm(pdfViewer1.Document))
+            {
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    pdfViewer1.Document = form.Document;
+                }
+            }
+        }
     }
 }

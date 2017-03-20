@@ -22,7 +22,7 @@ namespace PdfiumViewer
         private double _scaleFactor;
         private ShadeBorder _shadeBorder = new ShadeBorder();
         private int _suspendPaintCount;
-        private PdfDocument _document;
+        private IPdfDocument _document;
         private ToolTip _toolTip;
         private PdfViewerZoomMode _zoomMode;
         private bool _pageCacheValid;
@@ -187,10 +187,10 @@ namespace PdfiumViewer
         }
 
         /// <summary>
-        /// Load a <see cref="PdfDocument"/> into the control.
+        /// Load a <see cref="IPdfDocument"/> into the control.
         /// </summary>
         /// <param name="document">Document to load.</param>
-        public void Load(PdfDocument document)
+        public void Load(IPdfDocument document)
         {
             if (document == null)
                 throw new ArgumentNullException("document");

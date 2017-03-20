@@ -14,7 +14,7 @@ namespace PdfiumViewer
     /// <summary>
     /// Provides functionality to render a PDF document.
     /// </summary>
-    public class PdfDocument : IDisposable
+    public class PdfDocument : IPdfDocument
     {
         private bool _disposed;
         private PdfFile _file;

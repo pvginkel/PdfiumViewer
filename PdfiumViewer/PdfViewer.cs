@@ -11,14 +11,14 @@ namespace PdfiumViewer
     /// </summary>
     public partial class PdfViewer : UserControl
     {
-        private PdfDocument _document;
+        private IPdfDocument _document;
         private bool _showBookmarks;
 
         /// <summary>
         /// Gets or sets the PDF document.
         /// </summary>
         [DefaultValue(null)]
-        public PdfDocument Document
+        public IPdfDocument Document
         {
             get { return _document; }
             set

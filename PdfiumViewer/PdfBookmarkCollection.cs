@@ -8,8 +8,8 @@ namespace PdfiumViewer
 {
     public class PdfBookmark
     {
-        public string Title { get; internal set; }
-        public int PageIndex { get; internal set; }
+        public string Title { get; set; }
+        public int PageIndex { get; set; }
         //public IntPtr Action { get; private set; }
         //public ulong ActionType { get; private set; }
 

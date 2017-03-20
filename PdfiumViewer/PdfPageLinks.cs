@@ -15,7 +15,7 @@ namespace PdfiumViewer
         /// </summary>
         public IList<PdfPageLink> Links { get; private set; }
 
-        internal PdfPageLinks(IList<PdfPageLink> links)
+        public PdfPageLinks(IList<PdfPageLink> links)
         {
             if (links == null)
                 throw new ArgumentNullException("links");
