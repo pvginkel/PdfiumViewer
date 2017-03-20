@@ -72,6 +72,7 @@
     <Compile Include="PdfDocument.cs" />
     <Compile Include="PdfFile.cs" />
     <Compile Include="PdfPoint.cs" />
+    <Compile Include="PdfInformation.cs" />
     <Compile Include="StreamManager.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />
