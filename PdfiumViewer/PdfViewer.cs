@@ -86,6 +86,20 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Occurs when a link in the pdf document is clicked.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when a link in the pdf document is clicked.")]
+        public event LinkClickEventHandler LinkClick;
+
+        protected virtual void OnLinkClick(LinkClickEventArgs e)
+        {
+            var handler = LinkClick;
+            if (handler != null)
+                handler(this, e);
+        }
+
         private void UpdateBookmarks()
         {
             bool visible = _showBookmarks && _document != null && _document.Bookmarks.Count > 0;
@@ -203,6 +217,11 @@ namespace PdfiumViewer
         private void _bookmarks_AfterSelect(object sender, TreeViewEventArgs e)
         {
             _renderer.Page = ((PdfBookmark)e.Node.Tag).PageIndex;
+        }
+
+        private void _renderer_LinkClick(object sender, LinkClickEventArgs e)
+        {
+            OnLinkClick(e);
         }
     }
 }
