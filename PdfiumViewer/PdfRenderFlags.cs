@@ -45,6 +45,10 @@ namespace PdfiumViewer
         /// <summary>
         /// Render with a transparent background.
         /// </summary>
-        Transparent = 0x1000
+        Transparent = 0x1000,
+        /// <summary>
+        /// Correct height/width for DPI.
+        /// </summary>
+        CorrectFromDpi = 0x2000
     }
 }

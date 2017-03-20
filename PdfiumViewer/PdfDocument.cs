@@ -292,6 +292,12 @@ namespace PdfiumViewer
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
+            if ((flags & PdfRenderFlags.CorrectFromDpi) != 0)
+            {
+                width = width / 72 * (int)dpiX;
+                height = height / 72 * (int)dpiY;
+            }
+
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             bitmap.SetResolution(dpiX, dpiY);
 
