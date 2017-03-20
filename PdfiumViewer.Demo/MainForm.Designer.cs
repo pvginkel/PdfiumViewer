@@ -84,9 +84,10 @@ namespace PdfiumViewer.Demo
             this._pageToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this._coordinatesToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pdfViewer1 = new PdfiumViewer.PdfViewer();
+            this._getTextFromPage = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -281,7 +282,8 @@ namespace PdfiumViewer.Demo
             this._rotateRight,
             this.toolStripSeparator6,
             this._showToolbar,
-            this._showBookmarks});
+            this._showBookmarks,
+            this._getTextFromPage});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1128, 25);
@@ -508,14 +510,6 @@ namespace PdfiumViewer.Demo
             this._coordinatesToolStripLabel.Size = new System.Drawing.Size(77, 17);
             this._coordinatesToolStripLabel.Text = "(coordinates)";
             // 
-            // pdfViewer1
-            // 
-            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
-            this.pdfViewer1.Name = "pdfViewer1";
-            this.pdfViewer1.Size = new System.Drawing.Size(1128, 524);
-            this.pdfViewer1.TabIndex = 0;
-            // 
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
@@ -527,6 +521,25 @@ namespace PdfiumViewer.Demo
             this.informationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.informationToolStripMenuItem.Text = "Information";
             this.informationToolStripMenuItem.Click += new System.EventHandler(this.informationToolStripMenuItem_Click);
+            // 
+            // pdfViewer1
+            // 
+            this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
+            this.pdfViewer1.Name = "pdfViewer1";
+            this.pdfViewer1.Size = new System.Drawing.Size(1128, 524);
+            this.pdfViewer1.TabIndex = 0;
+            // 
+            // _getTextFromPage
+            // 
+            this._getTextFromPage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this._getTextFromPage.Image = ((System.Drawing.Image)(resources.GetObject("_getTextFromPage.Image")));
+            this._getTextFromPage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._getTextFromPage.Name = "_getTextFromPage";
+            this._getTextFromPage.Size = new System.Drawing.Size(53, 22);
+            this._getTextFromPage.Text = "Get Text";
+            this._getTextFromPage.ToolTipText = "Get Text From Current Page";
+            this._getTextFromPage.Click += new System.EventHandler(this._getTextFromPage_Click);
             // 
             // MainForm
             // 
@@ -608,6 +621,7 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripMenuItem showRangeOfPagesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
         private System.Windows.Forms.ToolStripMenuItem informationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton _getTextFromPage;
     }
 }
 

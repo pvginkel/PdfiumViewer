@@ -124,5 +124,6 @@ namespace PdfiumViewer
         void DeletePage(int pageNumber);
         void RotatePage(int pageNumber, PdfRotation rotation);
         PdfInformation GetInformation();
+        string GetPDFText(int page);
     }
 }
