@@ -355,14 +355,14 @@ namespace PdfiumViewer.Demo
         {
             PdfInformation info = pdfViewer1.Document.GetInformation();
             StringBuilder sz = new StringBuilder();
-            sz.Append($"Author: {info.Author}\n");
-            sz.Append($"Creator: {info.Creator}\n");
-            sz.Append($"Keywords: {info.Keywords}\n");
-            sz.Append($"Producer: {info.Producer}\n");
-            sz.Append($"Subject: {info.Subject}\n");
-            sz.Append($"Title: {info.Title}\n");
-            sz.Append($"Create Date: {info.CreationDate}\n");
-            sz.Append($"Modified Date: {info.ModificationDate}");
+            sz.AppendLine($"Author: {info.Author}");
+            sz.AppendLine($"Creator: {info.Creator}");
+            sz.AppendLine($"Keywords: {info.Keywords}");
+            sz.AppendLine($"Producer: {info.Producer}");
+            sz.AppendLine($"Subject: {info.Subject}");
+            sz.AppendLine($"Title: {info.Title}");
+            sz.AppendLine($"Create Date: {info.CreationDate}");
+            sz.AppendLine($"Modified Date: {info.ModificationDate}");
 
             MessageBox.Show(sz.ToString(), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

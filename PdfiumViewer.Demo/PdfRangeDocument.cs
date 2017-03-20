@@ -51,7 +51,7 @@ namespace PdfiumViewer.Demo
             get
             {
                 if (_bookmarks == null)
-                    return TranslateBookmarks(_document.Bookmarks);
+                    _bookmarks = TranslateBookmarks(_document.Bookmarks);
                 return _bookmarks;
             }
         }
@@ -226,6 +226,11 @@ namespace PdfiumViewer.Demo
         public void RotatePage(int pageNumber, PdfRotation rotation)
         {
             _document.RotatePage(TranslatePage(pageNumber), rotation);
+        }
+
+        public PdfInformation GetInformation()
+        {
+            return _document.GetInformation();
         }
 
         private int TranslatePage(int page)
