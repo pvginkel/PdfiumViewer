@@ -365,7 +365,16 @@ namespace PdfiumViewer.Demo
             sz.AppendLine($"Modified Date: {info.ModificationDate}");
 
             MessageBox.Show(sz.ToString(), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}	
 
+        private void _getTextFromPage_Click(object sender, EventArgs e)
+        {
+            int page = pdfViewer1.Renderer.Page;
+            string text = pdfViewer1.Document.GetPDFText(page);
+            string caption = string.Format("Page {0} contains {1} character(s):", page + 1, text.Length);
+
+            if (text.Length > 128) text = text.Substring(0, 125) + "...\n\n\n\n..." + text.Substring(text.Length - 125);
+            MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
