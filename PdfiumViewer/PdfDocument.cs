@@ -459,7 +459,17 @@ namespace PdfiumViewer
         /// <returns></returns>
         public PrintDocument CreatePrintDocument(PdfPrintMode printMode)
         {
-            return new PdfPrintDocument(this, printMode);
+            return CreatePrintDocument(new PdfPrintSettings(printMode, null));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="PrintDocument"/> for the PDF document.
+        /// </summary>
+        /// <param name="settings">The settings used to configure the print document.</param>
+        /// <returns></returns>
+        public PrintDocument CreatePrintDocument(PdfPrintSettings settings)
+        {
+            return new PdfPrintDocument(this, settings);
         }
 
         /// <summary>

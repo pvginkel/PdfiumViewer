@@ -69,6 +69,8 @@
       <DependentUpon>PasswordForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PdfBookmarkCollection.cs" />
+    <Compile Include="PdfPrintMultiplePages.cs" />
+    <Compile Include="PdfPrintSettings.cs" />
     <Compile Include="PdfRectangle.cs" />
     <Compile Include="PdfError.cs" />
     <Compile Include="PdfException.cs" />

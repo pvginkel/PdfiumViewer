@@ -150,6 +150,13 @@ namespace PdfiumViewer
         PrintDocument CreatePrintDocument(PdfPrintMode printMode);
 
         /// <summary>
+        /// Creates a <see cref="PrintDocument"/> for the PDF document.
+        /// </summary>
+        /// <param name="settings">The settings used to configure the print document.</param>
+        /// <returns></returns>
+        PrintDocument CreatePrintDocument(PdfPrintSettings settings);
+
+        /// <summary>
         /// Returns all links on the PDF page.
         /// </summary>
         /// <param name="page">The page to get the links for.</param>

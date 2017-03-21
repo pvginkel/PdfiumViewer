@@ -370,5 +370,13 @@ namespace PdfiumViewer.Demo
 
             _searchForm.Focus();
         }
+
+        private void printMultiplePagesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new PrintMultiplePagesForm(pdfViewer1))
+            {
+                form.ShowDialog(this);
+            }
+        }
     }
 }

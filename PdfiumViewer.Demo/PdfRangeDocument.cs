@@ -194,6 +194,11 @@ namespace PdfiumViewer.Demo
             return _document.CreatePrintDocument(printMode);
         }
 
+        public PrintDocument CreatePrintDocument(PdfPrintSettings settings)
+        {
+            return _document.CreatePrintDocument(settings);
+        }
+
         public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)
         {
             return TranslateLinks(_document.GetPageLinks(pageNumber + _startPage, pageSize));
