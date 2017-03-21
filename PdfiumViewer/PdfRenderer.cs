@@ -63,13 +63,22 @@ namespace PdfiumViewer
                 if (Document == null || !_pageCacheValid)
                     return 0;
 
-                int top = -DisplayRectangle.Top + (int)(ClientSize.Height * Zoom) / 2;
+                int top = -DisplayRectangle.Top;
+                int bottom = top + GetScrollClientArea().Height;
 
                 for (int page = 0; page < Document.PageSizes.Count; page++)
                 {
                     var pageCache = _pageCache[page].OuterBounds;
-                    if (top >= pageCache.Top && top < pageCache.Bottom)
+                    if (top - 10 < pageCache.Top)
+                    {
+                        // If more than 50% of the page is hidden, return the previous page.
+
+                        int hidden = pageCache.Bottom - bottom;
+                        if (hidden > 0 && (double)hidden / pageCache.Height > 0.5 && page > 0)
+                            return page - 1;
+
                         return page;
+                    }
                 }
 
                 return Document.PageCount - 1;
@@ -360,6 +369,8 @@ namespace PdfiumViewer
             }
 
             _documentScaleFactor = _maxHeight != 0 ? (double)_maxWidth / _maxHeight : 0D;
+
+            _markers = null;
 
             UpdateScrollbars();
 
