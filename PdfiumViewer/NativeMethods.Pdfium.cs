@@ -288,6 +288,14 @@ namespace PdfiumViewer
             }
         }
 
+        public static int FPDFText_CountChars(IntPtr page)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFText_CountChars(page);
+            }
+        }
+
         public static bool FPDFText_FindNext(IntPtr handle)
         {
             lock (LockString)
@@ -669,6 +677,9 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern void FPDFText_GetCharBox(IntPtr page, int index, out double left, out double right, out double bottom, out double top);
+
+            [DllImport("pdfium.dll")]
+            public static extern int FPDFText_CountChars(IntPtr page);
 
             [DllImport("pdfium.dll")]
             public static extern bool FPDFText_FindNext(IntPtr handle);

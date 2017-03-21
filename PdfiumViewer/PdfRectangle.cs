@@ -5,11 +5,11 @@ using System.Text;
 
 namespace PdfiumViewer
 {
-    public struct PdfPoint : IEquatable<PdfPoint>
+    public struct PdfRectangle : IEquatable<PdfRectangle>
     {
-        public static readonly PdfPoint Empty = new PdfPoint();
+        public static readonly PdfRectangle Empty = new PdfRectangle();
 
-        // _page is offset by 1 so that Empty returns an invalid point.
+        // _page is offset by 1 so that Empty returns an invalid rectangle.
         private readonly int _page;
 
         public int Page
@@ -17,47 +17,47 @@ namespace PdfiumViewer
             get { return _page - 1; }
         }
 
-        public PointF Location { get; }
+        public RectangleF Bounds { get; }
 
         public bool IsValid
         {
             get { return _page != 0; }
         }
 
-        public PdfPoint(int page, PointF location)
+        public PdfRectangle(int page, RectangleF bounds)
         {
             _page = page + 1;
-            Location = location;
+            Bounds = bounds;
         }
 
-        public bool Equals(PdfPoint other)
+        public bool Equals(PdfRectangle other)
         {
             return
                 Page == other.Page &&
-                Location == other.Location;
+                Bounds == other.Bounds;
         }
 
         public override bool Equals(object obj)
         {
             return
-                obj is PdfPoint &&
-                Equals((PdfPoint)obj);
+                obj is PdfRectangle &&
+                Equals((PdfRectangle)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Page * 397) ^ Location.GetHashCode();
+                return (Page * 397) ^ Bounds.GetHashCode();
             }
         }
 
-        public static bool operator ==(PdfPoint left, PdfPoint right)
+        public static bool operator ==(PdfRectangle left, PdfRectangle right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(PdfPoint left, PdfPoint right)
+        public static bool operator !=(PdfRectangle left, PdfRectangle right)
         {
             return !left.Equals(right);
         }

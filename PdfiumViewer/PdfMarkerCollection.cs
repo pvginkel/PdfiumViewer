@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PdfiumViewer
 {
-    public class PdfMarkerCollection : Collection<PdfMarker>
+    public class PdfMarkerCollection : Collection<IPdfMarker>
     {
         public event EventHandler CollectionChanged;
 
@@ -16,7 +16,7 @@ namespace PdfiumViewer
             OnCollectionChanged(EventArgs.Empty);
         }
 
-        protected override void InsertItem(int index, PdfMarker item)
+        protected override void InsertItem(int index, IPdfMarker item)
         {
             base.InsertItem(index, item);
 
@@ -30,7 +30,7 @@ namespace PdfiumViewer
             OnCollectionChanged(EventArgs.Empty);
         }
 
-        protected override void SetItem(int index, PdfMarker item)
+        protected override void SetItem(int index, IPdfMarker item)
         {
             base.SetItem(index, item);
 

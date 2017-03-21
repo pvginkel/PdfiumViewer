@@ -51,6 +51,7 @@
     </Compile>
     <Compile Include="HitTest.cs" />
     <Compile Include="IPdfDocument.cs" />
+    <Compile Include="IPdfMarker.cs" />
     <Compile Include="LinkClickEventHandler.cs" />
     <Compile Include="MouseWheelMode.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -68,6 +69,7 @@
       <DependentUpon>PasswordForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PdfBookmarkCollection.cs" />
+    <Compile Include="PdfRectangle.cs" />
     <Compile Include="PdfError.cs" />
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfDocument.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="PdfMarkerCollection.cs" />
     <Compile Include="PdfPoint.cs" />
     <Compile Include="PdfInformation.cs" />
+    <Compile Include="PdfTextSpan.cs" />
     <Compile Include="StreamManager.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />

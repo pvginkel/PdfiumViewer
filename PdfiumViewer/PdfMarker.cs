@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PdfiumViewer
 {
-    public class PdfMarker
+    public class PdfMarker : IPdfMarker
     {
         public int Page { get; }
         public RectangleF Bounds { get; }
@@ -25,6 +25,29 @@ namespace PdfiumViewer
             Color = color;
             BorderColor = borderColor;
             BorderWidth = borderWidth;
+        }
+
+        public void Draw(PdfRenderer renderer, Graphics graphics, int page)
+        {
+            if (renderer == null)
+                throw new ArgumentNullException(nameof(renderer));
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
+
+            var bounds = renderer.BoundsFromPdf(new PdfRectangle(page, Bounds));
+
+            using (var brush = new SolidBrush(Color))
+            {
+                graphics.FillRectangle(brush, bounds);
+            }
+
+            if (BorderWidth > 0)
+            {
+                using (var pen = new Pen(BorderColor, BorderWidth))
+                {
+                    graphics.DrawRectangle(pen, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+                }
+            }
         }
     }
 }

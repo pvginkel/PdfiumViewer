@@ -32,7 +32,7 @@ namespace PdfiumViewer
         private PdfPageLink _cachedLink;
         private DragState _dragState;
         private PdfRotation _rotation;
-        private List<PdfMarker>[] _markers;
+        private List<IPdfMarker>[] _markers;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can give the focus to this control using the TAB key.
@@ -146,46 +146,133 @@ namespace PdfiumViewer
         /// Converts client coordinates to PDF coordinates.
         /// </summary>
         /// <param name="location">Client coordinates to get the PDF location for.</param>
-        /// <returns>The location in a PDF page or null when the coordinates do not match a PDF page.</returns>
+        /// <returns>The location in a PDF page or a PdfPoint with IsValid false when the coordinates do not match a PDF page.</returns>
         public PdfPoint PointToPdf(Point location)
         {
             if (_document == null)
-                return null;
+                return PdfPoint.Empty;
 
-            var bounds = GetScrollClientArea();
-            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-            int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
-            int topOffset = VScroll ? DisplayRectangle.Y : 0;
+            var offset = GetScrollOffset();
 
             for (int page = 0; page < _document.PageSizes.Count; page++)
             {
                 var pageCache = _pageCache[page];
                 var rectangle = pageCache.OuterBounds;
-                rectangle.Offset(leftOffset, topOffset);
+                rectangle.Offset(offset.Width, offset.Height);
 
                 if (rectangle.Contains(location))
                 {
                     var pageBounds = pageCache.Bounds;
-                    pageBounds.Offset(leftOffset, topOffset);
+                    pageBounds.Offset(offset.Width, offset.Height);
 
                     if (pageBounds.Contains(location))
                     {
                         var size = TranslateSize(_document.PageSizes[page]);
                         location = new Point(location.X - pageBounds.Left, location.Y - pageBounds.Top);
 
-                        var translated = new Point(
-                            (int)(location.X * (size.Width / pageBounds.Width)),
-                            (int)((pageBounds.Height - location.Y) * (size.Height / pageBounds.Height))
+                        var translated = new PointF(
+                            location.X * (size.Width / pageBounds.Width),
+                            (pageBounds.Height - location.Y) * (size.Height / pageBounds.Height)
                         );
 
                         return new PdfPoint(page, translated);
                     }
 
-                    return null;
+                    break;
                 }
             }
 
-            return null;
+            return PdfPoint.Empty;
+        }
+
+        public Point PointFromPdf(PdfPoint point)
+        {
+            var offset = GetScrollOffset();
+            var pageCache = _pageCache[point.Page];
+
+            var pageBounds = pageCache.Bounds;
+            pageBounds.Offset(offset.Width, offset.Height);
+
+            var size = TranslateSize(_document.PageSizes[point.Page]);
+            double scaleX = pageBounds.Width / size.Width;
+            double scaleY = pageBounds.Height / size.Height;
+
+            return new Point(
+                (int)(pageBounds.X + point.Location.X * scaleX),
+                (int)(pageBounds.Y + (size.Height - point.Location.Y) * scaleY)
+            );
+        }
+
+        public PdfRectangle BoundsToPdf(Rectangle bounds)
+        {
+            if (_document == null)
+                return PdfRectangle.Empty;
+
+            var offset = GetScrollOffset();
+
+            for (int page = 0; page < _document.PageSizes.Count; page++)
+            {
+                var pageCache = _pageCache[page];
+                var rectangle = pageCache.OuterBounds;
+                rectangle.Offset(offset.Width, offset.Height);
+
+                if (rectangle.IntersectsWith(bounds))
+                {
+                    var pageBounds = pageCache.Bounds;
+                    pageBounds.Offset(offset.Width, offset.Height);
+
+                    if (pageBounds.IntersectsWith(bounds))
+                    {
+                        var size = TranslateSize(_document.PageSizes[page]);
+                        float scaleX = size.Width / pageBounds.Width;
+                        float scaleY = size.Height / pageBounds.Height;
+
+                        return new PdfRectangle(
+                            page,
+                            new RectangleF(
+                                (bounds.X - pageBounds.Left) * scaleX,
+                                (pageBounds.Height - (bounds.Y - pageBounds.Top)) * scaleY,
+                                bounds.Width * scaleX,
+                                bounds.Height * scaleY
+                            )
+                        );
+                    }
+
+                    break;
+                }
+            }
+
+            return PdfRectangle.Empty;
+        }
+
+        public Rectangle BoundsFromPdf(PdfRectangle bounds)
+        {
+            var offset = GetScrollOffset();
+            var pageCache = _pageCache[bounds.Page];
+
+            var pageBounds = pageCache.Bounds;
+            pageBounds.Offset(offset.Width, offset.Height);
+
+            var size = TranslateSize(_document.PageSizes[bounds.Page]);
+            double scaleX = pageBounds.Width / size.Width;
+            double scaleY = pageBounds.Height / size.Height;
+
+            return new Rectangle(
+                (int)(pageBounds.X + bounds.Bounds.X * scaleX),
+                (int)(pageBounds.Y + (size.Height - bounds.Bounds.Y - bounds.Bounds.Height) * scaleY),
+                (int)(bounds.Bounds.Width * scaleX),
+                (int)(bounds.Bounds.Height * scaleY)
+            );
+        }
+
+        private Size GetScrollOffset()
+        {
+            var bounds = GetScrollClientArea();
+            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
+            int topOffset = VScroll ? DisplayRectangle.Y : 0;
+
+            return new Size(leftOffset, topOffset);
         }
 
         /// <summary>
@@ -407,10 +494,8 @@ namespace PdfiumViewer
 
             EnsureMarkers();
 
+            var offset = GetScrollOffset();
             var bounds = GetScrollClientArea();
-            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-            int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
-            int topOffset = VScroll ? DisplayRectangle.Y : 0;
 
             using (var brush = new SolidBrush(BackColor))
             {
@@ -424,7 +509,7 @@ namespace PdfiumViewer
             {
                 var pageCache = _pageCache[page];
                 var rectangle = pageCache.OuterBounds;
-                rectangle.Offset(leftOffset, topOffset);
+                rectangle.Offset(offset.Width, offset.Height);
 
                 if (_visiblePageStart == -1 && rectangle.Bottom >= 0)
                     _visiblePageStart = page;
@@ -434,7 +519,7 @@ namespace PdfiumViewer
                 if (e.ClipRectangle.IntersectsWith(rectangle))
                 {
                     var pageBounds = pageCache.Bounds;
-                    pageBounds.Offset(leftOffset, topOffset);
+                    pageBounds.Offset(offset.Width, offset.Height);
 
                     e.Graphics.FillRectangle(Brushes.White, pageBounds);
 
@@ -442,7 +527,7 @@ namespace PdfiumViewer
 
                     _shadeBorder.Draw(e.Graphics, pageBounds);
 
-                    DrawMarkers(e.Graphics, page, pageBounds);
+                    DrawMarkers(e.Graphics, page);
                 }
             }
 
@@ -531,9 +616,8 @@ namespace PdfiumViewer
 
             if (_pageCacheValid)
             {
+                var offset = GetScrollOffset();
                 var bounds = GetScrollClientArea();
-                int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-                int leftOffset = (HScroll ? DisplayRectangle.X : (bounds.Width - maxWidth) / 2) + maxWidth / 2;
 
                 var displayLocation = DisplayRectangle.Location;
 
@@ -548,7 +632,7 @@ namespace PdfiumViewer
 
                     var pageLocation = location;
                     var pageBounds = _pageCache[page].Bounds;
-                    pageLocation.X -= leftOffset + pageBounds.Left;
+                    pageLocation.X -= offset.Width + pageBounds.Left;
                     pageLocation.Y -= pageBounds.Top;
 
                     foreach (var link in links.Links)
@@ -740,7 +824,7 @@ namespace PdfiumViewer
             if (_markers != null)
                 return;
 
-            _markers = new List<PdfMarker>[_pageCache.Count];
+            _markers = new List<IPdfMarker>[_pageCache.Count];
 
             foreach (var marker in Markers)
             {
@@ -748,13 +832,13 @@ namespace PdfiumViewer
                     continue;
 
                 if (_markers[marker.Page] == null)
-                    _markers[marker.Page] = new List<PdfMarker>();
+                    _markers[marker.Page] = new List<IPdfMarker>();
 
                 _markers[marker.Page].Add(marker);
             }
         }
 
-        private void DrawMarkers(Graphics graphics, int page, Rectangle pageBounds)
+        private void DrawMarkers(Graphics graphics, int page)
         {
             var markers = _markers[page];
             if (markers == null)
@@ -762,34 +846,7 @@ namespace PdfiumViewer
 
             foreach (var marker in markers)
             {
-                DrawMarker(graphics, marker, page, pageBounds);
-            }
-        }
-
-        private void DrawMarker(Graphics graphics, PdfMarker marker, int page, Rectangle pageBounds)
-        {
-            var size = TranslateSize(_document.PageSizes[page]);
-            double scaleX = pageBounds.Width / size.Width;
-            double scaleY = pageBounds.Height / size.Height;
-
-            var bounds = new RectangleF(
-                (float)(pageBounds.X + marker.Bounds.X * scaleX),
-                (float)(pageBounds.Y + (size.Height - marker.Bounds.Y - marker.Bounds.Height) * scaleY),
-                (float)(marker.Bounds.Width * scaleX),
-                (float)(marker.Bounds.Height * scaleY)
-            );
-
-            using (var brush = new SolidBrush(marker.Color))
-            {
-                graphics.FillRectangle(brush, bounds);
-            }
-
-            if (marker.BorderWidth > 0)
-            {
-                using (var pen = new Pen(marker.BorderColor, marker.BorderWidth))
-                {
-                    graphics.DrawRectangle(pen, bounds.X, bounds.Y, bounds.Width, bounds.Height);
-                }
+                marker.Draw(this, graphics, page);
             }
         }
 

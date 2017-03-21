@@ -171,9 +171,8 @@ namespace PdfiumViewer.Demo
             foreach (var match in search.Items)
             {
                 matches.Add(new PdfMatch(
-                    match.Location,
                     match.Text,
-                    match.TextBounds,
+                    new PdfTextSpan(match.TextSpan.Page + _startPage, match.TextSpan.Offset, match.TextSpan.Length),
                     match.Page + _startPage
                 ));
             }
@@ -234,9 +233,29 @@ namespace PdfiumViewer.Demo
             return _document.GetInformation();
         }
 
-        public string GetPDFText(int page)
+        public string GetPdfText(int page)
         {
-            return _document.GetPDFText(TranslatePage(page));
+            return _document.GetPdfText(TranslatePage(page));
+        }
+
+        public string GetPdfText(PdfTextSpan textSpan)
+        {
+            return _document.GetPdfText(textSpan);
+        }
+
+        public IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan)
+        {
+            var result = new List<PdfRectangle>();
+
+            foreach (var rectangle in _document.GetTextBounds(textSpan))
+            {
+                result.Add(new PdfRectangle(
+                    rectangle.Page + _startPage,
+                    rectangle.Bounds
+                ));
+            }
+
+            return result;
         }
 
         private int TranslatePage(int page)

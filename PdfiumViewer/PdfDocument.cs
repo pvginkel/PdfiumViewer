@@ -384,9 +384,19 @@ namespace PdfiumViewer
             return _file.Search(text, matchCase, wholeWord, startPage, endPage);
         }
 
-        public string GetPDFText(int page)
+        public string GetPdfText(int page)
         {
-            return _file.GetPDFText(page);
+            return _file.GetPdfText(page);
+        }
+
+        public string GetPdfText(PdfTextSpan textSpan)
+        {
+            return _file.GetPdfText(textSpan);
+        }
+
+        public IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan)
+        {
+            return _file.GetTextBounds(textSpan);
         }
 
         /// <summary>

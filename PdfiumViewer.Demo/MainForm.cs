@@ -22,7 +22,7 @@ namespace PdfiumViewer.Demo
 
             pdfViewer1.Renderer.MouseMove += Renderer_MouseMove;
             pdfViewer1.Renderer.MouseLeave += Renderer_MouseLeave;
-            ShowPdfLocation(null);
+            ShowPdfLocation(PdfPoint.Empty);
 
             cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
 
@@ -33,7 +33,7 @@ namespace PdfiumViewer.Demo
 
         private void Renderer_MouseLeave(object sender, EventArgs e)
         {
-            ShowPdfLocation(null);
+            ShowPdfLocation(PdfPoint.Empty);
         }
 
         private void Renderer_MouseMove(object sender, MouseEventArgs e)
@@ -43,7 +43,7 @@ namespace PdfiumViewer.Demo
 
         private void ShowPdfLocation(PdfPoint point)
         {
-            if (point == null)
+            if (!point.IsValid)
             {
                 _pageToolStripLabel.Text = null;
                 _coordinatesToolStripLabel.Text = null;
@@ -333,8 +333,9 @@ namespace PdfiumViewer.Demo
                 {
                     foreach (var match in matches.Items)
                     {
-                        foreach (var bounds in match.TextBounds)
+                        foreach (var pdfBounds in pdfViewer1.Document.GetTextBounds(match.TextSpan))
                         {
+                            var bounds = pdfBounds.Bounds;
                             bounds.Inflate(0.5f, 0.5f);
 
                             pdfViewer1.Renderer.Markers.Add(new PdfMarker(
@@ -386,7 +387,7 @@ namespace PdfiumViewer.Demo
         private void _getTextFromPage_Click(object sender, EventArgs e)
         {
             int page = pdfViewer1.Renderer.Page;
-            string text = pdfViewer1.Document.GetPDFText(page);
+            string text = pdfViewer1.Document.GetPdfText(page);
             string caption = string.Format("Page {0} contains {1} character(s):", page + 1, text.Length);
 
             if (text.Length > 128) text = text.Substring(0, 125) + "...\n\n\n\n..." + text.Substring(text.Length - 125);
