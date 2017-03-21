@@ -7,6 +7,9 @@ using System.Text;
 
 namespace PdfiumViewer
 {
+    /// <summary>
+    /// Represents a PDF document.
+    /// </summary>
     public interface IPdfDocument : IDisposable
     {
         /// <summary>
@@ -102,8 +105,34 @@ namespace PdfiumViewer
         /// <param name="stream">Stream to save the PDF document to.</param>
         void Save(Stream stream);
 
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <returns>All matches.</returns>
         PdfMatches Search(string text, bool matchCase, bool wholeWord);
+
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <param name="page">The page to search on.</param>
+        /// <returns>All matches.</returns>
         PdfMatches Search(string text, bool matchCase, bool wholeWord, int page);
+
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <param name="startPage">The page to start searching.</param>
+        /// <param name="endPage">The page to end searching.</param>
+        /// <returns>All matches.</returns>
         PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage);
 
         /// <summary>
@@ -120,12 +149,56 @@ namespace PdfiumViewer
         /// <returns></returns>
         PrintDocument CreatePrintDocument(PdfPrintMode printMode);
 
-        PdfPageLinks GetPageLinks(int pageNumber, Size pageSize);
-        void DeletePage(int pageNumber);
-        void RotatePage(int pageNumber, PdfRotation rotation);
+        /// <summary>
+        /// Returns all links on the PDF page.
+        /// </summary>
+        /// <param name="page">The page to get the links for.</param>
+        /// <param name="size">The size of the page.</param>
+        /// <returns>A collection with the links on the page.</returns>
+        PdfPageLinks GetPageLinks(int page, Size size);
+
+        /// <summary>
+        /// Delete the page from the PDF document.
+        /// </summary>
+        /// <param name="page">The page to delete.</param>
+        void DeletePage(int page);
+
+        /// <summary>
+        /// Rotate the page.
+        /// </summary>
+        /// <param name="page">The page to rotate.</param>
+        /// <param name="rotation">How to rotate the page.</param>
+        void RotatePage(int page, PdfRotation rotation);
+
+        /// <summary>
+        /// Get metadata information from the PDF document.
+        /// </summary>
+        /// <returns>The PDF metadata.</returns>
         PdfInformation GetInformation();
+
+        /// <summary>
+        /// Get all text on the page.
+        /// </summary>
+        /// <param name="page">The page to get the text for.</param>
+        /// <returns>The text on the page.</returns>
         string GetPdfText(int page);
+
+        /// <summary>
+        /// Get all text matching the text span.
+        /// </summary>
+        /// <param name="textSpan">The span to get the text for.</param>
+        /// <returns>The text matching the span.</returns>
         string GetPdfText(PdfTextSpan textSpan);
+
+        /// <summary>
+        /// Get all bounding rectangles for the text span.
+        /// </summary>
+        /// <description>
+        /// The algorithm used to get the bounding rectangles tries to join
+        /// adjacent character bounds into larger rectangles.
+        /// </description>
+        /// <param name="textSpan">The span to get the bounding rectangles for.</param>
+        /// <returns>The bounding rectangles.</returns>
         IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan);
     }
 }

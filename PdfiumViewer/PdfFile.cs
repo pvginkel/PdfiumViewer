@@ -417,21 +417,16 @@ namespace PdfiumViewer
 
         private string GetMetaText(string tag)
         {
-            uint length = NativeMethods.FPDF_GetMetaText(_document, tag, null, 0);
+            // Length includes a trailing \0.
 
-            if (length == 0)
+            uint length = NativeMethods.FPDF_GetMetaText(_document, tag, null, 0);
+            if (length <= 2)
                 return string.Empty;
 
             byte[] buffer = new byte[length];
             NativeMethods.FPDF_GetMetaText(_document, tag, buffer, length);
 
-            // The FPDF_GetMetaText method will have a \0 at the end of the string. Strip it.
-
-            string result = Encoding.Unicode.GetString(buffer);
-            if (result.Length > 0 && result[result.Length - 1] == '\0')
-                result = result.Substring(0, result.Length - 1);
-
-            return result;
+            return Encoding.Unicode.GetString(buffer, 0, (int)(length - 2));
         }
 
         public DateTime? GetMetaTextAsDate(string tag)

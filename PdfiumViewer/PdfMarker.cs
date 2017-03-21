@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
+#pragma warning disable 1591
+
 namespace PdfiumViewer
 {
     public class PdfMarker : IPdfMarker
@@ -27,14 +29,14 @@ namespace PdfiumViewer
             BorderWidth = borderWidth;
         }
 
-        public void Draw(PdfRenderer renderer, Graphics graphics, int page)
+        public void Draw(PdfRenderer renderer, Graphics graphics)
         {
             if (renderer == null)
                 throw new ArgumentNullException(nameof(renderer));
             if (graphics == null)
                 throw new ArgumentNullException(nameof(graphics));
 
-            var bounds = renderer.BoundsFromPdf(new PdfRectangle(page, Bounds));
+            var bounds = renderer.BoundsFromPdf(new PdfRectangle(Page, Bounds));
 
             using (var brush = new SolidBrush(Color))
             {

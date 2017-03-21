@@ -7,6 +7,8 @@ using System.Security.Permissions;
 using System.Text;
 using System.Windows.Forms;
 
+#pragma warning disable 1591
+
 namespace PdfiumViewer
 {
     public class CustomScrollControl : Control

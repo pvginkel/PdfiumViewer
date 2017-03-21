@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
+#pragma warning disable 1591
+
 namespace PdfiumViewer
 {
     public struct PdfPoint : IEquatable<PdfPoint>

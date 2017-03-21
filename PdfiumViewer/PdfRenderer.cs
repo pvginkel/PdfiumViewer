@@ -49,6 +49,9 @@ namespace PdfiumViewer
             set { base.TabStop = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the currently focused page.
+        /// </summary>
         public int Page
         {
             get
@@ -82,6 +85,11 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Get the outer bounds of the page.
+        /// </summary>
+        /// <param name="page">The page to get the bounds for.</param>
+        /// <returns>The bounds of the page.</returns>
         public Rectangle GetOuterBounds(int page)
         {
             if (_document == null || !_pageCacheValid)
@@ -120,6 +128,9 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Gets a collection with all markers.
+        /// </summary>
         public PdfMarkerCollection Markers { get; }
 
         /// <summary>
@@ -185,6 +196,11 @@ namespace PdfiumViewer
             return PdfPoint.Empty;
         }
 
+        /// <summary>
+        /// Converts a PDF point to a client point.
+        /// </summary>
+        /// <param name="point">The PDF point to convert.</param>
+        /// <returns>The location of the point in client coordinates.</returns>
         public Point PointFromPdf(PdfPoint point)
         {
             var offset = GetScrollOffset();
@@ -203,6 +219,11 @@ namespace PdfiumViewer
             );
         }
 
+        /// <summary>
+        /// Converts client coordinates to PDF bounds.
+        /// </summary>
+        /// <param name="bounds">The client coordinates to convert.</param>
+        /// <returns>The PDF bounds.</returns>
         public PdfRectangle BoundsToPdf(Rectangle bounds)
         {
             if (_document == null)
@@ -245,6 +266,11 @@ namespace PdfiumViewer
             return PdfRectangle.Empty;
         }
 
+        /// <summary>
+        /// Converts PDF bounds to client bounds.
+        /// </summary>
+        /// <param name="bounds">The PDF bounds to convert.</param>
+        /// <returns>The bounds of the PDF bounds in client coordinates.</returns>
         public Rectangle BoundsFromPdf(PdfRectangle bounds)
         {
             var offset = GetScrollOffset();
@@ -286,6 +312,10 @@ namespace PdfiumViewer
             UpdateScrollbars();
         }
 
+        /// <summary>
+        /// Called when the zoom level changes.
+        /// </summary>
+        /// <param name="e">The event args.</param>
         protected override void OnZoomChanged(EventArgs e)
         {
             base.OnZoomChanged(e);
@@ -584,6 +614,10 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Gets the document bounds.
+        /// </summary>
+        /// <returns>The document bounds.</returns>
         protected override Rectangle GetDocumentBounds()
         {
             int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
@@ -610,6 +644,10 @@ namespace PdfiumViewer
             );
         }
 
+        /// <summary>
+        /// Called whent he cursor changes.
+        /// </summary>
+        /// <param name="e">The event args.</param>
         protected override void OnSetCursor(SetCursorEventArgs e)
         {
             _cachedLink = null;
@@ -650,6 +688,8 @@ namespace PdfiumViewer
             base.OnSetCursor(e);
         }
 
+        /// <summary>Raises the <see cref="E:System.Windows.Forms.Control.MouseDown" /> event.</summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data. </param>
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
@@ -666,6 +706,8 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>Raises the <see cref="E:System.Windows.Forms.Control.MouseUp" /> event.</summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data. </param>
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
@@ -720,6 +762,10 @@ namespace PdfiumViewer
         [Description("Occurs when a link in the pdf document is clicked.")]
         public event LinkClickEventHandler LinkClick;
 
+        /// <summary>
+        /// Called when a link is clicked.
+        /// </summary>
+        /// <param name="e">The event args.</param>
         protected virtual void OnLinkClick(LinkClickEventArgs e)
         {
             var handler = LinkClick;
@@ -769,6 +815,11 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Called when the zoom level changes.
+        /// </summary>
+        /// <param name="zoom">The new zoom level.</param>
+        /// <param name="focus">The location to focus on.</param>
         protected override void SetZoom(double zoom, Point? focus)
         {
             Point location;
@@ -846,7 +897,7 @@ namespace PdfiumViewer
 
             foreach (var marker in markers)
             {
-                marker.Draw(this, graphics, page);
+                marker.Draw(this, graphics);
             }
         }
 

@@ -369,31 +369,74 @@ namespace PdfiumViewer
             _file.Save(stream);
         }
 
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <returns>All matches.</returns>
         public PdfMatches Search(string text, bool matchCase, bool wholeWord)
         {
             return Search(text, matchCase, wholeWord, 0, PageCount - 1);
         }
 
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <param name="page">The page to search on.</param>
+        /// <returns>All matches.</returns>
         public PdfMatches Search(string text, bool matchCase, bool wholeWord, int page)
         {
             return Search(text, matchCase, wholeWord, page, page);
         }
 
+        /// <summary>
+        /// Finds all occurences of text.
+        /// </summary>
+        /// <param name="text">The text to search for.</param>
+        /// <param name="matchCase">Whether to match case.</param>
+        /// <param name="wholeWord">Whether to match whole words only.</param>
+        /// <param name="startPage">The page to start searching.</param>
+        /// <param name="endPage">The page to end searching.</param>
+        /// <returns>All matches.</returns>
         public PdfMatches Search(string text, bool matchCase, bool wholeWord, int startPage, int endPage)
         {
             return _file.Search(text, matchCase, wholeWord, startPage, endPage);
         }
 
+        /// <summary>
+        /// Get all text on the page.
+        /// </summary>
+        /// <param name="page">The page to get the text for.</param>
+        /// <returns>The text on the page.</returns>
         public string GetPdfText(int page)
         {
             return _file.GetPdfText(page);
         }
 
+        /// <summary>
+        /// Get all text matching the text span.
+        /// </summary>
+        /// <param name="textSpan">The span to get the text for.</param>
+        /// <returns>The text matching the span.</returns>
         public string GetPdfText(PdfTextSpan textSpan)
         {
             return _file.GetPdfText(textSpan);
         }
 
+        /// <summary>
+        /// Get all bounding rectangles for the text span.
+        /// </summary>
+        /// <description>
+        /// The algorithm used to get the bounding rectangles tries to join
+        /// adjacent character bounds into larger rectangles.
+        /// </description>
+        /// <param name="textSpan">The span to get the bounding rectangles for.</param>
+        /// <returns>The bounding rectangles.</returns>
         public IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan)
         {
             return _file.GetTextBounds(textSpan);
@@ -419,34 +462,57 @@ namespace PdfiumViewer
             return new PdfPrintDocument(this, printMode);
         }
 
-        public PdfPageLinks GetPageLinks(int pageNumber, Size pageSize)
+        /// <summary>
+        /// Returns all links on the PDF page.
+        /// </summary>
+        /// <param name="page">The page to get the links for.</param>
+        /// <param name="size">The size of the page.</param>
+        /// <returns>A collection with the links on the page.</returns>
+        public PdfPageLinks GetPageLinks(int page, Size size)
         {
-            return _file.GetPageLinks(pageNumber, pageSize);
+            return _file.GetPageLinks(page, size);
         }
 
-        public void DeletePage(int pageNumber)
+        /// <summary>
+        /// Delete the page from the PDF document.
+        /// </summary>
+        /// <param name="page">The page to delete.</param>
+        public void DeletePage(int page)
         {
-            _file.DeletePage(pageNumber);
-            _pageSizes.RemoveAt(pageNumber);
+            _file.DeletePage(page);
+            _pageSizes.RemoveAt(page);
         }
 
-        public void RotatePage(int pageNumber, PdfRotation rotation)
+        /// <summary>
+        /// Rotate the page.
+        /// </summary>
+        /// <param name="page">The page to rotate.</param>
+        /// <param name="rotation">How to rotate the page.</param>
+        public void RotatePage(int page, PdfRotation rotation)
         {
-            _file.RotatePage(pageNumber, rotation);
-            _pageSizes[pageNumber] = _file.GetPDFDocInfo(pageNumber);
+            _file.RotatePage(page, rotation);
+            _pageSizes[page] = _file.GetPDFDocInfo(page);
         }
 
+        /// <summary>
+        /// Get metadata information from the PDF document.
+        /// </summary>
+        /// <returns>The PDF metadata.</returns>
         public PdfInformation GetInformation()
         {
             return _file.GetInformation();
         }
 
+        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        /// <param name="disposing">Whether this method is called from Dispose.</param>
         protected void Dispose(bool disposing)
         {
             if (!_disposed && disposing)

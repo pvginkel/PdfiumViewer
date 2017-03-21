@@ -68,6 +68,9 @@ namespace PdfiumViewer
             set { _renderer.ZoomMode = value; }
         }
 
+        /// <summary>
+        /// Gets or sets whether the toolbar should be shown.
+        /// </summary>
         [DefaultValue(true)]
         public bool ShowToolbar
         {
@@ -75,6 +78,9 @@ namespace PdfiumViewer
             set { _toolStrip.Visible = value; }
         }
 
+        /// <summary>
+        /// Gets or sets whether the bookmarks panel should be shown.
+        /// </summary>
         [DefaultValue(true)]
         public bool ShowBookmarks
         {
@@ -93,6 +99,10 @@ namespace PdfiumViewer
         [Description("Occurs when a link in the pdf document is clicked.")]
         public event LinkClickEventHandler LinkClick;
 
+        /// <summary>
+        /// Called when a link is clicked.
+        /// </summary>
+        /// <param name="e"></param>
         protected virtual void OnLinkClick(LinkClickEventArgs e)
         {
             var handler = LinkClick;

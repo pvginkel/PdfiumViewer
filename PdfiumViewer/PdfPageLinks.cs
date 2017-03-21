@@ -15,6 +15,10 @@ namespace PdfiumViewer
         /// </summary>
         public IList<PdfPageLink> Links { get; private set; }
 
+        /// <summary>
+        /// Creates a new instance of the PdfPageLinks class.
+        /// </summary>
+        /// <param name="links">The links on the PDF page.</param>
         public PdfPageLinks(IList<PdfPageLink> links)
         {
             if (links == null)

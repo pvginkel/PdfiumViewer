@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
+#pragma warning disable 1591
+
 namespace PdfiumViewer
 {
     public class PdfException : Exception
