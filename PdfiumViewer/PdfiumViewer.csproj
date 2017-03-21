@@ -78,6 +78,7 @@
     <Compile Include="PdfMarkerCollection.cs" />
     <Compile Include="PdfPoint.cs" />
     <Compile Include="PdfInformation.cs" />
+    <Compile Include="PdfSearchManager.cs" />
     <Compile Include="PdfTextSpan.cs" />
     <Compile Include="StreamManager.cs" />
     <Compile Include="PdfPageLink.cs" />

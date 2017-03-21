@@ -11,6 +11,8 @@ namespace PdfiumViewer.Demo
 {
     public partial class MainForm : Form
     {
+        private SearchForm _searchForm;
+
         public MainForm()
         {
             InitializeComponent();
@@ -320,43 +322,6 @@ namespace PdfiumViewer.Demo
             pdfViewer1.Renderer.Page = page;
         }
 
-        private void _search_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-
-                pdfViewer1.Renderer.Markers.Clear();
-
-                var matches = pdfViewer1.Document.Search(_search.Text, false, false);
-                if (matches.Items.Count > 0)
-                {
-                    foreach (var match in matches.Items)
-                    {
-                        foreach (var pdfBounds in pdfViewer1.Document.GetTextBounds(match.TextSpan))
-                        {
-                            var bounds = pdfBounds.Bounds;
-                            bounds.Inflate(0.5f, 0.5f);
-
-                            pdfViewer1.Renderer.Markers.Add(new PdfMarker(
-                                match.Page,
-                                bounds,
-                                Color.FromArgb(128, Color.Yellow)
-                            ));
-                        }
-                    }
-
-                    MessageBox.Show(this, String.Format("{0} matches found.", matches.Items.Count));
-
-                    pdfViewer1.Renderer.Page = matches.Items[0].Page;
-                }
-                else
-                {
-                    MessageBox.Show(this, "No matches found");
-                }
-            }
-        }
-
         private void showRangeOfPagesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (var form = new PageRangeForm(pdfViewer1.Document))
@@ -392,6 +357,18 @@ namespace PdfiumViewer.Demo
 
             if (text.Length > 128) text = text.Substring(0, 125) + "...\n\n\n\n..." + text.Substring(text.Length - 125);
             MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void findToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_searchForm == null)
+            {
+                _searchForm = new SearchForm(pdfViewer1.Renderer);
+                _searchForm.Disposed += (s, ea) => _searchForm = null;
+                _searchForm.Show(this);
+            }
+
+            _searchForm.Focus();
         }
     }
 }
