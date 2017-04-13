@@ -53,6 +53,11 @@ Note that in the directory `Libraries\Pdfium\Without V8`, there are versions
 of the Pdfium DLL's without V8 support. These are a lot smaller and work on
 Windows XP. See Compatibility above for instructions on how to use these.
 
+The versions in this project are snapshots of the PDFium library which may
+be out of date. Up to date versions of the PDFium library are automatically
+generated using the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project.
+Have a look there for where to find daily builds of the PDFium library.
+
 ## Note on the `PdfViewer` control
 
 The PdfiumViewer library primarily consists out of three components:
@@ -83,6 +88,14 @@ wiki page. However, if you are just looking to use the PdfiumViewer component
 or looking for a compiled version of PDFium, these steps are not required.
 A compiled version of the PDFium library is included in the NuGet package
 and precompiled libraries can be found at [https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium](https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium).
+
+Alternatively, the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project
+is provided to automate building PDFium. This project contains scripts to
+build PdfiumViewer specific versions of the PDFium library. This project
+is configured on a build server to compile PDFium daily. Please refer to
+the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project page
+for the location of the output of the build server. The PdfiumViewer specific
+libraries are located in the `PdfiumViewer-...` target directories.
 
 ## Bugs
 
