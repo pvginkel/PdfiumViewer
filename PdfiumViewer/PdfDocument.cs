@@ -161,6 +161,12 @@ namespace PdfiumViewer
             PageSizes = new ReadOnlyCollection<SizeF>(_pageSizes);
         }
 
+        ~PdfDocument()
+        {
+            if(_file != null)
+                _file.Dispose();
+        }
+
         /// <summary>
         /// Renders a page of the PDF document to the provided graphics instance.
         /// </summary>
