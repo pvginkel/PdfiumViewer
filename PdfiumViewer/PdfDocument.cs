@@ -294,8 +294,8 @@ namespace PdfiumViewer
 
             if ((flags & PdfRenderFlags.CorrectFromDpi) != 0)
             {
-                width = width / 72 * (int)dpiX;
-                height = height / 72 * (int)dpiY;
+                width = width * (int)dpiX / 72;
+                height = height * (int)dpiY / 72;
             }
 
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
