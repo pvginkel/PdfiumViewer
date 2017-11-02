@@ -96,7 +96,7 @@ namespace PdfiumViewer
         /// Gets or sets the pre-selected printer to be used when the print
         /// dialog shows up.
         /// </summary>
-        [DefaultValue("")]
+        [DefaultValue(null)]
         public string DefaultPrinter { get; set; }
 
         /// <summary>
@@ -203,7 +203,8 @@ namespace PdfiumViewer
                 form.UseEXDialog = true;
                 form.Document.PrinterSettings.FromPage = 1;
                 form.Document.PrinterSettings.ToPage = _document.PageCount;
-                form.Document.PrinterSettings.PrinterName = DefaultPrinter;
+                if (DefaultPrinter != null)
+                    form.Document.PrinterSettings.PrinterName = DefaultPrinter;
 
                 if (form.ShowDialog(FindForm()) == DialogResult.OK)
                 {
