@@ -40,8 +40,8 @@ namespace PdfiumViewer
             return File.Exists(path) && LoadLibrary(path) != IntPtr.Zero;
         }
 
-        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
-        private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPTStr)] string lpFileName);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern MemoryMappedHandle CreateFileMapping(SafeHandle hFile, IntPtr lpFileMappingAttributes, FileMapProtection flProtect, uint dwMaximumSizeHigh, uint dwMaximumSizeLow, [MarshalAs(UnmanagedType.LPTStr)] string lpName);
