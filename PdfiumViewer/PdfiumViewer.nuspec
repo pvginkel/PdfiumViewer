@@ -12,10 +12,15 @@
     <description>PDF viewer based on the PDFium project.</description>
     <copyright>Pieter van Ginkel © 2012-2015</copyright>
     <tags>pdf viewer pdfium</tags>
+    <contentFiles>
+      <files include="any/any/*/pdfium.dll" buildAction="None" copyToOutput="true" />
+    </contentFiles>
   </metadata>
   <files>
     <file src="..\Libraries\Pdfium\x86\pdfium.dll" target="content\x86" />
+    <file src="..\Libraries\Pdfium\x86\pdfium.dll" target="contentFiles\any\any\x86" />
     <file src="..\Libraries\Pdfium\x64\pdfium.dll" target="content\x64" />
+    <file src="..\Libraries\Pdfium\x64\pdfium.dll" target="contentFiles\any\any\x64" />
     <file src="bin\Release\nl\*.dll" target="lib\net20\nl" />
   </files>
 </package>
