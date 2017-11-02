@@ -119,8 +119,7 @@ namespace PdfiumViewer
 
         private bool ApplyScrollbarChanges()
         {
-            var currentClient = ClientRectangle;
-            var fullClient = currentClient;
+            var fullClient = ClientRectangle;
             var minClient = fullClient;
 
             if (HScroll)
@@ -349,10 +348,14 @@ namespace PdfiumViewer
         {
             bool needLayout = false;
 
+            double hScale = (double)width / _displayRect.Height;
+            double vScale = (double)height / _displayRect.Height;
+
             if (_displayRect.Width != width || _displayRect.Height != height)
             {
                 _displayRect.Width = width;
                 _displayRect.Height = height;
+
                 needLayout = true;
             }
 
@@ -364,12 +367,12 @@ namespace PdfiumViewer
             if (minY > 0)
                 minY = 0;
 
-            int x = _displayRect.X;
-            int y = _displayRect.Y;
+            int x = (int)(_displayRect.X * hScale);
+            int y = (int)(_displayRect.Y * vScale);
 
-            if (!HScroll)
+            if (!HScroll || x > 0)
                 x = 0;
-            if (!VScroll)
+            if (!VScroll || y > 0)
                 y = 0;
 
             if (x < minX)
