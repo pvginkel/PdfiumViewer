@@ -20,43 +20,15 @@ PdfiumViewer provides a number of components to work with PDF files:
 ## Compatibility
 
 The PdfiumViewer library has been tested with Windows XP and Windows 8, and
-is fully compatible with both. However, do not that the standard DLL's won't
-work on Window XP. To build for Windows XP, you need:
-
-* The DLL's from the directory `Libraries\Pdfium\Without V8`;
-* Also, you need to distribute a recent version of `dbghelp.dll`. These are
-  also located in the `Libraries\Pdfium\Without V8` directory. Note that
-  these are not part of the standard distribution and won't be loaded
-  automatically.
+is fully compatible with both. However, the native PDFium libraries with V8
+support do not support Windows XP. See below for instructions on how to
+reference the native libraries.
 
 ## Using the library
 
-To use the library, you must first add a reference to the NuGet package.
-
-After you've added this reference, two files will be added to your project:
-
-* `x86\pdfium.dll` is the 32-bit version of the Pdfium library;
-
-* `x64\pdfium.dll` is the 64-bit version of the Pdfium library.
-
-You have two options. If your application is 32-bit only or 64-bit only, you can
-remove the DLL that won't be used. You can leave this file in the `x86` or `x64`
-directory, or move it to the root of your project. PdfiumViewer will find the DLL
-in both cases.
-
-When building your project, the `pdfium.dll` library(s) must be placed next to
-your application, either in the root or the `x86` or `x64` sub directory.
-The easiest way to accomplish this is by changing the properties of that file,
-changing the Copy to Output Directory setting to Copy always.
-
-Note that in the directory `Libraries\Pdfium\Without V8`, there are versions
-of the Pdfium DLL's without V8 support. These are a lot smaller and work on
-Windows XP. See Compatibility above for instructions on how to use these.
-
-The versions in this project are snapshots of the PDFium library which may
-be out of date. Up to date versions of the PDFium library are automatically
-generated using the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project.
-Have a look there for where to find daily builds of the PDFium library.
+The PdfiumViewer control requires native PDFium libraries. These are not included
+in the PdfiumViewer NuGet package. See the [Installation instructions](https://github.com/pvginkel/PdfiumViewer/wiki/Installation-instructions)
+Wiki page for more information on how to add these.
 
 ## Note on the `PdfViewer` control
 
@@ -86,8 +58,9 @@ for more information.
 Instructions to build the PDFium library can be found on the [Building PDFium](https://github.com/pvginkel/PdfiumViewer/wiki/Building-PDFium)
 wiki page. However, if you are just looking to use the PdfiumViewer component
 or looking for a compiled version of PDFium, these steps are not required.
-A compiled version of the PDFium library is included in the NuGet package
-and precompiled libraries can be found at [https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium](https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium).
+NuGet packages with precompiled PDFium libraries are made available for
+usage with PdfiumViewer. See the chapter on **Using the library** for more
+information.
 
 Alternatively, the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project
 is provided to automate building PDFium. This project contains scripts to
