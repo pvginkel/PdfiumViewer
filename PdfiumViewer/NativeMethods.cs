@@ -17,15 +17,8 @@ namespace PdfiumViewer
         {
             // Load the platform dependent Pdfium.dll if it exists.
 
-            bool loaded = TryLoadNativeLibrary(AppDomain.CurrentDomain.RelativeSearchPath) ||
-                          TryLoadNativeLibrary(Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location));
-            if (!loaded) {
-                // Convert URI to file system path
-                Uri dllBaseUri = new Uri(typeof(NativeMethods).Assembly.CodeBase);
-                if (dllBaseUri.IsFile) {
-                    TryLoadNativeLibrary(Path.GetDirectoryName(dllBaseUri.AbsolutePath));
-                }
-            }
+            if (!TryLoadNativeLibrary(AppDomain.CurrentDomain.RelativeSearchPath))
+                TryLoadNativeLibrary(Path.GetDirectoryName(typeof (NativeMethods).Assembly.Location));
         }
 
         private static bool TryLoadNativeLibrary(string path)
