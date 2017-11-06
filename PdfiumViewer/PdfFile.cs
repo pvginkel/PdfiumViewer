@@ -157,9 +157,19 @@ namespace PdfiumViewer
 
             _formCallbacks = new NativeMethods.FPDF_FORMFILLINFO();
             _formCallbacksHandle = GCHandle.Alloc(_formCallbacks, GCHandleType.Pinned);
-            _formCallbacks.version = 2;
 
-            _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, _formCallbacks);
+            // Depending on whether XFA support is built into the PDFium library, the version
+            // needs to be 1 or 2. We don't really care, so we just try one or the other.
+
+            for (int i = 1; i <= 2; i++)
+            {
+                _formCallbacks.version = i;
+
+                _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, _formCallbacks);
+                if (_form != IntPtr.Zero)
+                    break;
+            }
+
             NativeMethods.FPDF_SetFormFieldHighlightColor(_form, 0, 0xFFE4DD);
             NativeMethods.FPDF_SetFormFieldHighlightAlpha(_form, 100);
 
