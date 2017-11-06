@@ -588,7 +588,7 @@ namespace PdfiumViewer
         /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs"/> that contains the event data. </param>
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (Document == null || _suspendPaintCount > 0)
+            if (Document == null || _suspendPaintCount > 0 || !_pageCacheValid)
                 return;
 
             EnsureMarkers();

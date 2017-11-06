@@ -29,8 +29,8 @@ namespace PdfiumViewer
 
                     if (_document != null)
                     {
-                        UpdateBookmarks();
                         _renderer.Load(_document);
+                        UpdateBookmarks();
                     }
 
                     UpdateEnabled();
