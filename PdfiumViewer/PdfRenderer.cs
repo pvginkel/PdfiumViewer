@@ -488,6 +488,12 @@ namespace PdfiumViewer
 
                 var pageCache = _pageCache[page];
 
+                if (pageCache.Image != null)
+                {
+                    pageCache.Image.Dispose();
+                    pageCache.Image = null;
+                }
+
                 pageCache.Links = null;
                 pageCache.Bounds = new Rectangle(
                     thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
@@ -610,10 +616,30 @@ namespace PdfiumViewer
                 var rectangle = pageCache.OuterBounds;
                 rectangle.Offset(offset.Width, offset.Height);
 
-                if (_visiblePageStart == -1 && rectangle.Bottom >= 0)
-                    _visiblePageStart = page;
-                if (_visiblePageEnd == -1 && rectangle.Top > bounds.Height)
-                    _visiblePageEnd = page - 1;
+                if (_visiblePageStart == -1)
+                {
+                    if (rectangle.Bottom >= 0)
+                    {
+                        _visiblePageStart = page;
+                    }
+                    else if (pageCache.Image != null)
+                    {
+                        pageCache.Image.Dispose();
+                        pageCache.Image = null;
+                    }
+                }
+
+                if (rectangle.Top > bounds.Height)
+                {
+                    if (_visiblePageEnd == -1)
+                        _visiblePageEnd = page - 1;
+
+                    if (pageCache.Image != null)
+                    {
+                        pageCache.Image.Dispose();
+                        pageCache.Image = null;
+                    }
+                }
 
                 if (e.ClipRectangle.IntersectsWith(rectangle))
                 {
@@ -638,49 +664,12 @@ namespace PdfiumViewer
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds)
         {
-            if (Rotation == PdfRotation.Rotate0)
-            {
-                Document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, PdfRenderFlags.Annotations);
-            }
-            else
-            {
-                // This is not ideal. Rather than this, we should set a world
-                // transform in PdfDocument.Render to natively rotate the output.
-                // However, this does not work, and the control isn't updated
-                // anymore. So we fall back to rendering to a Bitmap and rotating
-                // that.
+            var pageCache = _pageCache[page];
 
-                RotateFlipType type;
-                Size size;
+            if (pageCache.Image == null)
+                pageCache.Image = Document.Render(page, pageBounds.Width, pageBounds.Height, graphics.DpiX, graphics.DpiY, Rotation, PdfRenderFlags.Annotations);
 
-                switch (Rotation)
-                {
-                    case PdfRotation.Rotate90:
-                        type = RotateFlipType.Rotate90FlipNone;
-                        size = new Size(pageBounds.Height, pageBounds.Width);
-                        break;
-                    case PdfRotation.Rotate180:
-                        type = RotateFlipType.Rotate180FlipNone;
-                        size = pageBounds.Size;
-                        break;
-                    case PdfRotation.Rotate270:
-                        type = RotateFlipType.Rotate270FlipNone;
-                        size = new Size(pageBounds.Height, pageBounds.Width);
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-
-                using (var rendered = Document.Render(page, size.Width, size.Height, graphics.DpiX, graphics.DpiY, PdfRenderFlags.Annotations))
-                {
-                    rendered.RotateFlip(type);
-
-                    graphics.DrawImageUnscaled(
-                        rendered,
-                        pageBounds.Location
-                    );
-                }
-            }
+            graphics.DrawImageUnscaled(pageCache.Image, pageBounds.Location);
         }
 
         /// <summary>
@@ -1012,6 +1001,15 @@ namespace PdfiumViewer
                     _toolTip = null;
                 }
 
+                foreach (var pageCache in _pageCache)
+                {
+                    if (pageCache.Image != null)
+                    {
+                        pageCache.Image.Dispose();
+                        pageCache.Image = null;
+                    }
+                }
+
                 _disposed = true;
             }
 
@@ -1023,6 +1021,7 @@ namespace PdfiumViewer
             public List<PageLink> Links { get; set; }
             public Rectangle Bounds { get; set; }
             public Rectangle OuterBounds { get; set; }
+            public Image Image { get; set; }
         }
 
         private class PageLink

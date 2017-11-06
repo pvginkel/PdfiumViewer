@@ -53,14 +53,20 @@ namespace PdfiumViewer
             return true;
         }
 
-        public bool RenderPDFPageToBitmap(int pageNumber, IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, NativeMethods.FPDF flags)
+        public bool RenderPDFPageToBitmap(int pageNumber, IntPtr bitmapHandle, int dpiX, int dpiY, int boundsOriginX, int boundsOriginY, int boundsWidth, int boundsHeight, int rotate, NativeMethods.FPDF flags, bool renderFormFill)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
             using (var pageData = new PageData(_document, _form, pageNumber))
             {
-                NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
+                if (renderFormFill)
+                    flags &= ~NativeMethods.FPDF.ANNOT;
+
+                NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
+
+                if (renderFormFill)
+                    NativeMethods.FPDF_FFLDraw(_form, bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
             }
 
             return true;
@@ -150,10 +156,10 @@ namespace PdfiumViewer
             NativeMethods.FPDF_GetDocPermissions(_document);
 
             _formCallbacks = new NativeMethods.FPDF_FORMFILLINFO();
-            _formCallbacksHandle = GCHandle.Alloc(_formCallbacks);
-            _formCallbacks.version = 1;
+            _formCallbacksHandle = GCHandle.Alloc(_formCallbacks, GCHandleType.Pinned);
+            _formCallbacks.version = 2;
 
-            _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, ref _formCallbacks);
+            _form = NativeMethods.FPDFDOC_InitFormFillEnvironment(_document, _formCallbacks);
             NativeMethods.FPDF_SetFormFieldHighlightColor(_form, 0, 0xFFE4DD);
             NativeMethods.FPDF_SetFormFieldHighlightAlpha(_form, 100);
 
@@ -595,7 +601,7 @@ namespace PdfiumViewer
                 if (_form != IntPtr.Zero)
                 {
                     NativeMethods.FORM_DoDocumentAAction(_form, NativeMethods.FPDFDOC_AACTION.WC);
-                    NativeMethods.FPDFDOC_ExitFormFillEnviroument(_form);
+                    NativeMethods.FPDFDOC_ExitFormFillEnvironment(_form);
                     _form = IntPtr.Zero;
                 }
 

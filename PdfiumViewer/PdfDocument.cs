@@ -289,6 +289,22 @@ namespace PdfiumViewer
         /// <returns>The rendered image.</returns>
         public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRenderFlags flags)
         {
+            return Render(page, width, height, dpiX, dpiY, 0, flags);
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="width">Width of the rendered image.</param>
+        /// <param name="height">Height of the rendered image.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="rotate">Rotation.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <returns>The rendered image.</returns>
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
+        {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
@@ -318,7 +334,9 @@ namespace PdfiumViewer
                         handle,
                         (int)dpiX, (int)dpiY,
                         0, 0, width, height,
-                        FlagsToFPDFFlags(flags)
+                        (int)rotate,
+                        FlagsToFPDFFlags(flags),
+                        (flags & PdfRenderFlags.Annotations) != 0
                     );
 
                     if (!success)
@@ -339,7 +357,7 @@ namespace PdfiumViewer
 
         private NativeMethods.FPDF FlagsToFPDFFlags(PdfRenderFlags flags)
         {
-            return (NativeMethods.FPDF)(flags & ~PdfRenderFlags.Transparent);
+            return (NativeMethods.FPDF)(flags & ~(PdfRenderFlags.Transparent | PdfRenderFlags.CorrectFromDpi));
         }
 
         /// <summary>

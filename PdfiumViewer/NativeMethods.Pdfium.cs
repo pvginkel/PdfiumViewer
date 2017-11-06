@@ -74,11 +74,11 @@ namespace PdfiumViewer
             }
         }
 
-        public static IntPtr FPDFDOC_InitFormFillEnvironment(IntPtr document, ref FPDF_FORMFILLINFO formInfo)
+        public static IntPtr FPDFDOC_InitFormFillEnvironment(IntPtr document, FPDF_FORMFILLINFO formInfo)
         {
             lock (LockString)
             {
-                return Imports.FPDFDOC_InitFormFillEnvironment(document, ref formInfo);
+                return Imports.FPDFDOC_InitFormFillEnvironment(document, formInfo);
             }
         }
 
@@ -114,11 +114,11 @@ namespace PdfiumViewer
             }
         }
 
-        public static void FPDFDOC_ExitFormFillEnviroument(IntPtr hHandle)
+        public static void FPDFDOC_ExitFormFillEnvironment(IntPtr hHandle)
         {
             lock (LockString)
             {
-                Imports.FPDFDOC_ExitFormFillEnviroument(hHandle);
+                Imports.FPDFDOC_ExitFormFillEnvironment(hHandle);
             }
         }
 
@@ -528,6 +528,14 @@ namespace PdfiumViewer
                 StreamManager.Unregister(id);
             }
         }
+
+        public static void FPDF_FFLDraw(IntPtr form, IntPtr bitmap, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags)
+        {
+            lock (LockString)
+            {
+                Imports.FPDF_FFLDraw(form, bitmap, page, start_x, start_y, size_x, size_y, rotate, flags);
+            }
+        }
         #endregion
 
         #region Custom Load/Save Logic
@@ -608,7 +616,7 @@ namespace PdfiumViewer
             public static extern uint FPDF_GetDocPermissions(IntPtr document);
 
             [DllImport("pdfium.dll")]
-            public static extern IntPtr FPDFDOC_InitFormFillEnvironment(IntPtr document, ref FPDF_FORMFILLINFO formInfo);
+            public static extern IntPtr FPDFDOC_InitFormFillEnvironment(IntPtr document, FPDF_FORMFILLINFO formInfo);
 
             [DllImport("pdfium.dll")]
             public static extern void FPDF_SetFormFieldHighlightColor(IntPtr hHandle, int fieldType, uint color);
@@ -623,7 +631,7 @@ namespace PdfiumViewer
             public static extern void FORM_DoDocumentOpenAction(IntPtr hHandle);
 
             [DllImport("pdfium.dll")]
-            public static extern void FPDFDOC_ExitFormFillEnviroument(IntPtr hHandle);
+            public static extern void FPDFDOC_ExitFormFillEnvironment(IntPtr hHandle);
 
             [DllImport("pdfium.dll")]
             public static extern void FORM_DoDocumentAAction(IntPtr hHandle, FPDFDOC_AACTION aaType);
@@ -791,6 +799,9 @@ namespace PdfiumViewer
             [DllImport("pdfium.dll")]
             public static extern bool FPDFPage_GenerateContent(IntPtr page);
 
+            [DllImport("pdfium.dll")]
+            public static extern void FPDF_FFLDraw(IntPtr form, IntPtr bitmap, IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, FPDF flags);
+
             #endregion
         }
 
@@ -830,6 +841,38 @@ namespace PdfiumViewer
             private IntPtr FFI_DoGoToAction;
 
             private IntPtr m_pJsPlatform;
+
+            // XFA support i.e. version 2
+
+            private IntPtr FFI_DisplayCaret;
+
+            private IntPtr FFI_GetCurrentPageIndex;
+
+            private IntPtr FFI_SetCurrentPage;
+
+            private IntPtr FFI_GotoURL;
+
+            private IntPtr FFI_GetPageViewRect;
+
+            private IntPtr FFI_PageEvent;
+
+            private IntPtr FFI_PopupMenu;
+
+            private IntPtr FFI_OpenFile;
+
+            private IntPtr FFI_EmailTo;
+
+            private IntPtr FFI_UploadTo;
+
+            private IntPtr FFI_GetPlatform;
+
+            private IntPtr FFI_GetLanguage;
+
+            private IntPtr FFI_DownloadFromURL;
+
+            private IntPtr FFI_PostRequestURL;
+
+            private IntPtr FFI_PutRequestURL;
         }
 
         public enum FPDF_UNSP
