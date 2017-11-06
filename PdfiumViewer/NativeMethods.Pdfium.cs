@@ -346,6 +346,14 @@ namespace PdfiumViewer
             }
         }
 
+        public static void FPDF_DeviceToPage(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, int device_x, int device_y, out double page_x, out double page_y)
+        {
+            lock (LockString)
+            {
+                Imports.FPDF_DeviceToPage(page, start_x, start_y, size_x, size_y, rotate, device_x, device_y, out page_x, out page_y);
+            }
+        }
+
         public static void FPDF_PageToDevice(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, double page_x, double page_y, out int device_x, out int device_y)
         {
             lock (LockString)
@@ -700,6 +708,9 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern bool FPDFLink_GetAnnotRect(IntPtr linkAnnot, FS_RECTF rect);
+
+            [DllImport("pdfium.dll")]
+            public static extern void FPDF_DeviceToPage(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, int device_x, int device_y, out double page_x, out double page_y);
 
             [DllImport("pdfium.dll")]
             public static extern void FPDF_PageToDevice(IntPtr page, int start_x, int start_y, int size_x, int size_y, int rotate, double page_x, double page_y, out int device_x, out int device_y);

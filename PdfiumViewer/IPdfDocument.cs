@@ -207,5 +207,37 @@ namespace PdfiumViewer
         /// <param name="textSpan">The span to get the bounding rectangles for.</param>
         /// <returns>The bounding rectangles.</returns>
         IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan);
+
+        /// <summary>
+        /// Convert a point from device coordinates to page coordinates.
+        /// </summary>
+        /// <param name="page">The page number where the point is from.</param>
+        /// <param name="point">The point to convert.</param>
+        /// <returns>The converted point.</returns>
+        PointF PointToPdf(int page, Point point);
+
+        /// <summary>
+        /// Convert a point from page coordinates to device coordinates.
+        /// </summary>
+        /// <param name="page">The page number where the point is from.</param>
+        /// <param name="point">The point to convert.</param>
+        /// <returns>The converted point.</returns>
+        Point PointFromPdf(int page, PointF point);
+
+        /// <summary>
+        /// Convert a rectangle from device coordinates to page coordinates.
+        /// </summary>
+        /// <param name="page">The page where the rectangle is from.</param>
+        /// <param name="rect">The rectangle to convert.</param>
+        /// <returns>The converted rectangle.</returns>
+        RectangleF RectangleToPdf(int page, Rectangle rect);
+
+        /// <summary>
+        /// Convert a rectangle from page coordinates to device coordinates.
+        /// </summary>
+        /// <param name="page">The page where the rectangle is from.</param>
+        /// <param name="rect">The rectangle to convert.</param>
+        /// <returns>The converted rectangle.</returns>
+        Rectangle RectangleFromPdf(int page, RectangleF rect);
     }
 }

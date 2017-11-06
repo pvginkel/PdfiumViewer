@@ -443,6 +443,50 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Convert a point from device coordinates to page coordinates.
+        /// </summary>
+        /// <param name="page">The page number where the point is from.</param>
+        /// <param name="point">The point to convert.</param>
+        /// <returns>The converted point.</returns>
+        public PointF PointToPdf(int page, Point point)
+        {
+            return _file.PointToPdf(page, point);
+        }
+
+        /// <summary>
+        /// Convert a point from page coordinates to device coordinates.
+        /// </summary>
+        /// <param name="page">The page number where the point is from.</param>
+        /// <param name="point">The point to convert.</param>
+        /// <returns>The converted point.</returns>
+        public Point PointFromPdf(int page, PointF point)
+        {
+            return _file.PointFromPdf(page, point);
+        }
+
+        /// <summary>
+        /// Convert a rectangle from device coordinates to page coordinates.
+        /// </summary>
+        /// <param name="page">The page where the rectangle is from.</param>
+        /// <param name="rect">The rectangle to convert.</param>
+        /// <returns>The converted rectangle.</returns>
+        public RectangleF RectangleToPdf(int page, Rectangle rect)
+        {
+            return _file.RectangleToPdf(page, rect);
+        }
+
+        /// <summary>
+        /// Convert a rectangle from page coordinates to device coordinates.
+        /// </summary>
+        /// <param name="page">The page where the rectangle is from.</param>
+        /// <param name="rect">The rectangle to convert.</param>
+        /// <returns>The converted rectangle.</returns>
+        public Rectangle RectangleFromPdf(int page, RectangleF rect)
+        {
+            return _file.RectangleFromPdf(page, rect);
+        }
+
+        /// <summary>
         /// Creates a <see cref="PrintDocument"/> for the PDF document.
         /// </summary>
         /// <returns></returns>

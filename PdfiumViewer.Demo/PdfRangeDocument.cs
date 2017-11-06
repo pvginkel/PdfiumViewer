@@ -263,6 +263,26 @@ namespace PdfiumViewer.Demo
             return result;
         }
 
+        public PointF PointToPdf(int page, Point point)
+        {
+            return _document.PointToPdf(TranslatePage(page), point);
+        }
+
+        public Point PointFromPdf(int page, PointF point)
+        {
+            return _document.PointFromPdf(TranslatePage(page), point);
+        }
+
+        public RectangleF RectangleToPdf(int page, Rectangle rect)
+        {
+            return _document.RectangleToPdf(TranslatePage(page), rect);
+        }
+
+        public Rectangle RectangleFromPdf(int page, RectangleF rect)
+        {
+            return _document.RectangleFromPdf(TranslatePage(page), rect);
+        }
+
         private int TranslatePage(int page)
         {
             if (page < 0 || page >= PageCount)

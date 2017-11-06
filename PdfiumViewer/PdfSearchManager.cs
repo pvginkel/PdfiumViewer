@@ -228,8 +228,12 @@ namespace PdfiumViewer
         {
             foreach (var pdfBounds in _bounds[index])
             {
-                var bounds = pdfBounds.Bounds;
-                bounds.Inflate(1f, 1f);
+                var bounds = new RectangleF(
+                    pdfBounds.Bounds.Left - 1,
+                    pdfBounds.Bounds.Top + 1,
+                    pdfBounds.Bounds.Width + 2,
+                    pdfBounds.Bounds.Height - 2
+                );
 
                 var marker = new PdfMarker(
                     pdfBounds.Page,
