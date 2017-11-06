@@ -26,38 +26,9 @@ reference the native libraries.
 
 ## Using the library
 
-To use the library, two NuGet packages are required to be added to your
-project. The main [PdfiumViewer](https://www.nuget.org/packages/PdfiumViewer/)
-NuGet package contains the PdfiumViewer controls. These controls depend
-on the PDFium native libraries.
-
-The PDFium native libraries are not included in the PdfiumViewer project.
-Instead, there are a number of NuGet packages that contain the PDFium
-native library:
-
-| NuGet package | Architecture | V8 support | XFA support |
-| ------------- | ------------ | ---------- | ----------- |
-| [PdfiumViewer.Native.x86_64.v8-xfa](https://www.nuget.org/packages/PdfiumViewer.Native.x86_64.v8-xfa/) | 64-bit | Yes | Yes |
-| [PdfiumViewer.Native.x86_64.no_v8-no_xfa](https://www.nuget.org/packages/PdfiumViewer.Native.x86_64.no_v8-no_xfa/) | 64-bit | No | No |
-| [PdfiumViewer.Native.x86.v8-xfa](https://www.nuget.org/packages/PdfiumViewer.Native.x86.v8-xfa/) | 32-bit | Yes | Yes |
-| [PdfiumViewer.Native.x86.no_v8-no_xfa](https://www.nuget.org/packages/PdfiumViewer.Native.x86.no_v8-no_xfa/) | 32-bit | No | No |
-
-These NuGet packages contain the PDFium DLL and a MSBuild properties file to
-copy this to the correct folder in your output directory.
-
-Depending on your needs, you can choose the NuGet package(s) you need. The ones
-with V8 and XFA support are bigger, but support more features. Also,
-the V8 version does not support Windows XP so if you need support for Windows XP,
-you need to choose one of the libraries that does not contain V8 support and include
-an updated version of the `dbghelp` libraries. These can be found in the
-[Libraries\Pdfium\dbghelp](https://github.com/pvginkel/PdfiumViewer/tree/master/Libraries/Pdfium/dbghelp) directory.
-
-As for the architecture you can choose one or the other, or both if you need support
-for both architectures.
-
-The above NuGet packages containing the native PDFium DLL's are build through
-a separate project. Please see [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) for
-more information on this.
+The PdfiumViewer control requires native PDFium libraries. These are not included
+in the PdfiumViewer NuGet package. See the [Installation instructions](https://github.com/pvginkel/PdfiumViewer/wiki/Installation-instructions)
+Wiki page for more information on how to add these.
 
 ## Note on the `PdfViewer` control
 
