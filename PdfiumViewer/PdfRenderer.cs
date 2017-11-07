@@ -895,6 +895,8 @@ namespace PdfiumViewer
 
             double oldScale = Zoom;
 
+            var displayRectangle = DisplayRectangle;
+
             base.SetZoom(zoom, null);
 
             var newLocation = new Point(
@@ -904,8 +906,8 @@ namespace PdfiumViewer
 
             SetDisplayRectLocation(
                 new Point(
-                    DisplayRectangle.Left - (newLocation.X - location.X),
-                    DisplayRectangle.Top - (newLocation.Y - location.Y)
+                    displayRectangle.Left - (newLocation.X - location.X),
+                    displayRectangle.Top - (newLocation.Y - location.Y)
                 ),
                 false
             );

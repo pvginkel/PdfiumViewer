@@ -46,6 +46,13 @@ namespace PdfiumViewer
             get { return _renderer; }
         }
 
+        [DefaultValue(ScrollStyle.Normal)]
+        public ScrollStyle ScrollStyle
+        {
+            get { return _renderer.ScrollStyle; }
+            set { _renderer.ScrollStyle = value; }
+        }
+
         /// <summary>
         /// Gets or sets the default document name used when saving the document.
         /// </summary>

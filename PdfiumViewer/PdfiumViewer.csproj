@@ -53,6 +53,7 @@
     <Compile Include="IPdfDocument.cs" />
     <Compile Include="IPdfMarker.cs" />
     <Compile Include="LinkClickEventHandler.cs" />
+    <Compile Include="MathEx.cs" />
     <Compile Include="MouseWheelMode.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeMethods.Pdfium.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="PdfInformation.cs" />
     <Compile Include="PdfSearchManager.cs" />
     <Compile Include="PdfTextSpan.cs" />
+    <Compile Include="ScrollStyle.cs" />
     <Compile Include="StreamManager.cs" />
     <Compile Include="PdfPageLink.cs" />
     <Compile Include="PdfPageLinks.cs" />

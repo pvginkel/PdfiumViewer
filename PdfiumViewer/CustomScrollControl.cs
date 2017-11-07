@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
@@ -17,6 +18,9 @@ namespace PdfiumViewer
         private Rectangle _displayRect;
         private readonly ScrollProperties _verticalScroll;
         private readonly ScrollProperties _horizontalScroll;
+        private IScrollManager _scrollManager;
+        private ScrollStyle _scrollStyle;
+        private bool _disposed;
 
         public event ScrollEventHandler Scroll;
 
@@ -92,10 +96,42 @@ namespace PdfiumViewer
         [Browsable(false)]
         public bool VScroll { get; private set; }
 
+        [DefaultValue(ScrollStyle.Normal)]
+        public ScrollStyle ScrollStyle
+        {
+            get { return _scrollStyle; }
+            set
+            {
+                _scrollStyle = value;
+
+                _scrollManager?.Dispose();
+
+                switch (value)
+                {
+                    case ScrollStyle.Auto:
+                        if (SystemInformation.TerminalServerSession)
+                            _scrollManager = new DirectScrollManager(this);
+                        else
+                            _scrollManager = new SmoothScrollManager(this);
+                        break;
+                    case ScrollStyle.Normal:
+                        _scrollManager = new DirectScrollManager(this);
+                        break;
+                    case ScrollStyle.Smooth:
+                        _scrollManager = new SmoothScrollManager(this);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(value), value, null);
+                }
+            }
+        }
+
         public CustomScrollControl()
         {
             SetStyle(ControlStyles.ContainerControl, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, false);
+
+            ScrollStyle = ScrollStyle.Normal;
 
             _horizontalScroll = new ScrollProperties(this, NativeMethods.SB_HORZ);
             _verticalScroll = new ScrollProperties(this, NativeMethods.SB_VERT);
@@ -187,30 +223,14 @@ namespace PdfiumViewer
 
             if (VScroll)
             {
-                var client = ClientRectangle;
-                int pos = -_displayRect.Y;
-                int maxPos = -(client.Height - _displayRect.Height);
-
-                pos = Math.Max(pos - e.Delta, 0);
-                pos = Math.Min(pos, maxPos);
-
-                SetDisplayRectLocation(_displayRect.X, -pos);
-                SyncScrollbars();
+                _scrollManager.ScrollLocation(0, -e.Delta);
 
                 if (e is HandledMouseEventArgs)
                     ((HandledMouseEventArgs)e).Handled = true;
             }
             else if (HScroll)
             {
-                var client = ClientRectangle;
-                int pos = -_displayRect.X;
-                int maxPos = -(client.Width - _displayRect.Width);
-
-                pos = Math.Max(pos - e.Delta, 0);
-                pos = Math.Min(pos, maxPos);
-
-                SetDisplayRectLocation(-pos, _displayRect.Y);
-                SyncScrollbars();
+                _scrollManager.ScrollLocation(-e.Delta, 0);
 
                 if (e is HandledMouseEventArgs)
                     ((HandledMouseEventArgs)e).Handled = true;
@@ -234,16 +254,14 @@ namespace PdfiumViewer
 
         public void SetDisplayRectLocation(Point offset, bool preserveContents)
         {
-            SetDisplayRectLocation(offset.X, offset.Y, preserveContents);
-            SyncScrollbars();
+            var style = SetDisplayLocationStyle.None;
+            if (!preserveContents)
+                style |= SetDisplayLocationStyle.ClearContent;
+
+            _scrollManager.SetLocation(offset.X, offset.Y, style);
         }
 
-        private void SetDisplayRectLocation(int x, int y)
-        {
-            SetDisplayRectLocation(x, y, true);
-        }
-
-        private void SetDisplayRectLocation(int x, int y, bool preserveContents)
+        private void SetDisplayRectLocation(int x, int y, SetDisplayLocationStyle style)
         {
             int xDelta = 0;
             int yDelta = 0;
@@ -270,7 +288,7 @@ namespace PdfiumViewer
             _displayRect.X = x;
             _displayRect.Y = y;
 
-            if ((xDelta != 0 || yDelta != 0) && IsHandleCreated && preserveContents)
+            if ((xDelta != 0 || yDelta != 0) && IsHandleCreated && (style & SetDisplayLocationStyle.ClearContent) == 0)
             {
                 var cr = ClientRectangle;
                 var rcClip = new NativeMethods.RECT(cr);
@@ -287,6 +305,9 @@ namespace PdfiumViewer
             }
 
             OnDisplayRectangleChanged(EventArgs.Empty);
+
+            if ((style & SetDisplayLocationStyle.LeaveScrollBars) == 0)
+                SyncScrollbars();
         }
 
         private int ScrollThumbPosition(int fnBar)
@@ -324,7 +345,7 @@ namespace PdfiumViewer
                 if (!vert)
                     y = 0;
 
-                SetDisplayRectLocation(x, y);
+                _scrollManager.SetLocation(x, y, SetDisplayLocationStyle.LeaveScrollBars);
                 HScroll = horiz;
                 VScroll = vert;
 
@@ -380,7 +401,7 @@ namespace PdfiumViewer
             if (y < minY)
                 y = minY;
 
-            SetDisplayRectLocation(x, y);
+            _scrollManager.SetLocation(x, y, SetDisplayLocationStyle.ClearContent | SetDisplayLocationStyle.LeaveScrollBars);
 
             return needLayout;
         }
@@ -396,7 +417,7 @@ namespace PdfiumViewer
             {
                 _horizontalScroll.Maximum = displayRect.Width - 1;
                 _horizontalScroll.LargeChange = ClientRectangle.Width;
-                _horizontalScroll.SmallChange = 5;
+                _horizontalScroll.SmallChange = ClientRectangle.Width / 10;
 
                 if (-displayRect.X >= 0 && -displayRect.X < _horizontalScroll.Maximum)
                     _horizontalScroll.Value = -displayRect.X;
@@ -408,7 +429,7 @@ namespace PdfiumViewer
             {
                 _verticalScroll.Maximum = displayRect.Height - 1;
                 _verticalScroll.LargeChange = ClientRectangle.Height;
-                _verticalScroll.SmallChange = 5;
+                _verticalScroll.SmallChange = ClientRectangle.Height / 10;
 
                 if (-displayRect.Y >= 0 && -displayRect.Y < _verticalScroll.Maximum)
                     _verticalScroll.Value = -displayRect.Y;
@@ -417,7 +438,7 @@ namespace PdfiumViewer
             }
         }
 
-        private void WmHScroll(ref System.Windows.Forms.Message m)
+        private void WmHScroll(ref Message m)
         {
             if (m.LParam != IntPtr.Zero)
             {
@@ -432,11 +453,11 @@ namespace PdfiumViewer
             {
                 case NativeMethods.SB_THUMBPOSITION:
                 case NativeMethods.SB_THUMBTRACK:
-                    SetDisplayRectLocation(
+                    _scrollManager.SetLocation(
                         -ScrollThumbPosition(NativeMethods.SB_HORZ),
-                        _displayRect.Y
+                        _displayRect.Y,
+                        SetDisplayLocationStyle.None
                     );
-                    SyncScrollbars();
                     break;
 
                 case NativeMethods.SB_LINEUP:
@@ -467,7 +488,7 @@ namespace PdfiumViewer
             WmOnScroll(ref m, oldValue, pos, ScrollOrientation.HorizontalScroll);
         }
 
-        private void WmVScroll(ref System.Windows.Forms.Message m)
+        private void WmVScroll(ref Message m)
         {
             if (m.LParam != IntPtr.Zero)
             {
@@ -482,11 +503,11 @@ namespace PdfiumViewer
             {
                 case NativeMethods.SB_THUMBPOSITION:
                 case NativeMethods.SB_THUMBTRACK:
-                    SetDisplayRectLocation(
+                    _scrollManager.SetLocation(
                         _displayRect.X,
-                        -ScrollThumbPosition(NativeMethods.SB_VERT)
+                        -ScrollThumbPosition(NativeMethods.SB_VERT),
+                        SetDisplayLocationStyle.None
                     );
-                    SyncScrollbars();
                     break;
 
                 case NativeMethods.SB_LINEUP:
@@ -521,101 +542,79 @@ namespace PdfiumViewer
         {
             if (scrollBar == Orientation.Horizontal)
             {
-                int pos = -_displayRect.X;
-                int maxPos = _horizontalScroll.Maximum;
+                int delta;
 
                 switch (action)
                 {
                     case ScrollAction.LineUp:
-                        if (pos > _horizontalScroll.SmallChange)
-                            pos -= _horizontalScroll.SmallChange;
-                        else
-                            pos = 0;
+                        delta = -_horizontalScroll.SmallChange;
                         break;
 
                     case ScrollAction.LineDown:
-                        if (pos < maxPos - _horizontalScroll.SmallChange)
-                            pos += _horizontalScroll.SmallChange;
-                        else
-                            pos = maxPos;
+                        delta = _horizontalScroll.SmallChange;
                         break;
 
                     case ScrollAction.PageUp:
-                        if (pos > _horizontalScroll.LargeChange)
-                            pos -= _horizontalScroll.LargeChange;
-                        else
-                            pos = 0;
+                        delta = -_horizontalScroll.LargeChange;
                         break;
 
                     case ScrollAction.PageDown:
-                        if (pos < maxPos - _horizontalScroll.LargeChange)
-                            pos += _horizontalScroll.LargeChange;
-                        else
-                            pos = maxPos;
+                        delta = _horizontalScroll.LargeChange;
                         break;
 
                     case ScrollAction.Home:
-                        pos = 0;
+                        delta = int.MinValue;
                         break;
 
                     case ScrollAction.End:
-                        pos = maxPos;
+                        delta = int.MaxValue;
                         break;
+
+                    default:
+                        return;
                 }
 
-                SetDisplayRectLocation(-pos, _displayRect.Y);
+                _scrollManager.ScrollLocation(delta, 0);
             }
             else
             {
-                int pos = -_displayRect.Y;
-                int maxPos = _verticalScroll.Maximum;
+                int delta;
 
                 switch (action)
                 {
                     case ScrollAction.LineUp:
-                        if (pos > 0)
-                            pos -= _verticalScroll.SmallChange;
-                        else
-                            pos = 0;
+                        delta = -_verticalScroll.SmallChange;
                         break;
 
                     case ScrollAction.LineDown:
-                        if (pos < maxPos - _verticalScroll.SmallChange)
-                            pos += _verticalScroll.SmallChange;
-                        else
-                            pos = maxPos;
+                        delta = _verticalScroll.SmallChange;
                         break;
 
                     case ScrollAction.PageUp:
-                        if (pos > _verticalScroll.LargeChange)
-                            pos -= _verticalScroll.LargeChange;
-                        else
-                            pos = 0;
+                        delta = -_verticalScroll.LargeChange;
                         break;
 
                     case ScrollAction.PageDown:
-                        if (pos < maxPos - _verticalScroll.LargeChange)
-                            pos += _verticalScroll.LargeChange;
-                        else
-                            pos = maxPos;
+                        delta = _verticalScroll.LargeChange;
                         break;
 
                     case ScrollAction.Home:
-                        pos = 0;
+                        delta = int.MinValue;
                         break;
 
                     case ScrollAction.End:
-                        pos = maxPos;
+                        delta = int.MaxValue;
                         break;
+
+                    default:
+                        return;
                 }
 
-                SetDisplayRectLocation(_displayRect.X, -pos);
+                _scrollManager.ScrollLocation(0, delta);
             }
-
-            SyncScrollbars();
         }
 
-        private void WmOnScroll(ref System.Windows.Forms.Message m, int oldValue, int value, ScrollOrientation scrollOrientation)
+        private void WmOnScroll(ref Message m, int oldValue, int value, ScrollOrientation scrollOrientation)
         {
             var type = (ScrollEventType)NativeMethods.Util.LOWORD(m.WParam);
 
@@ -625,7 +624,7 @@ namespace PdfiumViewer
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected override void WndProc(ref System.Windows.Forms.Message m)
+        protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
             {
@@ -698,6 +697,22 @@ namespace PdfiumViewer
             }
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (_scrollManager != null)
+                {
+                    _scrollManager.Dispose();
+                    _scrollManager = null;
+                }
+
+                _disposed = true;
+            }
+
+            base.Dispose(disposing);
+        }
+
         private class ScrollProperties
         {
             private int _smallChange = 1;
@@ -749,6 +764,274 @@ namespace PdfiumViewer
 
                 NativeMethods.SetScrollInfo(new HandleRef(_parentControl, _parentControl.Handle), _orientation, si, true);
             }
+        }
+
+        private interface IScrollManager : IDisposable
+        {
+            void SetLocation(int x, int y, SetDisplayLocationStyle style);
+            void ScrollLocation(int deltaX, int deltaY);
+        }
+
+        private class DirectScrollManager : IScrollManager
+        {
+            private readonly CustomScrollControl _owner;
+
+            public DirectScrollManager(CustomScrollControl owner)
+            {
+                _owner = owner;
+            }
+
+            public void SetLocation(int x, int y, SetDisplayLocationStyle style)
+            {
+                _owner.SetDisplayRectLocation(x, y, style);
+            }
+
+            public void ScrollLocation(int deltaX, int deltaY)
+            {
+                SetLocation(_owner._displayRect.X + deltaX, _owner._displayRect.Y + deltaY, SetDisplayLocationStyle.None);
+            }
+
+            public void Dispose()
+            {
+            }
+        }
+
+        private class SmoothScrollManager : IScrollManager
+        {
+            private const int AnimationDuration = 180;
+            private const int StepDuration = AnimationDuration / 2;
+
+            private readonly CustomScrollControl _owner;
+            private Timer _timer = new Timer();
+            private readonly Stopwatch _stopwatch = new Stopwatch();
+            private Point _from;
+            private ScrollOrientation _direction;
+            private int _steps;
+            private int _lead;
+            private int _travel;
+            private int _tail;
+#if DEBUG
+            private int _animations;
+#endif
+            private bool _disposed;
+
+            public SmoothScrollManager(CustomScrollControl owner)
+            {
+                _owner = owner;
+                _timer.Interval = 10;
+                _timer.Tick += _timer_Tick;
+            }
+
+            private void _timer_Tick(object sender, EventArgs e)
+            {
+                long elapsed = _stopwatch.ElapsedMilliseconds;
+
+                if (elapsed >= _steps * StepDuration)
+                {
+#if DEBUG
+                    double fps = _animations / (elapsed / 1000.0);
+                    Console.WriteLine("FPS: " + (int)fps);
+#endif
+
+                    Stop(true);
+                    return;
+                }
+
+                int step = (int)(elapsed / StepDuration);
+                int delta;
+
+                if (step == 0)
+                    delta = GetDelta(_lead, elapsed, StepDuration, DeltaStage.Lead);
+                else if (step < _steps - 1)
+                    delta = _lead + GetDelta(_travel, elapsed - StepDuration, (_steps - 2) * StepDuration, DeltaStage.Travel);
+                else
+                    delta = _lead + _travel + GetDelta(_tail, elapsed - (_steps - 1) * StepDuration, StepDuration, DeltaStage.Tail);
+
+                int x = _from.X;
+                int y = _from.Y;
+
+                if (_direction == ScrollOrientation.HorizontalScroll)
+                    x -= delta;
+                else
+                    y -= delta;
+
+                _owner.SetDisplayRectLocation(x, y, SetDisplayLocationStyle.None);
+                _owner.Update();
+
+#if DEBUG
+                _animations++;
+#endif
+            }
+
+            private int GetDelta(int delta, long elapsed, long duration, DeltaStage stage)
+            {
+                // Calculate the delta. If we're in a lead or tail, we use an interpolation function
+                // from https://en.wikipedia.org/wiki/Smoothstep. For the travel, we just interpolate.
+
+                switch (stage)
+                {
+                    case DeltaStage.Lead:
+                        return (int)(MathEx.SmoothStep(0, duration * 2, elapsed) * 2 * delta);
+                    case DeltaStage.Travel:
+                        return (int)(delta * elapsed / duration);
+                    case DeltaStage.Tail:
+                        return (int)((MathEx.SmoothStep(0, duration * 2, elapsed + duration) - 0.5) * 2 * delta);
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(stage), stage, null);
+                }
+            }
+
+            private void Stop(bool applyDelta)
+            {
+                if (_stopwatch.IsRunning)
+                {
+                    _stopwatch.Reset();
+                    _timer.Stop();
+
+                    if (applyDelta)
+                    {
+                        int x = _from.X;
+                        int y = _from.Y;
+
+                        var delta = _lead + _travel + _tail;
+
+                        if (_direction == ScrollOrientation.HorizontalScroll)
+                            x -= delta;
+                        else
+                            y -= delta;
+
+                        _owner.SetDisplayRectLocation(x, y, SetDisplayLocationStyle.None);
+                    }
+                }
+            }
+
+            public void SetLocation(int x, int y, SetDisplayLocationStyle style)
+            {
+                Stop(false);
+                _owner.SetDisplayRectLocation(x, y, style);
+            }
+
+            public void ScrollLocation(int deltaX, int deltaY)
+            {
+                // We can't animate both directions.
+
+                if (deltaX != 0 && deltaY != 0)
+                {
+                    SetLocation(_owner._displayRect.X + deltaX, _owner._displayRect.Y + deltaY, SetDisplayLocationStyle.None);
+                    return;
+                }
+
+                var direction = deltaX != 0 ? ScrollOrientation.HorizontalScroll : ScrollOrientation.VerticalScroll;
+                int delta = deltaX != 0 ? deltaX : deltaY;
+
+                var client = _owner.ClientRectangle;
+                int maxX = Math.Max(_owner._displayRect.Width - client.Width, 0);
+                int maxY = Math.Max(_owner._displayRect.Height - client.Height, 0);
+
+                // Do we need to add to the currently running animation?
+
+                int currentDelta = _lead + _travel + _tail;
+
+                if (_stopwatch.IsRunning && direction == _direction && Math.Sign(delta) == Math.Sign(currentDelta))
+                {
+                    if (direction == ScrollOrientation.HorizontalScroll)
+                    {
+                        if (delta < 0)
+                            delta = MathEx.Clamp(delta, _from.X + currentDelta, 0);
+                        else
+                            delta = MathEx.Clamp(delta, 0, maxX - (-_from.X + currentDelta));
+                    }
+                    else
+                    {
+                        if (delta < 0)
+                            delta = MathEx.Clamp(delta, _from.Y + currentDelta, 0);
+                        else
+                            delta = MathEx.Clamp(delta, 0, maxY - (-_from.Y + currentDelta));
+                    }
+
+                    // Nothing to scroll?
+
+                    if (delta == 0)
+                        return;
+
+                    // Add to the current animation.
+
+                    int half = delta / 2;
+                    _travel += _tail + half;
+                    _tail = delta - half;
+                    _steps += 2;
+                }
+                else
+                {
+                    // If we can't update the current animation, or we're starting a new one,
+                    // we always start from the current position.
+
+                    _from = _owner._displayRect.Location;
+
+                    if (direction == ScrollOrientation.HorizontalScroll)
+                    {
+                        if (delta < 0)
+                            delta = MathEx.Clamp(delta, _from.X, 0);
+                        else
+                            delta = MathEx.Clamp(delta, 0, maxX + _from.X);
+                    }
+                    else
+                    {
+                        if (delta < 0)
+                            delta = MathEx.Clamp(delta, _from.Y, 0);
+                        else
+                            delta = MathEx.Clamp(delta, 0, maxY + _from.Y);
+                    }
+
+                    if (delta == 0)
+                        return;
+
+                    _direction = direction;
+                    int half = delta / 2;
+                    _lead = half;
+                    _tail = delta - half;
+                    _travel = 0;
+                    _steps = 2;
+#if DEBUG
+                    _animations = 0;
+#endif
+
+                    _stopwatch.Reset();
+                    _stopwatch.Start();
+                    _timer.Start();
+                }
+            }
+
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Stop(false);
+
+                    if (_timer != null)
+                    {
+                        _timer.Dispose();
+                        _timer = null;
+                    }
+
+                    _disposed = true;
+                }
+            }
+
+            private enum DeltaStage
+            {
+                Lead,
+                Travel,
+                Tail
+            }
+        }
+
+        [Flags]
+        private enum SetDisplayLocationStyle
+        {
+            None = 0,
+            ClearContent = 1,
+            LeaveScrollBars = 2
         }
     }
 }

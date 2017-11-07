@@ -38,6 +38,7 @@ namespace PdfiumViewer.Demo
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.printPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printMultiplePagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,7 +88,6 @@ namespace PdfiumViewer.Demo
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this._coordinatesToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.pdfViewer1 = new PdfiumViewer.PdfViewer();
-            this.printMultiplePagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -136,6 +136,13 @@ namespace PdfiumViewer.Demo
             this.printPreviewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.printPreviewToolStripMenuItem.Text = "Print Preview";
             this.printPreviewToolStripMenuItem.Click += new System.EventHandler(this.printPreviewToolStripMenuItem_Click);
+            // 
+            // printMultiplePagesToolStripMenuItem
+            // 
+            this.printMultiplePagesToolStripMenuItem.Name = "printMultiplePagesToolStripMenuItem";
+            this.printMultiplePagesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.printMultiplePagesToolStripMenuItem.Text = "Print Multiple Pages";
+            this.printMultiplePagesToolStripMenuItem.Click += new System.EventHandler(this.printMultiplePagesToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -534,15 +541,9 @@ namespace PdfiumViewer.Demo
             this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pdfViewer1.Location = new System.Drawing.Point(0, 49);
             this.pdfViewer1.Name = "pdfViewer1";
+            this.pdfViewer1.ScrollStyle = PdfiumViewer.ScrollStyle.Smooth;
             this.pdfViewer1.Size = new System.Drawing.Size(1128, 524);
             this.pdfViewer1.TabIndex = 0;
-            // 
-            // printMultiplePagesToolStripMenuItem
-            // 
-            this.printMultiplePagesToolStripMenuItem.Name = "printMultiplePagesToolStripMenuItem";
-            this.printMultiplePagesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.printMultiplePagesToolStripMenuItem.Text = "Print Multiple Pages";
-            this.printMultiplePagesToolStripMenuItem.Click += new System.EventHandler(this.printMultiplePagesToolStripMenuItem_Click);
             // 
             // MainForm
             // 
