@@ -36,6 +36,19 @@ namespace PdfiumViewer
 
         public event EventHandler ZoomChanged;
 
+        /// <summary>
+        /// If true, cursor will be a hand and the mouse can be used to pan
+        /// within the document.  If false, cursor will be an arrow and
+        /// mouse operations can be defined by consumers of the control.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool PanningEnabled = true;
+
+        private bool ShouldPan
+        {
+            get { return _canPan && PanningEnabled; }
+        }
+
         protected virtual void OnZoomChanged(EventArgs e)
         {
             var ev = ZoomChanged;
@@ -226,7 +239,7 @@ namespace PdfiumViewer
 
         protected override void OnSetCursor(SetCursorEventArgs e)
         {
-            if (_canPan && e.HitTest == HitTest.Client)
+            if (ShouldPan && e.HitTest == HitTest.Client)
                 e.Cursor = PanCursor;
 
             base.OnSetCursor(e);
@@ -243,7 +256,7 @@ namespace PdfiumViewer
         {
             base.OnMouseDown(e);
 
-            if (e.Button != MouseButtons.Left || !_canPan)
+            if (e.Button != MouseButtons.Left || !ShouldPan)
                 return;
 
             Capture = true;
@@ -255,7 +268,7 @@ namespace PdfiumViewer
         {
             base.OnMouseMove(e);
 
-            if (!Capture)
+            if (!Capture || !ShouldPan)
                 return;
 
             var offset = new Point(e.Location.X - _dragStart.X, e.Location.Y - _dragStart.Y);
