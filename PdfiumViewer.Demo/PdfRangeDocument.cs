@@ -288,6 +288,11 @@ namespace PdfiumViewer.Demo
             return _document.RectangleFromPdf(TranslatePage(page), rect);
         }
 
+        public IList<PdfCharacterInformation> GetCharacterInformation(int page)
+        {
+            return _document.GetCharacterInformation(page);
+        }
+
         private int TranslatePage(int page)
         {
             if (page < 0 || page >= PageCount)

@@ -252,5 +252,12 @@ namespace PdfiumViewer
         /// <param name="rect">The rectangle to convert.</param>
         /// <returns>The converted rectangle.</returns>
         Rectangle RectangleFromPdf(int page, RectangleF rect);
+
+        /// <summary>
+        /// Get detailed information for all characters on the page.
+        /// </summary>
+        /// <param name="page">The page to get the information for.</param>
+        /// <returns>The character information.</returns>
+        IList<PdfCharacterInformation> GetCharacterInformation(int page);
     }
 }
