@@ -161,11 +161,6 @@ namespace PdfiumViewer
             PageSizes = new ReadOnlyCollection<SizeF>(_pageSizes);
         }
 
-        /// <summary>
-        /// Renders a page of the PDF document to the provided graphics instance.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="graphics">Graphics instance to render the page on.</param>
         /// <param name="dpiX">Horizontal DPI.</param>
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="bounds">Bounds to render the page in.</param>
@@ -289,7 +284,7 @@ namespace PdfiumViewer
         /// <returns>The rendered image.</returns>
         public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRenderFlags flags)
         {
-            return Render(page, width, height, dpiX, dpiY, 0, flags);
+            return Render(page, width, height, dpiX, dpiY, 0, flags & ~PdfRenderFlags.Annotations, (flags & PdfRenderFlags.Annotations) != 0);
         }
 
         /// <summary>
@@ -304,6 +299,23 @@ namespace PdfiumViewer
         /// <param name="flags">Flags used to influence the rendering.</param>
         /// <returns>The rendered image.</returns>
         public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags)
+        {
+            return Render(page, width, height, dpiX, dpiY, rotate, flags, false);
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="width">Width of the rendered image.</param>
+        /// <param name="height">Height of the rendered image.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="rotate">Rotation.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <param name="drawFormFields">Draw form fields.</param>
+        /// <returns>The rendered image.</returns>
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags, bool drawFormFields)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -336,7 +348,7 @@ namespace PdfiumViewer
                         0, 0, width, height,
                         (int)rotate,
                         FlagsToFPDFFlags(flags),
-                        (flags & PdfRenderFlags.Annotations) != 0
+                        drawFormFields
                     );
 
                     if (!success)
