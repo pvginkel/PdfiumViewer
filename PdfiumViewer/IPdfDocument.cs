@@ -252,5 +252,38 @@ namespace PdfiumViewer
         /// <param name="rect">The rectangle to convert.</param>
         /// <returns>The converted rectangle.</returns>
         Rectangle RectangleFromPdf(int page, RectangleF rect);
+
+        /// <summary>
+        /// Get the character index at or nearby a specific position. 
+        /// </summary>
+        /// <param name="location">The location to inspect</param>
+        /// <param name="xTolerance">An x-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="yTolerance">A y-axis tolerance value for character hit detection, in point unit.</param>
+        /// <returns>The zero-based index of the character at, or nearby the point specified by parameter x and y. If there is no character at or nearby the point, it will return -1.</returns>
+        int GetCharacterIndexAtPosition(PdfPoint location, double xTolerance, double yTolerance);
+
+        /// <summary>
+        /// Get the full word at or nearby a specific position
+        /// </summary>
+        /// <param name="location">The location to inspect</param>
+        /// <param name="xTolerance">An x-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="yTolerance">A y-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="span">The location of the found word, if any</param>
+        /// <returns>A value indicating whether a word was found at the specified location</returns>
+        bool GetWordAtPosition(PdfPoint location, double xTolerance, double yTolerance, out PdfTextSpan span);
+
+        /// <summary>
+        /// Get number of characters in a page.
+        /// </summary>
+        /// <param name="page">The page to get the character count from</param>
+        /// <returns>Number of characters in the page. Generated characters, like additional space characters, new line characters, are also counted.</returns>
+        int CountCharacters(int page);
+
+        /// <summary>
+        /// Gets the rectangular areas occupied by a segment of text
+        /// </summary>
+        /// <param name="page">The page to get the rectangles from</param>
+        /// <returns>The rectangular areas occupied by a segment of text</returns>
+        List<PdfRectangle> GetTextRectangles(int page, int startIndex, int count);
     }
 }

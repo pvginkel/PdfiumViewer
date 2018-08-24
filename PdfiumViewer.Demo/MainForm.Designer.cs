@@ -32,12 +32,14 @@ namespace PdfiumViewer.Demo
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.printPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printMultiplePagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -86,11 +88,14 @@ namespace PdfiumViewer.Demo
             this._pageToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this._coordinatesToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.pdfViewerContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pdfViewer1 = new PdfiumViewer.PdfViewer();
-            this.printMultiplePagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.pdfViewerContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -136,6 +141,13 @@ namespace PdfiumViewer.Demo
             this.printPreviewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.printPreviewToolStripMenuItem.Text = "Print Preview";
             this.printPreviewToolStripMenuItem.Click += new System.EventHandler(this.printPreviewToolStripMenuItem_Click);
+            // 
+            // printMultiplePagesToolStripMenuItem
+            // 
+            this.printMultiplePagesToolStripMenuItem.Name = "printMultiplePagesToolStripMenuItem";
+            this.printMultiplePagesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.printMultiplePagesToolStripMenuItem.Text = "Print Multiple Pages";
+            this.printMultiplePagesToolStripMenuItem.Click += new System.EventHandler(this.printMultiplePagesToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -529,6 +541,29 @@ namespace PdfiumViewer.Demo
             this._coordinatesToolStripLabel.Size = new System.Drawing.Size(77, 17);
             this._coordinatesToolStripLabel.Text = "(coordinates)";
             // 
+            // pdfViewerContextMenu
+            // 
+            this.pdfViewerContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem,
+            this.selectAllToolStripMenuItem});
+            this.pdfViewerContextMenu.Name = "pdfViewerContextMenu";
+            this.pdfViewerContextMenu.Size = new System.Drawing.Size(123, 48);
+            this.pdfViewerContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.pdfViewerContextMenu_Opening);
+            // 
+            // copyToolStripMenuItem
+            // 
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.copyToolStripMenuItem.Text = "&Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
+            // 
+            // selectAllToolStripMenuItem
+            // 
+            this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.selectAllToolStripMenuItem.Text = "Select &All";
+            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+            // 
             // pdfViewer1
             // 
             this.pdfViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -536,13 +571,6 @@ namespace PdfiumViewer.Demo
             this.pdfViewer1.Name = "pdfViewer1";
             this.pdfViewer1.Size = new System.Drawing.Size(1128, 524);
             this.pdfViewer1.TabIndex = 0;
-            // 
-            // printMultiplePagesToolStripMenuItem
-            // 
-            this.printMultiplePagesToolStripMenuItem.Name = "printMultiplePagesToolStripMenuItem";
-            this.printMultiplePagesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.printMultiplePagesToolStripMenuItem.Text = "Print Multiple Pages";
-            this.printMultiplePagesToolStripMenuItem.Click += new System.EventHandler(this.printMultiplePagesToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -563,6 +591,7 @@ namespace PdfiumViewer.Demo
             this.toolStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.pdfViewerContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -625,6 +654,9 @@ namespace PdfiumViewer.Demo
         private System.Windows.Forms.ToolStripMenuItem findToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
         private System.Windows.Forms.ToolStripMenuItem printMultiplePagesToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip pdfViewerContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
     }
 }
 
