@@ -161,6 +161,9 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Indicates whether the user currently has text selected
+        /// </summary>
         public bool IsTextSelected
         {
             get
@@ -176,6 +179,9 @@ namespace PdfiumViewer
             }
         }
 
+        /// <summary>
+        /// Gets the currently selected text
+        /// </summary>
         public string SelectedText
         {
             get
@@ -450,30 +456,22 @@ namespace PdfiumViewer
             UpdateScrollbars();
         }
 
-        /// <summary>
-        /// Determines whether the specified key is a regular input key or a special key that requires preprocessing.
-        /// </summary>
-        /// <returns>
-        /// true if the specified key is a regular input key; otherwise, false.
-        /// </returns>
-        /// <param name="keyData">One of the <see cref="T:System.Windows.Forms.Keys"/> values. </param>
-        protected override bool IsInputKey(Keys keyData)
+        protected override void OnKeyDown(KeyEventArgs e)
         {
-            switch ((keyData) & Keys.KeyCode)
+            switch ((e.KeyData) & Keys.KeyCode)
             {
                 case Keys.A:
-                    if ((keyData & Keys.Modifiers) == Keys.Control)
+                    if ((e.KeyData & Keys.Modifiers) == Keys.Control)
                         SelectAll();
-                    return true;
+                    break;
 
                 case Keys.C:
-                    if ((keyData & Keys.Modifiers) == Keys.Control)
+                    if ((e.KeyData & Keys.Modifiers) == Keys.Control)
                         CopySelection();
-                    return true;
-
-                default:
-                    return base.IsInputKey(keyData);
+                    break;
             }
+
+            base.OnKeyDown(e);
         }
 
         public void SelectAll()
@@ -519,6 +517,7 @@ namespace PdfiumViewer
             _height = 0;
             _maxWidth = 0;
             _maxHeight = 0;
+			_textSelectionState = null;
 
             foreach (var size in Document.PageSizes)
             {

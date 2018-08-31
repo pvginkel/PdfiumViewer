@@ -94,7 +94,8 @@ namespace PdfiumViewer
 
         public CustomScrollControl()
         {
-            SetStyle(ControlStyles.ContainerControl, true);
+            SetStyle(ControlStyles.Selectable, true);
+            SetStyle(ControlStyles.UserMouse, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, false);
 
             _horizontalScroll = new ScrollProperties(this, NativeMethods.SB_HORZ);
