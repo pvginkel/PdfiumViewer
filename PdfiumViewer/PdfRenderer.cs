@@ -517,7 +517,7 @@ namespace PdfiumViewer
             _height = 0;
             _maxWidth = 0;
             _maxHeight = 0;
-			_textSelectionState = null;
+            _textSelectionState = null;
 
             foreach (var size in Document.PageSizes)
             {
