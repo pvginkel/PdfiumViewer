@@ -32,8 +32,8 @@ namespace PdfiumViewer
             if (path == null)
                 return false;
 
-            path = Path.Combine(path, IntPtr.Size == 4 ? "x86" : "x64");
-            path = Path.Combine(path, "Pdfium.dll");
+			path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
+			path = Path.Combine(path, "Pdfium.dll");
 
             return File.Exists(path) && LoadLibrary(path) != IntPtr.Zero;
         }
