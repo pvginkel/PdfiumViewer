@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,8 +22,18 @@ namespace PdfiumViewer.WPFDemo
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			/*
+			PdfiumResolver.Resolve += (s, e) => e.PdfiumFileName = Path.Combine(
+				Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location),
+				"native",
+				"pdfium",
+				Environment.Is64BitProcess ? "x64" : "x86",
+				"pdfium.dll");
+			*/
 		}
-		private async void RenderToMemDCButton_Click(object sender, RoutedEventArgs e)
+
+		private void RenderToMemDCButton_Click(object sender, RoutedEventArgs e)
 		{
 			if (pdfDoc == null)
 			{
@@ -106,7 +117,7 @@ namespace PdfiumViewer.WPFDemo
 
 			//var host = new System.Windows.Forms.Integration.WindowsFormsHost();
 
-			
+
 			//host.HorizontalAlignment = HorizontalAlignment.Stretch;
 			//host.VerticalAlignment=VerticalAlignment.Stretch;
 
