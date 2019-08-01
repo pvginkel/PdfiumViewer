@@ -4,6 +4,16 @@ Apache 2.0 License.
 
 [Download from NuGet](http://nuget.org/packages/PdfiumViewer).
 
+## Archived
+
+I regret to announce I'm archiving this project. I haven't been able to spend any real time on this for a long time now, and must face the fact I'm not in a position to properly support this project.
+
+I understand that even though I haven't been able to spend time, other developers have stepped in helping out answering issues, and archiving this project will make it more difficult finding help using PdfiumViewer. I'm sorry for this inconvenience.
+
+Together with archiving this project, I will also be archiving the [PdfiumBuild](https://github.com/pvginkel/PdfiumBuild) project. I'll make a number of successful builds available in the PdfiumBuild repository for anyone who needs them, but the build server will be shutdown as part of archiving these projects.
+
+I've had a great time developing this project and helping you out using this project, and I'm sad I have to now close this down. I hope PdfiumViewer has been of value to you. The source code and NuGet packages won't be going anywhere, so keep using them if they're of value to you.
+
 ## Introduction
 
 PdfiumViewer is a PDF viewer based on the PDFium project.
