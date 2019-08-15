@@ -21,6 +21,9 @@ namespace PdfiumViewer
         private readonly int _id;
         private Stream _stream;
 
+        private PageData _currentPageData = null;
+        private int _currentPageDataPageNumber = -1;
+
         public PdfFile(Stream stream, string password)
         {
             if (stream == null)
@@ -45,10 +48,7 @@ namespace PdfiumViewer
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-            using (var pageData = new PageData(_document, _form, pageNumber))
-            {
-                NativeMethods.FPDF_RenderPage(dc, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
-            }
+            NativeMethods.FPDF_RenderPage(dc, GetPageData(pageNumber).Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, 0, flags);
 
             return true;
         }
@@ -58,15 +58,14 @@ namespace PdfiumViewer
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
-            using (var pageData = new PageData(_document, _form, pageNumber))
+            var pageData = GetPageData(pageNumber);
+
+            NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
+
+            if (renderFormFill)
             {
-                if (renderFormFill)
-                    flags &= ~NativeMethods.FPDF.ANNOT;
-
-                NativeMethods.FPDF_RenderPageBitmap(bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
-
-                if (renderFormFill)
-                    NativeMethods.FPDF_FFLDraw(_form, bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
+                flags &= ~NativeMethods.FPDF.ANNOT;
+                NativeMethods.FPDF_FFLDraw(_form, bitmapHandle, pageData.Page, boundsOriginX, boundsOriginY, boundsWidth, boundsHeight, rotate, flags);
             }
 
             return true;
@@ -79,40 +78,37 @@ namespace PdfiumViewer
 
             var links = new List<PdfPageLink>();
 
-            using (var pageData = new PageData(_document, _form, pageNumber))
+            int link = 0;
+            IntPtr annotation;
+
+            while (NativeMethods.FPDFLink_Enumerate(GetPageData(pageNumber).Page, ref link, out annotation))
             {
-                int link = 0;
-                IntPtr annotation;
+                var destination = NativeMethods.FPDFLink_GetDest(_document, annotation);
+                int? target = null;
+                string uri = null;
 
-                while (NativeMethods.FPDFLink_Enumerate(pageData.Page, ref link, out annotation))
+                if (destination != IntPtr.Zero)
+                    target = (int)NativeMethods.FPDFDest_GetPageIndex(_document, destination);
+
+                var action = NativeMethods.FPDFLink_GetAction(annotation);
+                if (action != IntPtr.Zero)
                 {
-                    var destination = NativeMethods.FPDFLink_GetDest(_document, annotation);
-                    int? target = null;
-                    string uri = null;
+                    const uint length = 1024;
+                    var sb = new StringBuilder(1024);
+                    NativeMethods.FPDFAction_GetURIPath(_document, action, sb, length);
 
-                    if (destination != IntPtr.Zero)
-                        target = (int)NativeMethods.FPDFDest_GetPageIndex(_document, destination);
+                    uri = sb.ToString();
+                }
 
-                    var action = NativeMethods.FPDFLink_GetAction(annotation);
-                    if (action != IntPtr.Zero)
-                    {
-                        const uint length = 1024;
-                        var sb = new StringBuilder(1024);
-                        NativeMethods.FPDFAction_GetURIPath(_document, action, sb, length);
+                var rect = new NativeMethods.FS_RECTF();
 
-                        uri = sb.ToString();
-                    }
-
-                    var rect = new NativeMethods.FS_RECTF();
-
-                    if (NativeMethods.FPDFLink_GetAnnotRect(annotation, rect) && (target.HasValue || uri != null))
-                    {
-                        links.Add(new PdfPageLink(
-                            new RectangleF(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top),
-                            target,
-                            uri
-                        ));
-                    }
+                if (NativeMethods.FPDFLink_GetAnnotRect(annotation, rect) && (target.HasValue || uri != null))
+                {
+                    links.Add(new PdfPageLink(
+                        new RectangleF(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top),
+                        target,
+                        uri
+                    ));
                 }
             }
 
@@ -241,39 +237,38 @@ namespace PdfiumViewer
 
             for (int page = startPage; page <= endPage; page++)
             {
-                using (var pageData = new PageData(_document, _form, page))
+                var pageData = GetPageData(page);
+
+                NativeMethods.FPDF_SEARCH_FLAGS flags = 0;
+                if (matchCase)
+                    flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHCASE;
+                if (wholeWord)
+                    flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHWHOLEWORD;
+
+                var handle = NativeMethods.FPDFText_FindStart(pageData.TextPage, FPDFEncoding.GetBytes(text), flags, 0);
+
+                try
                 {
-                    NativeMethods.FPDF_SEARCH_FLAGS flags = 0;
-                    if (matchCase)
-                        flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHCASE;
-                    if (wholeWord)
-                        flags |= NativeMethods.FPDF_SEARCH_FLAGS.FPDF_MATCHWHOLEWORD;
-
-                    var handle = NativeMethods.FPDFText_FindStart(pageData.TextPage, FPDFEncoding.GetBytes(text), flags, 0);
-
-                    try
+                    while (NativeMethods.FPDFText_FindNext(handle))
                     {
-                        while (NativeMethods.FPDFText_FindNext(handle))
-                        {
-                            int index = NativeMethods.FPDFText_GetSchResultIndex(handle);
+                        int index = NativeMethods.FPDFText_GetSchResultIndex(handle);
 
-                            int matchLength = NativeMethods.FPDFText_GetSchCount(handle);
+                        int matchLength = NativeMethods.FPDFText_GetSchCount(handle);
 
-                            var result = new byte[(matchLength + 1) * 2];
-                            NativeMethods.FPDFText_GetText(pageData.TextPage, index, matchLength, result);
-                            string match = FPDFEncoding.GetString(result, 0, matchLength * 2);
+                        var result = new byte[(matchLength + 1) * 2];
+                        NativeMethods.FPDFText_GetText(pageData.TextPage, index, matchLength, result);
+                        string match = FPDFEncoding.GetString(result, 0, matchLength * 2);
 
-                            matches.Add(new PdfMatch(
-                                match,
-                                new PdfTextSpan(page, index, matchLength),
-                                page
-                            ));
-                        }
+                        matches.Add(new PdfMatch(
+                            match,
+                            new PdfTextSpan(page, index, matchLength),
+                            page
+                        ));
                     }
-                    finally
-                    {
-                        NativeMethods.FPDFText_FindClose(handle);
-                    }
+                }
+                finally
+                {
+                    NativeMethods.FPDFText_FindClose(handle);
                 }
             }
 
@@ -282,130 +277,119 @@ namespace PdfiumViewer
 
         public IList<PdfRectangle> GetTextBounds(PdfTextSpan textSpan)
         {
-            using (var pageData = new PageData(_document, _form, textSpan.Page))
-            {
-                return GetTextBounds(pageData.TextPage, textSpan.Page, textSpan.Offset, textSpan.Length);
-            }
+            return GetTextBounds(GetPageData(textSpan.Page).TextPage, textSpan.Page, textSpan.Offset, textSpan.Length);
         }
 
         public Point PointFromPdf(int page, PointF point)
         {
-            using (var pageData = new PageData(_document, _form, page))
-            {
-                NativeMethods.FPDF_PageToDevice(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    point.X,
-                    point.Y,
-                    out var deviceX,
-                    out var deviceY
-                );
+            var pageData = GetPageData(page);
+            NativeMethods.FPDF_PageToDevice(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                point.X,
+                point.Y,
+                out var deviceX,
+                out var deviceY
+            );
 
-                return new Point(deviceX, deviceY);
-            }
+            return new Point(deviceX, deviceY);
         }
 
         public Rectangle RectangleFromPdf(int page, RectangleF rect)
         {
-            using (var pageData = new PageData(_document, _form, page))
-            {
-                NativeMethods.FPDF_PageToDevice(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    rect.Left,
-                    rect.Top,
-                    out var deviceX1,
-                    out var deviceY1
-                );
+            var pageData = GetPageData(page);
+            NativeMethods.FPDF_PageToDevice(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                rect.Left,
+                rect.Top,
+                out var deviceX1,
+                out var deviceY1
+            );
 
-                NativeMethods.FPDF_PageToDevice(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    rect.Right,
-                    rect.Bottom,
-                    out var deviceX2,
-                    out var deviceY2
-                );
+            NativeMethods.FPDF_PageToDevice(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                rect.Right,
+                rect.Bottom,
+                out var deviceX2,
+                out var deviceY2
+            );
 
-                return new Rectangle(
-                    deviceX1,
-                    deviceY1,
-                    deviceX2 - deviceX1,
-                    deviceY2 - deviceY1
-                );
-            }
+            return new Rectangle(
+                deviceX1,
+                deviceY1,
+                deviceX2 - deviceX1,
+                deviceY2 - deviceY1
+            );
         }
 
         public PointF PointToPdf(int page, Point point)
         {
-            using (var pageData = new PageData(_document, _form, page))
-            {
-                NativeMethods.FPDF_DeviceToPage(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    point.X,
-                    point.Y,
-                    out var deviceX,
-                    out var deviceY
-                );
+            var pageData = GetPageData(page);
+            NativeMethods.FPDF_DeviceToPage(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                point.X,
+                point.Y,
+                out var deviceX,
+                out var deviceY
+            );
 
-                return new PointF((float)deviceX, (float)deviceY);
-            }
+            return new PointF((float)deviceX, (float)deviceY);
         }
 
         public RectangleF RectangleToPdf(int page, Rectangle rect)
         {
-            using (var pageData = new PageData(_document, _form, page))
-            {
-                NativeMethods.FPDF_DeviceToPage(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    rect.Left,
-                    rect.Top,
-                    out var deviceX1,
-                    out var deviceY1
-                );
+            var pageData = GetPageData(page);
+            NativeMethods.FPDF_DeviceToPage(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                rect.Left,
+                rect.Top,
+                out var deviceX1,
+                out var deviceY1
+            );
 
-                NativeMethods.FPDF_DeviceToPage(
-                    pageData.Page,
-                    0,
-                    0,
-                    (int)pageData.Width,
-                    (int)pageData.Height,
-                    0,
-                    rect.Right,
-                    rect.Bottom,
-                    out var deviceX2,
-                    out var deviceY2
-                );
+            NativeMethods.FPDF_DeviceToPage(
+                pageData.Page,
+                0,
+                0,
+                (int)pageData.Width,
+                (int)pageData.Height,
+                0,
+                rect.Right,
+                rect.Bottom,
+                out var deviceX2,
+                out var deviceY2
+            );
 
-                return new RectangleF(
-                    (float)deviceX1,
-                    (float)deviceY1,
-                    (float)(deviceX2 - deviceX1),
-                    (float)(deviceY2 - deviceY1)
-                );
-            }
+            return new RectangleF(
+                (float)deviceX1,
+                (float)deviceY1,
+                (float)(deviceX2 - deviceX1),
+                (float)(deviceY2 - deviceY1)
+            );
         }
 
         private IList<PdfRectangle> GetTextBounds(IntPtr textPage, int page, int index, int matchLength)
@@ -475,39 +459,106 @@ namespace PdfiumViewer
 
         public string GetPdfText(int page)
         {
-            using (var pageData = new PageData(_document, _form, page))
-            {
-                int length = NativeMethods.FPDFText_CountChars(pageData.TextPage);
-                return GetPdfText(pageData, new PdfTextSpan(page, 0, length));
-            }
+            var pageData = GetPageData(page);
+            int length = NativeMethods.FPDFText_CountChars(pageData.TextPage);
+            return GetPdfText(pageData, new PdfTextSpan(page, 0, length));
         }
 
         public string GetPdfText(PdfTextSpan textSpan)
         {
-            using (var pageData = new PageData(_document, _form, textSpan.Page))
-            {
-                return GetPdfText(pageData, textSpan);
-            }
+            return GetPdfText(GetPageData(textSpan.Page), textSpan);
         }
 
         private string GetPdfText(PageData pageData, PdfTextSpan textSpan)
         {
+            // NOTE: The count parameter in FPDFText_GetText seems to include the null terminator, even though the documentation does not specify this.
+            // So to read 40 characters, we need to allocate 82 bytes (2 for the terminator), and request 41 characters from GetText.
+            // The return value also includes the terminator (which is documented)
             var result = new byte[(textSpan.Length + 1) * 2];
-            NativeMethods.FPDFText_GetText(pageData.TextPage, textSpan.Offset, textSpan.Length, result);
-            return FPDFEncoding.GetString(result, 0, textSpan.Length * 2);
+            int count = NativeMethods.FPDFText_GetText(pageData.TextPage, textSpan.Offset, textSpan.Length + 1, result);
+            if (count <= 0)
+                return string.Empty;
+            return FPDFEncoding.GetString(result, 0, (count - 1) * 2);
         }
 
-        public void DeletePage (int pageNumber)
+        public int GetCharIndexAtPos(PdfPoint location, double xTolerance, double yTolerance)
+        {
+            return NativeMethods.FPDFText_GetCharIndexAtPos(
+                GetPageData(location.Page).TextPage,
+                location.Location.X,
+                location.Location.Y,
+                xTolerance,
+                yTolerance
+            );
+        }
+
+        public bool GetWordAtPosition(PdfPoint location, double xTolerance, double yTolerance, out PdfTextSpan span)
+        {
+            var index = GetCharIndexAtPos(location, xTolerance, yTolerance);
+            if (index < 0)
+            {
+                span = default(PdfTextSpan);
+                return false;
+            }
+
+            var baseCharacter = GetCharacter(location.Page, index);
+            if (IsWordSeparator(baseCharacter))
+            {
+                span = default(PdfTextSpan);
+                return false;
+            }
+
+            int start = index, end = index;
+
+            for (int i = index - 1; i >= 0; i--)
+            {
+                var c = GetCharacter(location.Page, i);
+                if (IsWordSeparator(c))
+                    break;
+                start = i;
+            }
+
+            var count = CountChars(location.Page);
+            for (int i = index + 1; i < count; i++)
+            {
+                var c = GetCharacter(location.Page, i);
+                if (IsWordSeparator(c))
+                    break;
+                end = i;
+            }
+
+            span = new PdfTextSpan(location.Page, start, end - start);
+            return true;
+
+            bool IsWordSeparator(char c)
+            {
+                return char.IsSeparator(c) || char.IsPunctuation(c) || char.IsControl(c) || char.IsWhiteSpace(c) || c == '\r' || c == '\n';
+            }
+        }
+
+        public char GetCharacter(int page, int index)
+        {
+            return NativeMethods.FPDFText_GetUnicode(GetPageData(page).TextPage, index);
+        }
+
+        public int CountChars(int page)
+        {
+            return NativeMethods.FPDFText_CountChars(GetPageData(page).TextPage);
+        }
+
+        public List<PdfRectangle> GetTextRectangles(int page, int startIndex, int count)
+        {
+            return NativeMethods.FPDFText_GetRectangles(GetPageData(page).TextPage, page, startIndex, count);
+        }
+
+        public void DeletePage(int pageNumber)
         {
             NativeMethods.FPDFPage_Delete(_document, pageNumber);
         }
 
-        public void RotatePage (int pageNumber, PdfRotation rotation)
+        public void RotatePage(int pageNumber, PdfRotation rotation)
         {
-            using (var pageData = new PageData(_document, _form, pageNumber))
-            {
-                NativeMethods.FPDFPage_SetRotation(pageData.Page, rotation);
-            }
+            NativeMethods.FPDFPage_SetRotation(GetPageData(pageNumber).Page, rotation);
         }
 
         public PdfInformation GetInformation()
@@ -608,6 +659,9 @@ namespace PdfiumViewer
             {
                 StreamManager.Unregister(_id);
 
+                _currentPageData?.Dispose();
+                _currentPageData = null;
+
                 if (_form != IntPtr.Zero)
                 {
                     NativeMethods.FORM_DoDocumentAAction(_form, NativeMethods.FPDFDOC_AACTION.WC);
@@ -632,6 +686,18 @@ namespace PdfiumViewer
 
                 _disposed = true;
             }
+        }
+
+        private PageData GetPageData(int pageNumber)
+        {
+            if (_currentPageDataPageNumber != pageNumber)
+            {
+                _currentPageData?.Dispose();
+                _currentPageData = new PageData(_document, _form, pageNumber);
+                _currentPageDataPageNumber = pageNumber;
+            }
+
+            return _currentPageData;
         }
 
         private class PageData : IDisposable

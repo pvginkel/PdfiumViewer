@@ -505,6 +505,53 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Get the character index at or nearby a specific position. 
+        /// </summary>
+        /// <param name="page">The page to get the character index from</param>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        /// <param name="xTolerance">An x-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="yTolerance">A y-axis tolerance value for character hit detection, in point unit.</param>
+        /// <returns>The zero-based index of the character at, or nearby the point specified by parameter x and y. If there is no character at or nearby the point, it will return -1.</returns>
+        public int GetCharacterIndexAtPosition(PdfPoint location, double xTolerance, double yTolerance)
+        {
+            return _file.GetCharIndexAtPos(location, xTolerance, yTolerance);
+        }
+
+        /// <summary>
+        /// Get the full word at or nearby a specific position
+        /// </summary>
+        /// <param name="location">The location to inspect</param>
+        /// <param name="xTolerance">An x-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="yTolerance">A y-axis tolerance value for character hit detection, in point unit.</param>
+        /// <param name="span">The location of the found word, if any</param>
+        /// <returns>A value indicating whether a word was found at the specified location</returns>
+        public bool GetWordAtPosition(PdfPoint location, double xTolerance, double yTolerance, out PdfTextSpan span)
+        {
+            return _file.GetWordAtPosition(location, xTolerance, yTolerance, out span);
+        }
+
+        /// <summary>
+        /// Get number of characters in a page.
+        /// </summary>
+        /// <param name="page">The page to get the character count from</param>
+        /// <returns>Number of characters in the page. Generated characters, like additional space characters, new line characters, are also counted.</returns>
+        public int CountCharacters(int page)
+        {
+            return _file.CountChars(page);
+        }
+
+        /// <summary>
+        /// Gets the rectangular areas occupied by a segment of text
+        /// </summary>
+        /// <param name="page">The page to get the rectangles from</param>
+        /// <returns>The rectangular areas occupied by a segment of text</returns>
+        public List<PdfRectangle> GetTextRectangles(int page, int startIndex, int count)
+        {
+            return _file.GetTextRectangles(page, startIndex, count);
+        }
+
+        /// <summary>
         /// Creates a <see cref="PrintDocument"/> for the PDF document.
         /// </summary>
         /// <returns></returns>

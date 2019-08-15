@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PdfiumViewer
@@ -13,6 +14,7 @@ namespace PdfiumViewer
     public class PdfRenderer : PanningZoomingScrollControl
     {
         private static readonly Padding PageMargin = new Padding(4);
+        private static readonly SolidBrush _textSelectionBrush = new SolidBrush(Color.FromArgb(90, Color.DodgerBlue));
 
         private int _height;
         private int _maxWidth;
@@ -32,6 +34,10 @@ namespace PdfiumViewer
         private DragState _dragState;
         private PdfRotation _rotation;
         private List<IPdfMarker>[] _markers;
+        private PdfViewerCursorMode _cursorMode = PdfViewerCursorMode.Pan;
+        private bool _isSelectingText = false;
+        private MouseState _cachedMouseState = null;
+        private TextSelectionState _textSelectionState = null;
 
         /// <summary>
         /// The associated PDF document.
@@ -126,6 +132,20 @@ namespace PdfiumViewer
         }
 
         /// <summary>
+        /// Gets or sets the way the viewer should respond to cursor input
+        /// </summary>
+        [DefaultValue(PdfViewerCursorMode.Pan)]
+        public PdfViewerCursorMode CursorMode
+        {
+            get { return _cursorMode; }
+            set
+            {
+                _cursorMode = value;
+                MousePanningEnabled = _cursorMode == PdfViewerCursorMode.Pan;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the current rotation of the PDF document.
         /// </summary>
         public PdfRotation Rotation
@@ -138,6 +158,58 @@ namespace PdfiumViewer
                     _rotation = value;
                     ResetFromRotation();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the user currently has text selected
+        /// </summary>
+        public bool IsTextSelected
+        {
+            get
+            {
+                var state = _textSelectionState?.GetNormalized();
+                if (state == null)
+                    return false;
+
+                if (state.EndPage < 0 || state.EndIndex < 0)
+                    return false;
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the currently selected text
+        /// </summary>
+        public string SelectedText
+        {
+            get
+            {
+                var state = _textSelectionState?.GetNormalized();
+                if (state == null)
+                    return null;
+
+                var sb = new StringBuilder();
+                for (int page = state.StartPage; page <= state.EndPage; page++)
+                {
+                    int start = 0, end = 0;
+
+                    if (page == state.StartPage)
+                        start = state.StartIndex;
+
+                    if (page == state.EndPage)
+                        end = (state.EndIndex + 1);
+                    else
+                        end = Document.CountCharacters(page);
+
+                    if (page != state.StartPage)
+                        sb.AppendLine();
+
+                    sb.Append(Document.GetPdfText(new PdfTextSpan(page, start, end - start)));
+                }
+
+                return sb.ToString();
             }
         }
 
@@ -283,7 +355,7 @@ namespace PdfiumViewer
         {
             return BoundsFromPdf(bounds, true);
         }
-            
+
         private Rectangle BoundsFromPdf(PdfRectangle bounds, bool translateOffset)
         {
             var offset = translateOffset ? GetScrollOffset() : Size.Empty;
@@ -384,6 +456,44 @@ namespace PdfiumViewer
             UpdateScrollbars();
         }
 
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            switch ((e.KeyData) & Keys.KeyCode)
+            {
+                case Keys.A:
+                    if ((e.KeyData & Keys.Modifiers) == Keys.Control)
+                        SelectAll();
+                    break;
+
+                case Keys.C:
+                    if ((e.KeyData & Keys.Modifiers) == Keys.Control)
+                        CopySelection();
+                    break;
+            }
+
+            base.OnKeyDown(e);
+        }
+
+        public void SelectAll()
+        {
+            _textSelectionState = new TextSelectionState()
+            {
+                StartPage = 0,
+                StartIndex = 0,
+                EndPage = Document.PageCount - 1,
+                EndIndex = Document.CountCharacters(Document.PageCount - 1) - 1
+            };
+
+            Invalidate();
+        }
+
+        public void CopySelection()
+        {
+            var text = SelectedText;
+            if (text.Length > 0)
+                Clipboard.SetText(text);
+        }
+
         /// <summary>
         /// Load a <see cref="IPdfDocument"/> into the control.
         /// </summary>
@@ -407,6 +517,7 @@ namespace PdfiumViewer
             _height = 0;
             _maxWidth = 0;
             _maxHeight = 0;
+            _textSelectionState = null;
 
             foreach (var size in Document.PageSizes)
             {
@@ -653,6 +764,10 @@ namespace PdfiumViewer
                     _shadeBorder.Draw(e.Graphics, pageBounds);
 
                     DrawMarkers(e.Graphics, page);
+
+                    var selectionInfo = _textSelectionState;
+                    if (selectionInfo != null)
+                        DrawTextSelection(e.Graphics, page, selectionInfo.GetNormalized());
                 }
             }
 
@@ -660,6 +775,37 @@ namespace PdfiumViewer
                 _visiblePageStart = 0;
             if (_visiblePageEnd == -1)
                 _visiblePageEnd = Document.PageCount - 1;
+        }
+
+        private void DrawTextSelection(Graphics graphics, int page, TextSelectionState state)
+        {
+            if (state.EndPage < 0 || state.EndIndex < 0)
+                return;
+
+            if (page >= state.StartPage && page <= state.EndPage)
+            {
+                int start = 0, end = 0;
+
+                if (page == state.StartPage)
+                    start = state.StartIndex;
+
+                if (page == state.EndPage)
+                    end = (state.EndIndex + 1);
+                else
+                    end = Document.CountCharacters(page);
+
+                Region region = null;
+                foreach (var rectangle in Document.GetTextRectangles(page, start, end - start))
+                {
+                    if (region == null)
+                        region = new Region(BoundsFromPdf(rectangle));
+                    else
+                        region.Union(BoundsFromPdf(rectangle));
+                }
+
+                if (region != null)
+                    graphics.FillRegion(_textSelectionBrush, region);
+            }
         }
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds)
@@ -731,6 +877,16 @@ namespace PdfiumViewer
                         }
                     }
                 }
+
+                if (_cursorMode == PdfViewerCursorMode.TextSelection)
+                {
+                    var state = GetMouseState(e.Location);
+                    if (state.CharacterIndex >= 0)
+                    {
+                        e.Cursor = Cursors.IBeam;
+                        return;
+                    }
+                }
             }
 
             base.OnSetCursor(e);
@@ -742,6 +898,50 @@ namespace PdfiumViewer
         {
             base.OnMouseDown(e);
 
+            HandleMouseDownForLinks(e);
+
+            if (_cursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                HandleMouseDownForTextSelection(e);
+            }
+        }
+
+        /// <summary>Raises the <see cref="E:System.Windows.Forms.Control.MouseUp" /> event.</summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data. </param>
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            HandleMouseUpForLinks(e);
+
+            if (_cursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                HandleMouseUpForTextSelection(e);
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            if (_cursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                HandleMouseMoveForTextSelection(e);
+            }
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+
+            if (_cursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                HandleMouseDoubleClickForTextSelection(e);
+            }
+        }
+
+        private void HandleMouseDownForLinks(MouseEventArgs e)
+        {
             _dragState = null;
 
             if (_cachedLink != null)
@@ -754,12 +954,8 @@ namespace PdfiumViewer
             }
         }
 
-        /// <summary>Raises the <see cref="E:System.Windows.Forms.Control.MouseUp" /> event.</summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data. </param>
-        protected override void OnMouseUp(MouseEventArgs e)
+        private void HandleMouseUpForLinks(MouseEventArgs e)
         {
-            base.OnMouseUp(e);
-
             if (_dragState == null)
                 return;
 
@@ -801,6 +997,106 @@ namespace PdfiumViewer
                     // be thrown (when it auto-updates).
                 }
             }
+        }
+
+        private void HandleMouseDownForTextSelection(MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            var pdfLocation = PointToPdf(e.Location);
+            if (!pdfLocation.IsValid)
+                return;
+
+            var characterIndex = Document.GetCharacterIndexAtPosition(pdfLocation, 4f, 4f);
+
+            if (characterIndex >= 0)
+            {
+                _textSelectionState = new TextSelectionState()
+                {
+                    StartPage = pdfLocation.Page,
+                    StartIndex = characterIndex,
+                    EndPage = -1,
+                    EndIndex = -1
+                };
+                _isSelectingText = true;
+                Capture = true;
+            }
+            else
+            {
+                _isSelectingText = false;
+                Capture = false;
+                _textSelectionState = null;
+            }
+        }
+
+        private void HandleMouseUpForTextSelection(MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            _isSelectingText = false;
+            Capture = false;
+            Invalidate();
+        }
+
+        private void HandleMouseMoveForTextSelection(MouseEventArgs e)
+        {
+            if (!_isSelectingText)
+                return;
+
+            var mouseState = GetMouseState(e.Location);
+
+            if (mouseState.CharacterIndex >= 0)
+            {
+                _textSelectionState.EndPage = mouseState.PdfLocation.Page;
+                _textSelectionState.EndIndex = mouseState.CharacterIndex;
+
+                Invalidate();
+            }
+        }
+
+        private void HandleMouseDoubleClickForTextSelection(MouseEventArgs e)
+        {
+            var pdfLocation = PointToPdf(e.Location);
+            if (!pdfLocation.IsValid)
+                return;
+
+            if (Document.GetWordAtPosition(pdfLocation, 4f, 4f, out var word))
+            {
+                _textSelectionState = new TextSelectionState()
+                {
+                    StartPage = pdfLocation.Page,
+                    EndPage = pdfLocation.Page,
+                    StartIndex = word.Offset,
+                    EndIndex = word.Offset + word.Length
+                };
+
+                Invalidate();
+            }
+        }
+
+        private MouseState GetMouseState(Point mouseLocation)
+        {
+            // OnMouseMove and OnSetCursor get invoked a lot, often multiple times in succession for the same point.
+            // By just caching the mouse state for the last known position we can save a lot of work.
+
+            var currentState = _cachedMouseState;
+            if (currentState?.MouseLocation == mouseLocation)
+                return currentState;
+
+            _cachedMouseState = new MouseState()
+            {
+                MouseLocation = mouseLocation,
+                PdfLocation = PointToPdf(mouseLocation)
+            };
+
+            if (!_cachedMouseState.PdfLocation.IsValid)
+                return _cachedMouseState;
+
+            _cachedMouseState.CharacterIndex = Document.GetCharacterIndexAtPosition(_cachedMouseState.PdfLocation, 4f, 4f);
+
+            return _cachedMouseState;
         }
 
         /// <summary>
@@ -1040,6 +1336,44 @@ namespace PdfiumViewer
         {
             public PdfPageLink Link { get; set; }
             public Point Location { get; set; }
+        }
+
+        private class MouseState
+        {
+            public Point MouseLocation { get; set; }
+            public PdfPoint PdfLocation { get; set; }
+            public int CharacterIndex { get; set; }
+        }
+
+        private class TextSelectionState
+        {
+            public int StartPage { get; set; }
+            public int StartIndex { get; set; }
+            public int EndPage { get; set; }
+            public int EndIndex { get; set; }
+
+            public TextSelectionState GetNormalized()
+            {
+                if (EndPage < 0 || EndIndex < 0) // Special case when only start position is known
+                    return this;
+
+                if (EndPage < StartPage ||
+                    (StartPage == EndPage && EndIndex < StartIndex))
+                {
+                    // End position is before start position.
+                    // Swap positions so start is always before end.
+
+                    return new TextSelectionState()
+                    {
+                        StartPage = EndPage,
+                        StartIndex = EndIndex,
+                        EndPage = StartPage,
+                        EndIndex = StartIndex
+                    };
+                }
+
+                return this;
+            }
         }
     }
 }

@@ -19,6 +19,8 @@ namespace PdfiumViewer.Demo
 
             renderToBitmapsToolStripMenuItem.Enabled = false;
 
+            pdfViewer1.Renderer.ContextMenuStrip = pdfViewerContextMenu;
+
             pdfViewer1.Renderer.DisplayRectangleChanged += Renderer_DisplayRectangleChanged;
             pdfViewer1.Renderer.ZoomChanged += Renderer_ZoomChanged;
 
@@ -377,6 +379,21 @@ namespace PdfiumViewer.Demo
             {
                 form.ShowDialog(this);
             }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.CopySelection();
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.SelectAll();
+        }
+
+        private void pdfViewerContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            copyToolStripMenuItem.Enabled = pdfViewer1.Renderer.IsTextSelected;
         }
     }
 }
