@@ -258,6 +258,14 @@ namespace PdfiumViewer
             }
         }
 
+        public static double FPDFText_GetFontSize(IntPtr page, int index)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFText_GetFontSize(page, index);
+            }
+        }
+
         public static int FPDFText_GetSchResultIndex(IntPtr handle)
         {
             lock (LockString)
@@ -683,6 +691,9 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern IntPtr FPDFText_FindStart(IntPtr page, byte[] findWhat, FPDF_SEARCH_FLAGS flags, int start_index);
+
+            [DllImport("pdfium.dll")]
+            public static extern double FPDFText_GetFontSize(IntPtr page, int index);
 
             [DllImport("pdfium.dll")]
             public static extern int FPDFText_GetSchResultIndex(IntPtr handle);

@@ -598,5 +598,15 @@ namespace PdfiumViewer
                 _disposed = true;
             }
         }
+
+        /// <summary>
+        /// Get detailed information all characters on the page.
+        /// </summary>
+        /// <param name="page">The page to get the information for.</param>
+        /// <returns>The character information.</returns>
+        public IList<PdfCharacterInformation> GetCharacterInformation(int page)
+        {
+            return _file.GetCharacterInformation(page);
+        }
     }
 }
