@@ -348,8 +348,8 @@ namespace PdfiumViewer
         {
             bool needLayout = false;
 
-            double hScale = (double)width / _displayRect.Height;
-            double vScale = (double)height / _displayRect.Height;
+            double hScale = _displayRect.Height==0 ? 1 :(double)width / _displayRect.Width;
+            double vScale = _displayRect.Height==0? 1 : (double)height / _displayRect.Height;
 
             if (_displayRect.Width != width || _displayRect.Height != height)
             {
