@@ -16,20 +16,22 @@
             <RowDefinition />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+           
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Label x:Name="labelMemDC" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
-
+        
         <Button Click="LoadPDFButton_Click" Content="Load PDF" Grid.ColumnSpan="2"/>
+        <!--
+        <Label x:Name="labelMemDC" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
         <Button Click="RenderToMemDCButton_Click" Content="Start Rendering by MemDC" Grid.Row="1" Grid.ColumnSpan="2" />
 
         <Label Content="RenderPage with Memory Device Context" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Background="LightGoldenrodYellow"/>
-
         <Image  x:Name="imageMemDC" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"/>
+        -->
 
         <StackPanel Grid.Row="5" Orientation="Horizontal">
             <TextBox x:Name="searchValueTextBox" Text="Enter value to search"   VerticalAlignment="Center" Width="150"/>
@@ -40,5 +42,8 @@
         <Button Content="Search" Grid.Row="6" Click="DoSearch_Click"/>
 
         <TextBox x:Name="searchResultLabel" Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" />
+        <DockPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" >
+            <WindowsFormsHost x:Name="formshHost"/>
+        </DockPanel>
     </Grid>
 </Window>

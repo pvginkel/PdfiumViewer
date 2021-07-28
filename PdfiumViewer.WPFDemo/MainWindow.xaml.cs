@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,129 +9,157 @@ using System.Windows.Media.Imaging;
 
 namespace PdfiumViewer.WPFDemo
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        CancellationTokenSource tokenSource;
-        Process currentProcess = Process.GetCurrentProcess();
-        PdfDocument pdfDoc;
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-        private async void RenderToMemDCButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (pdfDoc == null)
-            {
-                MessageBox.Show("First load the document");
-                return;
-            }
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
+	{
+		CancellationTokenSource tokenSource;
+		Process currentProcess = Process.GetCurrentProcess();
+		PdfDocument pdfDoc;
+		private PdfViewer pdfViewer1;
 
-            int width = (int)(this.ActualWidth - 30) / 2;
-            int height = (int)this.ActualHeight - 30;
+		public MainWindow()
+		{
+			InitializeComponent();
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+			/*
+			PdfiumResolver.Resolve += (s, e) => e.PdfiumFileName = Path.Combine(
+				Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location),
+				"native",
+				"pdfium",
+				Environment.Is64BitProcess ? "x64" : "x86",
+				"pdfium.dll");
+			*/
+		}
 
-            try
-            {
-                for (int i = 1; i < pdfDoc.PageCount; i++)
-                {
-                    imageMemDC.Source =
-                        await
-                            Task.Run<BitmapSource>(
-                                new Func<BitmapSource>(
-                                    () =>
-                                    {
-                                        tokenSource.Token.ThrowIfCancellationRequested();
+		private void RenderToMemDCButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (pdfDoc == null)
+			{
+				MessageBox.Show("First load the document");
+				return;
+			}
 
-                                        return RenderPageToMemDC(i, width, height);
-                                    }
-                            ), tokenSource.Token);
+			int width = (int)(this.ActualWidth - 30) / 2;
+			int height = (int)this.ActualHeight - 30;
 
-                    labelMemDC.Content = String.Format("Renderd Pages: {0}, Memory: {1} MB, Time: {2:0.0} sec",
-                        i,
-                        currentProcess.PrivateMemorySize64 / (1024 * 1024),
-                        sw.Elapsed.TotalSeconds);
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
 
-                    currentProcess.Refresh();
+			try
+			{
+				for (int i = 1; i < pdfDoc.PageCount; i++)
+				{
+					/*imageMemDC.Source =
+						await
+							Task.Run<BitmapSource>(
+								new Func<BitmapSource>(
+									() =>
+									{
+										tokenSource.Token.ThrowIfCancellationRequested();
 
-                    GC.Collect();
-                }
-            }
-            catch (Exception ex)
-            {
-                tokenSource.Cancel();
-                MessageBox.Show(ex.Message);
-            }
+										return RenderPageToMemDC(i, width, height);
+									}
+							), tokenSource.Token);
 
-            sw.Stop();
-            labelMemDC.Content = String.Format("Rendered {0} Pages within {1:0.0} seconds, Memory: {2} MB",
-                pdfDoc.PageCount,
-                sw.Elapsed.TotalSeconds,
-                currentProcess.PrivateMemorySize64 / (1024 * 1024));
-        }
+					labelMemDC.Content = String.Format("Renderd Pages: {0}, Memory: {1} MB, Time: {2:0.0} sec",
+						i,
+						currentProcess.PrivateMemorySize64 / (1024 * 1024),
+						sw.Elapsed.TotalSeconds);
+						*/
+					currentProcess.Refresh();
 
-        private BitmapSource RenderPageToMemDC(int page, int width, int height)
-        {
-            var image = pdfDoc.Render(page, width, height, 96, 96, false);
-            return BitmapHelper.ToBitmapSource(image);
-        }
+					GC.Collect();
+				}
+			}
+			catch (Exception ex)
+			{
+				tokenSource.Cancel();
+				MessageBox.Show(ex.Message);
+			}
 
-        private void LoadPDFButton_Click(object sender, RoutedEventArgs e)
-        {
-            using (var dialog = new System.Windows.Forms.OpenFileDialog())
-            {
-                dialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
-                dialog.Title = "Open PDF File";
+			sw.Stop();
 
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    pdfDoc = PdfDocument.Load(dialog.FileName);
-                }
-            }
-        }
+			/*labelMemDC.Content = String.Format("Rendered {0} Pages within {1:0.0} seconds, Memory: {2} MB",
+				pdfDoc.PageCount,
+				sw.Elapsed.TotalSeconds,
+				currentProcess.PrivateMemorySize64 / (1024 * 1024));*/
+		}
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            tokenSource = new CancellationTokenSource();
-        }
+		private BitmapSource RenderPageToMemDC(int page, int width, int height)
+		{
+			var image = pdfDoc.Render(page, width, height, 96, 96, false);
+			return BitmapHelper.ToBitmapSource(image);
+		}
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            if (tokenSource != null)
-                tokenSource.Cancel();
+		private void LoadPDFButton_Click(object sender, RoutedEventArgs e)
+		{
+			using (var dialog = new System.Windows.Forms.OpenFileDialog())
+			{
+				dialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
+				dialog.Title = "Open PDF File";
 
-            if (pdfDoc != null)
-                pdfDoc.Dispose();
-        }
+				if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				{
+					pdfDoc = PdfDocument.Load(dialog.FileName);
 
-        private void DoSearch_Click(object sender, RoutedEventArgs e)
-        {
-            string text = searchValueTextBox.Text;
-            bool matchCase = matchCaseCheckBox.IsChecked.GetValueOrDefault();
-            bool wholeWordOnly = wholeWordOnlyCheckBox.IsChecked.GetValueOrDefault();
+					pdfViewer1.Document?.Dispose();
+					pdfViewer1.Document = pdfDoc;
 
-            DoSearch(text, matchCase, wholeWordOnly);
-        }
+				}
+			}
+		}
 
-        private void DoSearch(string text, bool matchCase, bool wholeWord)
-        {
-            var matches = pdfDoc.Search(text, matchCase, wholeWord);
-            var sb = new StringBuilder();
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			tokenSource = new CancellationTokenSource();
 
-            foreach (var match in matches.Items)
-            {
-                sb.AppendLine(
-                    String.Format(
-                    "Found \"{0}\" in page: {1}", match.Text, match.Page)
-                );
-            }
+			//var host = new System.Windows.Forms.Integration.WindowsFormsHost();
 
-            searchResultLabel.Text = sb.ToString();
-        }
 
-    }
+			//host.HorizontalAlignment = HorizontalAlignment.Stretch;
+			//host.VerticalAlignment=VerticalAlignment.Stretch;
+
+			this.pdfViewer1 = new PdfViewer();
+			formshHost.Child = pdfViewer1;
+
+			//this.previewPanel.Children.Add(host);
+		}
+
+		private void Window_Closed(object sender, EventArgs e)
+		{
+			if (tokenSource != null)
+				tokenSource.Cancel();
+
+			if (pdfDoc != null)
+				pdfDoc.Dispose();
+		}
+
+		private void DoSearch_Click(object sender, RoutedEventArgs e)
+		{
+			string text = searchValueTextBox.Text;
+			bool matchCase = matchCaseCheckBox.IsChecked.GetValueOrDefault();
+			bool wholeWordOnly = wholeWordOnlyCheckBox.IsChecked.GetValueOrDefault();
+
+			DoSearch(text, matchCase, wholeWordOnly);
+		}
+
+		private void DoSearch(string text, bool matchCase, bool wholeWord)
+		{
+			var matches = pdfDoc.Search(text, matchCase, wholeWord);
+			var sb = new StringBuilder();
+
+			foreach (var match in matches.Items)
+			{
+				sb.AppendLine(
+					String.Format(
+					"Found \"{0}\" in page: {1}", match.Text, match.Page)
+				);
+			}
+
+			searchResultLabel.Text = sb.ToString();
+		}
+
+	}
 }
